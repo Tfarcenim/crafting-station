@@ -1,0 +1,7 @@
+{
+    "recipes": {
+        "table_recipe": "slimeknights.tconstruct.tools.common.TableRecipeFactory"
+    },
+    "conditions": {
+    }
+}

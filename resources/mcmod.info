@@ -1,0 +1,19 @@
+[{
+    "modid": "craftingstation",
+    "name": "Crafting Station",
+    "description": "A mod that only adds the crafting station from tinker's",
+    "version": "${version}",
+    "mcversion": "${MCversion}",
+    "url": "https://github.com/something",
+    "updateUrl": "",
+    "authorList": [
+      "boni",
+      "KnightMiner",
+        "Tfarecnim"
+    ],
+    "credits": "Slime Knights, mDiyo, fuj1n, ProgWML6, Sunstrike, Pillbox",
+    "logoFile": "",
+    "screenshots": [],
+    "parent":"",
+    "dependencies": []
+}]
