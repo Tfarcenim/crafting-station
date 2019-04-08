@@ -79,7 +79,7 @@ configurations {
 }
 
 
-version = "0.0.0"
+version = "0.0.1"
 
 minecraft {
     version = config.minecraft_version + "-" + config.forge_version
