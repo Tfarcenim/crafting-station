@@ -26,13 +26,13 @@ public class CrashHandler implements ICrashCallable {
     }
 
     @Override
-    public String call() {
-        StringBuilder out = new StringBuilder("\n");
+    public String call() throws Exception {
+        String out = "\n";
         for (PulseMeta meta : manager.getAllPulseMetadata()) {
             String state = getStateFromMeta(meta);
-            out.append("\t\t- ").append(meta.getId()).append(" (").append(state).append(")\n"); // Yes, yes, manual indenting, I know...
+            out += "\t\t- " + meta.getId() + " (" + state + ")\n"; // Yes, yes, manual indenting, I know...
         }
-        return out.toString();
+        return out;
     }
 
     private static String getStateFromMeta(PulseMeta meta) {

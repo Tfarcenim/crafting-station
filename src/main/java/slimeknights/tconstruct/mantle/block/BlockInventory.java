@@ -51,6 +51,7 @@ public abstract class BlockInventory extends BlockContainer {
     if(!world.isRemote) {
       return this.openGui(player, world, pos);
     }
+
     return true;
   }
 

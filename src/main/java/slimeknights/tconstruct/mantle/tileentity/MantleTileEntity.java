@@ -5,8 +5,7 @@ import net.minecraft.tileentity.TileEntity;
 public class MantleTileEntity extends TileEntity {
 
   public boolean isClient() {
-    this.getWorld();
-    return this.getWorld().isRemote;
+    return this.getWorld() != null && this.getWorld().isRemote;
   }
 
   /**

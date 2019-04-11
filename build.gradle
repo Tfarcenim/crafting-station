@@ -29,6 +29,10 @@ plugins {
     id "net.minecraftforge.gradle.forge" version "2.0.1"
 }*/
 
+
+
+
+
 repositories {
     maven {
         name 'DVS1 Maven FS'
@@ -79,11 +83,11 @@ configurations {
 }
 
 
-version = "0.0.1"
+version = "0.0.3"
 
 minecraft {
-    version = config.minecraft_version + "-" + config.forge_version
-    mappings = config.mappings
+    version = "1.12.2-14.23.5.2814"
+    mappings = "stable_39"
     runDir = "run"
     replace '${version}', project.version
     useDepAts = true

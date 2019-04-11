@@ -56,7 +56,9 @@ public class ItemBlockTable extends ItemBlockMeta {
     // get the inventory, so we can inspect its items
     NBTTagCompound inventory = stack.getTagCompound().getCompoundTag("inventory");
 
-    if(!inventory.hasKey("Items")) return;
+    if(!inventory.hasKey("Items")) {
+      return;
+    }
 
     NBTTagList items = inventory.getTagList("Items", 10);
 

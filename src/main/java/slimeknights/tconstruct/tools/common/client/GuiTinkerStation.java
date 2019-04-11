@@ -25,6 +25,8 @@ import slimeknights.tconstruct.tools.common.network.TinkerStationTabPacket;
 // Takes care of the tinker station pseudo-multiblock
 public class GuiTinkerStation extends GuiMultiModule {
 
+  public static final ResourceLocation BLANK_BACK = Util.getResource("textures/gui/blank.png");
+
   protected final ContainerMultiModule<?> container;
 
   protected GuiTinkerTabs tinkerTabs;

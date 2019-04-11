@@ -61,6 +61,10 @@ public class TileInventory extends MantleTileEntity implements IInventory {
     return super.getCapability(capability, facing);
   }
 
+  public IItemHandlerModifiable getItemHandler() {
+    return itemHandler;
+  }
+
   /* Inventory management */
 
   @Nonnull
@@ -71,6 +75,10 @@ public class TileInventory extends MantleTileEntity implements IInventory {
     }
 
     return inventory.get(slot);
+  }
+
+  public boolean isStackInSlot(int slot) {
+    return !getStackInSlot(slot).isEmpty();
   }
 
   /** Same as resize, but does not call markDirty. Used on loading from NBT */
@@ -85,6 +93,11 @@ public class TileInventory extends MantleTileEntity implements IInventory {
       newInventory.set(i, inventory.get(i));
     }
     inventory = newInventory;
+  }
+
+  public void resize(int size) {
+    resizeInternal(size);
+    this.markDirtyFast();
   }
 
   @Override
@@ -284,6 +297,12 @@ public class TileInventory extends MantleTileEntity implements IInventory {
         inventory.set(slot, stack);
       }
     }
+  }
+
+  /* Default implementations of hardly used methods */
+  @Nonnull
+  public ItemStack getStackInSlotOnClosing(int slot) {
+    return ItemStack.EMPTY;
   }
 
   @Override

@@ -14,13 +14,23 @@ public abstract class AbstractPacketThreadsafe extends AbstractPacket {
 
   @Override
   public final IMessage handleClient(final NetHandlerPlayClient netHandler) {
-    FMLCommonHandler.instance().getWorldThread(netHandler).addScheduledTask(() -> handleClientSafe(netHandler));
+    FMLCommonHandler.instance().getWorldThread(netHandler).addScheduledTask(new Runnable() {
+      @Override
+      public void run() {
+        handleClientSafe(netHandler);
+      }
+    });
     return null;
   }
 
   @Override
   public final IMessage handleServer(final NetHandlerPlayServer netHandler) {
-    FMLCommonHandler.instance().getWorldThread(netHandler).addScheduledTask(() -> handleServerSafe(netHandler));
+    FMLCommonHandler.instance().getWorldThread(netHandler).addScheduledTask(new Runnable() {
+      @Override
+      public void run() {
+        handleServerSafe(netHandler);
+      }
+    });
     return null;
   }
 

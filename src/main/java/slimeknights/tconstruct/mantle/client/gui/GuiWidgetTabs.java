@@ -55,6 +55,11 @@ public class GuiWidgetTabs extends GuiWidget {
     icons.add(icon);
   }
 
+  public void clear() {
+    selected = 0;
+    icons.clear();
+  }
+
   public void update(int mouseX, int mouseY) {
     boolean mouseDown = Mouse.isButtonDown(0); // left mouse button
 

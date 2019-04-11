@@ -36,14 +36,14 @@ public class ItemBlockMeta extends ItemColored {
 
   @Nonnull
   @Override
-  public String getUnlocalizedName(@Nonnull ItemStack stack) {
+  public String getTranslationKey(@Nonnull ItemStack stack) {
     if(mappingProperty == null) {
-      return super.getUnlocalizedName(stack);
+      return super.getTranslationKey(stack);
     }
 
     IBlockState state = block.getStateFromMeta(stack.getMetadata());
     String name = state.getValue(mappingProperty).toString().toLowerCase(Locale.US);
-    return super.getUnlocalizedName(stack) + "." + name;
+    return super.getTranslationKey(stack) + "." + name;
   }
 
   public static void setMappingProperty(Block block, IProperty<?> property) {
@@ -52,13 +52,13 @@ public class ItemBlockMeta extends ItemColored {
 
   @Override
   public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-    if(I18n.canTranslate(this.getUnlocalizedName(stack) + ".tooltip")) {
+    if(I18n.canTranslate(this.getTranslationKey(stack) + ".tooltip")) {
       tooltip.addAll(LocUtils.getTooltips(TextFormatting.GRAY.toString() +
-                  LocUtils.translateRecursive(this.getUnlocalizedName(stack) + ".tooltip")));
+                  LocUtils.translateRecursive(this.getTranslationKey(stack) + ".tooltip")));
     }
-    else if(I18n.canTranslate(super.getUnlocalizedName(stack) + ".tooltip")) {
+    else if(I18n.canTranslate(super.getTranslationKey(stack) + ".tooltip")) {
       tooltip.addAll(LocUtils.getTooltips(
-          TextFormatting.GRAY.toString() + LocUtils.translateRecursive(super.getUnlocalizedName(stack) + ".tooltip")));
+          TextFormatting.GRAY.toString() + LocUtils.translateRecursive(super.getTranslationKey(stack) + ".tooltip")));
     }
     super.addInformation(stack, worldIn, tooltip, flagIn);
   }

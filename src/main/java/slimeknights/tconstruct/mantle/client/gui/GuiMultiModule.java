@@ -57,6 +57,14 @@ public class GuiMultiModule extends GuiContainer { //implements INEIGuiHandler {
     modules.add(module);
   }
 
+  public List<Rectangle> getModuleAreas() {
+    List<Rectangle> areas = new ArrayList<Rectangle>(modules.size());
+    for(GuiModule module : modules) {
+      areas.add(module.getArea());
+    }
+    return areas;
+  }
+
   @Override
   public void initGui() {
     if(realWidth > -1) {
@@ -96,7 +104,7 @@ public class GuiMultiModule extends GuiContainer { //implements INEIGuiHandler {
       // set correct state for the module
       GlStateManager.pushMatrix();
       GlStateManager.translate(-this.guiLeft, -this.guiTop, 0.0F);
-      GlStateManager.translate(module.guiLeft, module.guiTop, 0.0F);
+      GlStateManager.translate(module.getGuiLeft(), module.getGuiTop(), 0.0F);
       GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       module.handleDrawGuiContainerForegroundLayer(mouseX, mouseY);
       GlStateManager.popMatrix();
@@ -182,13 +190,13 @@ public class GuiMultiModule extends GuiContainer { //implements INEIGuiHandler {
   protected void updateSubmodule(GuiModule module) {
     module.updatePosition(this.cornerX, this.cornerY, this.realWidth, this.realHeight);
 
-    if(module.guiLeft < this.guiLeft) {
-      this.xSize += this.guiLeft - module.guiLeft;
-      this.guiLeft = module.guiLeft;
+    if(module.getGuiLeft() < this.guiLeft) {
+      this.xSize += this.guiLeft - module.getGuiLeft();
+      this.guiLeft = module.getGuiLeft();
     }
-    if(module.guiTop < this.guiTop) {
-      this.ySize += this.guiTop - module.guiTop;
-      this.guiTop = module.guiTop;
+    if(module.getGuiTop() < this.guiTop) {
+      this.ySize += this.guiTop - module.getGuiTop();
+      this.guiTop = module.getGuiTop();
     }
     if(module.guiRight() > this.guiLeft + this.xSize) {
       xSize = module.guiRight() - this.guiLeft;
@@ -279,7 +287,7 @@ public class GuiMultiModule extends GuiContainer { //implements INEIGuiHandler {
 
   protected GuiModule getModuleForPoint(int x, int y) {
     for(GuiModule module : modules) {
-      if(this.isPointInRegion(module.guiLeft, module.guiTop, module.guiRight(), module.guiBottom(),
+      if(this.isPointInRegion(module.getGuiLeft(), module.getGuiTop(), module.guiRight(), module.guiBottom(),
                               x + this.cornerX, y + this.cornerY)) {
         return module;
       }

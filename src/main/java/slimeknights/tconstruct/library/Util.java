@@ -21,7 +21,7 @@ import java.util.Locale;
 public class Util {
 
   public static final String MODID = "craftingstation";
-  public static final String RESOURCE = MODID.toLowerCase(Locale.US);
+  public static final String RESOURCE = MODID/*.toLowerCase(Locale.US)*/;
 
   public static Logger getLogger(String type) {
     String log = MODID;
@@ -70,8 +70,11 @@ public class Util {
     return deepCopyFixedNonNullList(in);
   }
 
+
   static {
     ImmutableMap.Builder<Vec3i, EnumFacing> builder = ImmutableMap.builder();
-    for(EnumFacing facing : EnumFacing.VALUES) builder.put(facing.getDirectionVec(), facing);
+    for(EnumFacing facing : EnumFacing.VALUES) {
+      builder.put(facing.getDirectionVec(), facing);
+    }
   }
 }

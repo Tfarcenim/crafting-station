@@ -13,6 +13,10 @@ public class ContainerSideInventory<T extends TileEntity> extends BaseContainer<
   public final int columns;
   public final int slotCount;
 
+  public ContainerSideInventory(T tile, int x, int y, int columns) {
+    this(tile, null, x, y, columns);
+  }
+
   public ContainerSideInventory(T tile, EnumFacing dir, int x, int y, int columns) {
     super(tile, dir);
 
@@ -44,4 +48,7 @@ public class ContainerSideInventory<T extends TileEntity> extends BaseContainer<
     return slotCount;
   }
 
+  public int getSizeInventory() {
+    return itemHandler.getSlots();
+  }
 }

@@ -30,7 +30,7 @@ public abstract class TinkerPulse {
     }
 
     String prefixedName = Util.prefix(name);
-    block.setUnlocalizedName(prefixedName);
+    block.setTranslationKey(prefixedName);
 
     register(registry, block, name);
     return block;
@@ -38,7 +38,7 @@ public abstract class TinkerPulse {
 
   @SuppressWarnings("unchecked")
   protected static <T extends Block> T registerItemBlockProp(IForgeRegistry<Item> registry, ItemBlock itemBlock, IProperty<?> property) {
-    itemBlock.setUnlocalizedName(itemBlock.getBlock().getUnlocalizedName());
+    itemBlock.setTranslationKey(itemBlock.getBlock().getTranslationKey());
 
     register(registry, itemBlock, itemBlock.getBlock().getRegistryName());
     ItemBlockMeta.setMappingProperty(itemBlock.getBlock(), property);

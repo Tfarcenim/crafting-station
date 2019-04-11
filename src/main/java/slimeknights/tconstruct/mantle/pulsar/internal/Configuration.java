@@ -164,6 +164,7 @@ public class Configuration implements IConfiguration {
     private static class ConfigEntry {
 
         private Boolean enabled;
+        private String description = null;
 
         public ConfigEntry(Boolean enabled) {
             this.enabled = enabled;
@@ -171,6 +172,7 @@ public class Configuration implements IConfiguration {
 
         public ConfigEntry(Boolean enabled, String description) {
             this(enabled);
+            this.description = description;
         }
 
         public Boolean getEnabled() {

@@ -8,6 +8,8 @@ import slimeknights.tconstruct.library.Util;
 
 public final class GuiGeneric {
 
+  public static final ResourceLocation LOCATION = Util.getResource("textures/gui/generic.png");
+
   // first one sets default texture w/h
   public static final GuiElement cornerTopLeft = new GuiElement(0, 0, 7, 7, 64, 64);
   public static final GuiElement cornerTopRight = new GuiElement(64 - 7, 0, 7, 7);

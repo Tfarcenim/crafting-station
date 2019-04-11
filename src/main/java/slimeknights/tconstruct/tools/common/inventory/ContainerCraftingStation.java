@@ -23,18 +23,20 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import slimeknights.tconstruct.common.TinkerNetwork;
-import slimeknights.tconstruct.common.config.Config;
-import slimeknights.tconstruct.mantle.inventory.BaseContainer;
-import slimeknights.tconstruct.shared.inventory.InventoryCraftingPersistent;
-import slimeknights.tconstruct.tools.common.network.LastRecipeMessage;
-import slimeknights.tconstruct.tools.common.tileentity.TileCraftingStation;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import slimeknights.tconstruct.mantle.inventory.BaseContainer;
+import slimeknights.tconstruct.common.TinkerNetwork;
+import slimeknights.tconstruct.common.config.Config;
+import slimeknights.tconstruct.shared.inventory.InventoryCraftingPersistent;
+import slimeknights.tconstruct.tools.common.network.LastRecipeMessage;
+import slimeknights.tconstruct.tools.common.tileentity.TileCraftingStation;
 
 // nearly the same as ContainerWorkbench but uses the TileEntities inventory
 @Mod.EventBusSubscriber
@@ -230,6 +232,40 @@ public class ContainerCraftingStation extends ContainerTinkerStation<TileCraftin
   @Override
   public boolean canMergeSlot(ItemStack p_94530_1_, Slot p_94530_2_) {
     return p_94530_2_.inventory != this.craftResult && super.canMergeSlot(p_94530_1_, p_94530_2_);
+  }
+
+  protected TileEntity detectInventory() {
+    for(EnumFacing dir : EnumFacing.HORIZONTALS) {
+      BlockPos neighbor = pos.offset(dir);
+      boolean stationPart = false;
+      for(Pair<BlockPos, IBlockState> tinkerPos : tinkerStationBlocks) {
+        if(tinkerPos.getLeft().equals(neighbor)) {
+          stationPart = true;
+          break;
+        }
+      }
+      if(!stationPart) {
+        TileEntity te = world.getTileEntity(neighbor);
+        if(te != null && te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
+          if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
+            return te;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @return the starting slot for the player inventory. Present for usage in the JEI crafting station support
+   */
+  public int getPlayerInventoryStart() {
+    return playerInventoryStart;
+  }
+
+  public InventoryCrafting getCraftMatrix() {
+    return craftMatrix;
   }
 
   public void updateLastRecipeFromServer(IRecipe recipe) {

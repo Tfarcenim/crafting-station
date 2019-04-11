@@ -64,7 +64,7 @@ public class BlockTable extends BlockInventory implements ITileEntityProvider {
   @Nonnull
   @Override
   @SideOnly(Side.CLIENT)
-  public BlockRenderLayer getBlockLayer() {
+  public BlockRenderLayer getRenderLayer() {
     return BlockRenderLayer.CUTOUT;
   }
 
@@ -141,7 +141,7 @@ public class BlockTable extends BlockInventory implements ITileEntityProvider {
   public boolean removedByPlayer(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, boolean willHarvest) {
     // we pull up a few calls to this point in time because we still have the TE here
     // the execution otherwise is equivalent to vanilla order
-    this.onBlockDestroyedByPlayer(world, pos, state);
+    this.removedByPlayer(state,world , pos,player,willHarvest);
     if(willHarvest) {
       this.harvestBlock(world, player, pos, state, world.getTileEntity(pos), player.getHeldItemMainhand());
     }
@@ -169,14 +169,14 @@ public class BlockTable extends BlockInventory implements ITileEntityProvider {
   private void writeDataOntoItemstack(@Nonnull ItemStack item, @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nonnull IBlockState state, boolean inventorySave) {
     // get block data from the block
     TileEntity te = world.getTileEntity(pos);
-    if(te instanceof TileTable) {
+    if(te != null && te instanceof TileTable) {
       TileTable table = (TileTable) te;
       NBTTagCompound tag = TagUtil.getTagSafe(item);
 
       // texture
       NBTTagCompound data = table.getTextureBlock();
 
-      if (!data.hasNoTags()) {
+      if (!data.isEmpty()) {
         tag.setTag(TileTable.FEET_TAG, data);
       }
 
@@ -190,7 +190,7 @@ public class BlockTable extends BlockInventory implements ITileEntityProvider {
         }
       }
 
-      if (!tag.hasNoTags()) {
+      if (!tag.isEmpty()) {
         item.setTagCompound(tag);
       }
     }
@@ -321,7 +321,7 @@ public class BlockTable extends BlockInventory implements ITileEntityProvider {
     Vec3d vec3d = start.subtract((double) pos.getX(), (double) pos.getY(), (double) pos.getZ());
     Vec3d vec3d1 = end.subtract((double) pos.getX(), (double) pos.getY(), (double) pos.getZ());
     RayTraceResult raytraceresult = boundingBox.calculateIntercept(vec3d, vec3d1);
-    return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.addVector((double) pos.getX(), (double) pos.getY(), (double) pos.getZ()), raytraceresult.sideHit, pos);
+    return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.add((double) pos.getX(), (double) pos.getY(), (double) pos.getZ()), raytraceresult.sideHit, pos);
   }
 
   @Override
