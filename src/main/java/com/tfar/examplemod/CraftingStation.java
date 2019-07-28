@@ -1,6 +1,7 @@
 package com.tfar.examplemod;
 
 import com.tfar.examplemod.client.CraftingStationScreen;
+import com.tfar.examplemod.client.CraftingStationTileSpecialRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScreenManager;
@@ -9,10 +10,13 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -46,6 +50,8 @@ public class CraftingStation {
 
   private void doClientStuff(final FMLClientSetupEvent event) {
     ScreenManager.registerFactory(Objects.crafting_station_container, CraftingStationScreen::new);
+    DistExecutor.runWhenOn(Dist.CLIENT,() -> () -> ClientRegistry.bindTileEntitySpecialRenderer(CraftingStationTile.class, new CraftingStationTileSpecialRenderer()));
+
   }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD

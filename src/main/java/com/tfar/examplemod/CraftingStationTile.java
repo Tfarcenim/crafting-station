@@ -23,7 +23,7 @@ public class CraftingStationTile extends TileEntity implements INamedContainerPr
 
   public CraftingStationTile() {
     super(CraftingStation.Objects.crafting_station_tile);
-    this.input = new ItemStackHandler(9);
+    this.input = new CraftingHandler(this,9);
     this.output = new ItemStackHandler();
   }
 
