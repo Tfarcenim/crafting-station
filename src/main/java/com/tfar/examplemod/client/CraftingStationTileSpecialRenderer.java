@@ -35,7 +35,6 @@ public class CraftingStationTileSpecialRenderer extends TileEntityRenderer<Craft
       if (this.itemRenderer == null) {
         this.itemRenderer = new ItemRenderer(Minecraft.getInstance().textureManager, Minecraft.getInstance().getModelManager(), Minecraft.getInstance().getItemColors());
       }
-
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3;j++) {
           ItemStack item = tileEntity.input.getStackInSlot(j + 3 * i);

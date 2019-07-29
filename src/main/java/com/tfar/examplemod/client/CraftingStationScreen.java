@@ -1,13 +1,13 @@
 package com.tfar.examplemod.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.tfar.examplemod.CraftingStation;
 import com.tfar.examplemod.CraftingStationContainer;
 import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.RecipeBookContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -16,6 +16,11 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   public static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
   private static final ResourceLocation RECIPE_BUTTON_TEXTURE = new ResourceLocation("textures/gui/recipe_button.png");
   public RecipeBookGui recipeBookGui = new RecipeBookGui();
+
+  public static final ResourceLocation SLOT_TEXTURE = new ResourceLocation(CraftingStation.MODID,"textures/gui/slot.png");
+  public static final ResourceLocation SECONDARY_GUI_TEXTURE = new ResourceLocation(CraftingStation.MODID,"textures/gui/secondary.png");
+
+
   private boolean widthTooNarrow;
 
 
@@ -26,7 +31,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   protected void init() {
     super.init();
     this.widthTooNarrow = this.width < 379;
-    this.recipeBookGui.func_201520_a(this.width, this.height, this.minecraft, this.widthTooNarrow, (RecipeBookContainer) this.container);
+    this.recipeBookGui.func_201520_a(this.width, this.height, this.minecraft, this.widthTooNarrow, this.container);
     this.guiLeft = this.recipeBookGui.updateScreenPosition(this.widthTooNarrow, this.width, this.xSize);
     this.children.add(this.recipeBookGui);
     this.func_212928_a(this.recipeBookGui);
@@ -62,6 +67,9 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
     this.font.drawString(this.title.getFormattedText(), 28.0F, 6.0F, 4210752);
     this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8.0F, (float) (this.ySize - 96 + 2), 4210752);
+    if (container.subContainer != null){
+      this.font.drawString(container.containerName.getFormattedText(),-110,6,4210752);
+    }
   }
 
   protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
@@ -70,6 +78,16 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     int lvt_4_1_ = this.guiLeft;
     int lvt_5_1_ = (this.height - this.ySize) / 2;
     this.blit(lvt_4_1_, lvt_5_1_, 0, 0, this.xSize, this.ySize);
+    if (container.subContainer != null){
+      this.minecraft.getTextureManager().bindTexture(SECONDARY_GUI_TEXTURE);
+      this.blit(lvt_4_1_ - 117, lvt_5_1_, 0, 0, this.xSize, this.ySize + 18);
+      this.minecraft.getTextureManager().bindTexture(SLOT_TEXTURE);
+      for (int i = 0;i < (container.range[1] - container.range[0]);i++){
+        int j = i % 6;
+        int k = i / 6;
+        blit(lvt_4_1_ - 112 + j * 18, lvt_5_1_ + 18 * k + 16, 0, 0, 18, 18,18,18);
+      }
+    }
   }
 
   protected boolean isPointInRegion(int p_195359_1_, int p_195359_2_, int p_195359_3_, int p_195359_4_, double p_195359_5_, double p_195359_7_) {

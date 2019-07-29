@@ -1,12 +1,17 @@
 package com.tfar.examplemod;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tfar.examplemod.slot.SlotFastCraft;
+import com.tfar.examplemod.slot.WrapperSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.RecipeBookContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -15,10 +20,16 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.RecipeItemHelper;
 import net.minecraft.network.play.server.SSetSlotPacket;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
-import java.util.Optional;
+import java.util.*;
 
 public class CraftingStationContainer extends RecipeBookContainer<CraftingInventory> implements CraftingStationTile.Listener {
   public final CraftingInventory craftMatrix;
@@ -30,6 +41,15 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
   public IRecipe<CraftingInventory> lastRecipe;
   protected IRecipe<CraftingInventory> lastLastRecipe;
 
+  public Container subContainer;
+  public ITextComponent containerName;
+
+  protected Set<Container> shiftClickContainers = Sets.newHashSet();
+  protected Map<Integer, Container> slotContainerMap = Maps.newHashMap();
+  public int subContainerSlotStart = -1;
+  public int[] range = new int[2];
+
+
   public CraftingStationContainer(int id, PlayerInventory playerInventory, World world, BlockPos pos, PlayerEntity player) {
     super(CraftingStation.Objects.crafting_station_container,id);
 
@@ -40,11 +60,72 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
     assert tileEntity != null;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
 
+
     addOwnSlots();
+
+    // detect te
+    TileEntity inventoryTE = null;
+    Direction accessDir = null;
+    for(Direction dir : Direction.values()) {
+      BlockPos neighbor = pos.offset(dir);
+
+      TileEntity te = world.getTileEntity(neighbor);
+      if(te != null && !(te instanceof CraftingStationTile)) {
+        // if blacklisted, skip checks entirely
+    //    if(blacklisted(te.getClass())) {
+      //    continue;
+    //    }
+//        if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
+ //         continue;
+  //      }
+
+        // try internal access first
+        IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)
+                .filter(IItemHandlerModifiable.class::isInstance).orElse(null);
+        if (handler == null)continue;
+
+        inventoryTE = te;
+        // try sided access else
+  //      if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
+  //        if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
+  //          inventoryTE = te;
+   //         accessDir = dir.getOpposite();
+   //         break;
+   //       }
+     //   }
+      }
+    }
+
+    if(inventoryTE != null) {
+      addSubContainer(new SideContainerInventory(id,inventoryTE, accessDir, -3 - 18 * 6, 17, 6), false);
+      containerName = inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
+    }
     addPlayerSlots(playerInventory);
     func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
 
     tileEntity.addListener(this);
+  }
+
+  //side container
+  private void addSubContainer(Container subcontainer, boolean prefershift) {
+    if(subContainer == null) {
+      subContainerSlotStart = inventorySlots.size();
+    }
+    this.subContainer = subcontainer;
+
+    if(prefershift) {
+      shiftClickContainers.add(subcontainer);
+    }
+
+    int begin = inventorySlots.size();
+    for(Slot slot : subcontainer.inventorySlots) {
+      WrapperSlot wrapper = new WrapperSlot(slot);
+      addSlot(wrapper);
+      slotContainerMap.put(wrapper.slotNumber, subcontainer);
+    }
+    int end = inventorySlots.size();
+    range[0]=begin;
+    range[1]=end;
   }
 
   @Override
@@ -157,7 +238,7 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
       ItemStack lvt_6_1_ = ItemStack.EMPTY;
       Optional<ICraftingRecipe> lvt_7_1_ = p_217066_1_.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, p_217066_3_, p_217066_1_);
       if (lvt_7_1_.isPresent()) {
-        ICraftingRecipe lvt_8_1_ = (ICraftingRecipe)lvt_7_1_.get();
+        ICraftingRecipe lvt_8_1_ = lvt_7_1_.get();
         if (p_217066_4_.canUseRecipe(p_217066_1_, lvt_5_1_, lvt_8_1_)) {
           lvt_6_1_ = lvt_8_1_.getCraftingResult(p_217066_3_);
         }

@@ -7,13 +7,14 @@ import net.minecraftforge.items.ItemStackHandler;
 
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
 public class CraftingInventoryPersistant extends CraftingInventory {
+
   ItemStackHandler itemHandler;
   Container eventHandler;
 
   CraftingInventoryPersistant(Container eventHandler, ItemStackHandler itemHandler) {
     super(eventHandler, 3, 3);
 
-    assert itemHandler.getSlots() == 3 * 3;
+    assert itemHandler.getSlots() == 9;
 
     this.eventHandler = eventHandler;
     this.itemHandler = itemHandler;

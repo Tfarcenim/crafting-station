@@ -77,6 +77,7 @@ public class CraftingStation {
     public static void container(final RegistryEvent.Register<ContainerType<?>> event){
       event.getRegistry().register(IForgeContainerType.create((windowId, inv, data) ->
               new CraftingStationContainer(windowId, inv, inv.player.world, data.readBlockPos(), inv.player)).setRegistryName("crafting_station_container"));
+
     }
 
     @SubscribeEvent
@@ -88,6 +89,7 @@ public class CraftingStation {
   public static class Objects {
     public static final Block crafting_station = null;
     public static final ContainerType<CraftingStationContainer> crafting_station_container = null;
+    public static final ContainerType<SideContainerInventory> side_container = null;
     public static final TileEntityType<CraftingStationTile> crafting_station_tile = null;
   }
 }

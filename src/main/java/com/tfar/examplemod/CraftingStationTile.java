@@ -51,7 +51,7 @@ public class CraftingStationTile extends TileEntity implements INamedContainerPr
   @Nonnull
   @Override
   public ITextComponent getDisplayName() {
-    return new TranslationTextComponent("title.craftingstation");
+    return new TranslationTextComponent("title.crafting_station");
   }
 
   @Nullable
@@ -77,18 +77,6 @@ public class CraftingStationTile extends TileEntity implements INamedContainerPr
         contentsChanged();
       }
     };
-  }
-
-  public void dropContents() {
-    for (int i = 0; i < input.getSlots(); i++) {
-      InventoryHelper.spawnItemStack(
-              world,
-              (double) pos.getX(),
-              (double) pos.getY(),
-              (double) pos.getZ(),
-              input.getStackInSlot(i)
-      );
-    }
   }
 
   public void addListener(Listener listener) {
