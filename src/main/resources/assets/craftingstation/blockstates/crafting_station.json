@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "craftingstation:block/crafting_station" }
+  }
+}
