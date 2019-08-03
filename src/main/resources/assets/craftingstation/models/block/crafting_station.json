@@ -4,7 +4,7 @@
 		"1": "craftingstation:block/leg",
 		"2": "craftingstation:block/top_side",
 		"3": "craftingstation:block/top",
-		"4": "block/oak_planks",
+		"4": "blocks/planks_oak",
 		"particle": "craftingstation:block/leg"
 	},
 	"elements": [

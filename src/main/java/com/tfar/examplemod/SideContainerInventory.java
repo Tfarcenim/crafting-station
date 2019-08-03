@@ -1,10 +1,10 @@
 package com.tfar.examplemod;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -16,14 +16,11 @@ public class SideContainerInventory extends Container {
   public final int slotCount;
   public IItemHandler itemHandler;
 
-  public SideContainerInventory(int id, TileEntity tile, Direction dir, int x, int y, int columns) {
-    super(CraftingStation.Objects.side_container,id);
+  public SideContainerInventory(TileEntity tile, EnumFacing dir, int x, int y, int columns) {
     this.columns = columns;
-    tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(
-            (iItemHandler) -> itemHandler = iItemHandler);
-
+    if (tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,dir))
+      itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
     this.slotCount = itemHandler.getSlots();
-
     int rows = slotCount / columns;
     if(slotCount % columns != 0) {
       rows++;
@@ -35,7 +32,7 @@ public class SideContainerInventory extends Container {
         if(index >= slotCount) {
           break;
         }
-        this.addSlot(createSlot(itemHandler, index, x + c * 18, y + r * 18));
+        this.addSlotToContainer(createSlot(itemHandler, index, x + c * 18, y + r * 18));
         index++;
       }
     }
@@ -46,7 +43,7 @@ public class SideContainerInventory extends Container {
    * @param playerIn
    */
   @Override
-  public boolean canInteractWith(PlayerEntity playerIn) {
+  public boolean canInteractWith(EntityPlayer playerIn) {
     return true;
   }
 

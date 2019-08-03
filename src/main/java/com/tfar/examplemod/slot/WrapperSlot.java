@@ -1,12 +1,10 @@
 package com.tfar.examplemod.slot;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 /**
@@ -37,7 +35,7 @@ import javax.annotation.Nonnull;
     }
 
     @Override
-    public boolean canTakeStack(PlayerEntity playerIn) {
+    public boolean canTakeStack(EntityPlayer playerIn) {
       return parent.canTakeStack(playerIn);
     }
 
@@ -48,7 +46,7 @@ import javax.annotation.Nonnull;
 
     @Override
     @Nonnull
-    public ItemStack onTake(PlayerEntity playerIn, ItemStack stack) {
+    public ItemStack onTake(EntityPlayer playerIn, ItemStack stack) {
       parent.onTake(playerIn, stack);
 
       return stack;
@@ -76,7 +74,7 @@ import javax.annotation.Nonnull;
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     public String getSlotTexture() {
       return parent.getSlotTexture();
     }
@@ -109,7 +107,7 @@ import javax.annotation.Nonnull;
       parent.setBackgroundLocation(texture);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //@OnlyIn(Dist.CLIENT)
     @Override
     public boolean isEnabled() {
       return parent.isEnabled();

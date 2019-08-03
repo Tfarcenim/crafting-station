@@ -4,42 +4,35 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tfar.examplemod.slot.SlotFastCraft;
 import com.tfar.examplemod.slot.WrapperSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.RecipeBookContainer;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.RecipeItemHelper;
-import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
-public class CraftingStationContainer extends RecipeBookContainer<CraftingInventory> implements CraftingStationTile.Listener {
-  public final CraftingInventory craftMatrix;
-  public final CraftResultInventory craftResult = new CraftResultInventory();
+
+public class CraftingStationContainer extends Container implements CraftingStationTile.Listener {
+  public final InventoryCrafting craftMatrix;
+  public final InventoryCraftResult craftResult = new InventoryCraftResult();
   public final World world;
   private final BlockPos pos;
-  private final PlayerEntity player;
+  private final EntityPlayer player;
   private final CraftingStationTile tileEntity;
-  public IRecipe<CraftingInventory> lastRecipe;
-  protected IRecipe<CraftingInventory> lastLastRecipe;
+  public IRecipe lastRecipe;
+  protected IRecipe lastLastRecipe;
 
   public Container subContainer;
   public ITextComponent containerName;
@@ -50,9 +43,7 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
   public int[] range = new int[2];
 
 
-  public CraftingStationContainer(int id, PlayerInventory playerInventory, World world, BlockPos pos, PlayerEntity player) {
-    super(CraftingStation.Objects.crafting_station_container,id);
-
+  public CraftingStationContainer(InventoryPlayer InventoryPlayer, World world, BlockPos pos, EntityPlayer player) {
     this.world = world;
     this.pos = pos;
     this.player = player;
@@ -65,8 +56,8 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
 
     // detect te
     TileEntity inventoryTE = null;
-    Direction accessDir = null;
-    for(Direction dir : Direction.values()) {
+    EnumFacing accessDir = null;
+    for(EnumFacing dir : EnumFacing.values()) {
       BlockPos neighbor = pos.offset(dir);
 
       TileEntity te = world.getTileEntity(neighbor);
@@ -80,11 +71,11 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
   //      }
 
         // try internal access first
-        IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)
-                .filter(IItemHandlerModifiable.class::isInstance).orElse(null);
-        if (handler == null)continue;
-
-        inventoryTE = te;
+        if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,null)) {
+          IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+          if (handler == null) continue;
+          inventoryTE = te;
+        }
         // try sided access else
   //      if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
   //        if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
@@ -97,11 +88,11 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
     }
 
     if(inventoryTE != null) {
-      addSubContainer(new SideContainerInventory(id,inventoryTE, accessDir, -3 - 18 * 6, 17, 6), false);
-      containerName = inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
+      addSubContainer(new SideContainerInventory(inventoryTE, accessDir, -3 - 18 * 6, 17, 6), false);
+      containerName = inventoryTE instanceof IInteractionObject ? ((IInteractionObject) inventoryTE).getDisplayName() : InventoryPlayer.getDisplayName();
     }
-    addPlayerSlots(playerInventory);
-    func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
+    addPlayerSlots(InventoryPlayer);
+    slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
 
     tileEntity.addListener(this);
   }
@@ -120,7 +111,7 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
     int begin = inventorySlots.size();
     for(Slot slot : subcontainer.inventorySlots) {
       WrapperSlot wrapper = new WrapperSlot(slot);
-      addSlot(wrapper);
+      addSlotToContainer(wrapper);
       slotContainerMap.put(wrapper.slotNumber, subcontainer);
     }
     int end = inventorySlots.size();
@@ -129,7 +120,7 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
   }
 
   @Override
-  public void onContainerClosed(PlayerEntity player) {
+  public void onContainerClosed(EntityPlayer player) {
     tileEntity.removeListener(this);
 
     super.onContainerClosed(player);
@@ -137,27 +128,27 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
 
   private void addOwnSlots() {
     // crafting result
-    addSlot(new SlotFastCraft(this,player, craftMatrix, craftResult, 0, 124, 35));
+    addSlotToContainer(new SlotFastCraft(this,player, craftMatrix, craftResult, 0, 124, 35));
 
     // crafting grid
     for (int y = 0; y < 3; y++) {
       for (int x = 0; x < 3; x++) {
-        addSlot(new Slot(craftMatrix, x + 3 * y, 30 + 18 * x, 17 + 18 * y));
+        addSlotToContainer(new Slot(craftMatrix, x + 3 * y, 30 + 18 * x, 17 + 18 * y));
       }
     }
   }
 
-  private void addPlayerSlots(PlayerInventory playerInventory) {
+  private void addPlayerSlots(InventoryPlayer inventoryPlayer) {
     // inventory
     for (int y = 0; y < 3; y++) {
       for (int x = 0; x < 9; x++) {
-        addSlot(new Slot(playerInventory, 9 + x + 9 * y, 8 + 18 * x, 84 + 18 * y));
+        addSlotToContainer(new Slot(inventoryPlayer, 9 + x + 9 * y, 8 + 18 * x, 84 + 18 * y));
       }
     }
 
     // hotbar
     for (int x = 0; x < 9; x++) {
-      addSlot(new Slot(playerInventory, x, 8 + 18 * x, 142));
+      addSlotToContainer(new Slot(inventoryPlayer, x, 8 + 18 * x, 142));
     }
   }
 
@@ -168,16 +159,16 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
 
   @Override
   public void onCraftMatrixChanged(IInventory inventory) {
-    func_217066_a(this.windowId, world, player, craftMatrix, craftResult);
+    slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
   }
 
   @Override
-  public boolean canInteractWith(PlayerEntity player) {
+  public boolean canInteractWith(EntityPlayer player) {
     return true;
   }
 
   @Override
-  public ItemStack transferStackInSlot(PlayerEntity player, int index) {
+  public ItemStack transferStackInSlot(EntityPlayer player, int index) {
     // shamelessly copied from ContainerWorkbench
 
     ItemStack itemstack = ItemStack.EMPTY;
@@ -231,39 +222,6 @@ public class CraftingStationContainer extends RecipeBookContainer<CraftingInvent
   public boolean canMergeSlot(ItemStack stack, Slot slot) {
     return slot.inventory != craftResult && super.canMergeSlot(stack, slot);
   }
-
-  protected static void func_217066_a(int p_217066_0_, World p_217066_1_, PlayerEntity p_217066_2_, CraftingInventory p_217066_3_, CraftResultInventory p_217066_4_) {
-    if (!p_217066_1_.isRemote) {
-      ServerPlayerEntity lvt_5_1_ = (ServerPlayerEntity)p_217066_2_;
-      ItemStack lvt_6_1_ = ItemStack.EMPTY;
-      Optional<ICraftingRecipe> lvt_7_1_ = p_217066_1_.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, p_217066_3_, p_217066_1_);
-      if (lvt_7_1_.isPresent()) {
-        ICraftingRecipe lvt_8_1_ = lvt_7_1_.get();
-        if (p_217066_4_.canUseRecipe(p_217066_1_, lvt_5_1_, lvt_8_1_)) {
-          lvt_6_1_ = lvt_8_1_.getCraftingResult(p_217066_3_);
-        }
-      }
-
-      p_217066_4_.setInventorySlotContents(0, lvt_6_1_);
-      lvt_5_1_.connection.sendPacket(new SSetSlotPacket(p_217066_0_, 0, lvt_6_1_));
-    }
-  }
-
-  @Override
-  public void func_201771_a(RecipeItemHelper p_201771_1_) {
-
-  }
-
-  @Override
-  public void clear() {
-
-  }
-
-  @Override
-  public boolean matches(IRecipe<? super CraftingInventory> recipeIn) {
-    return false;
-  }
-
 
   public int getOutputSlot() {
     return 0;

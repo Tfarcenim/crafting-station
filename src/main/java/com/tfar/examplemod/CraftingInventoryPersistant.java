@@ -1,12 +1,12 @@
 package com.tfar.examplemod;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
-public class CraftingInventoryPersistant extends CraftingInventory {
+public class CraftingInventoryPersistant extends InventoryCrafting {
 
   ItemStackHandler itemHandler;
   Container eventHandler;

@@ -1,18 +1,17 @@
 package com.tfar.examplemod.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.tfar.examplemod.CraftingHandler;
 import com.tfar.examplemod.CraftingStationTile;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 
-public class CraftingStationTileSpecialRenderer extends TileEntityRenderer<CraftingStationTile> { private ItemRenderer itemRenderer;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
+
+public class CraftingStationTileSpecialRenderer extends TileEntitySpecialRenderer<CraftingStationTile> { private ItemRenderer itemRenderer;
 
   private static double level = 1.015;
 
@@ -23,36 +22,35 @@ public class CraftingStationTileSpecialRenderer extends TileEntityRenderer<Craft
   //        {0.5F, level, 0.75F}
   };
 
-
   @Override
-  public void render(CraftingStationTile tileEntity, double x, double y, double z, float partialTicks, int destroyStage) {
-    if (!((CraftingHandler)tileEntity.input).getContents().isEmpty() && this.rendererDispatcher.renderInfo != null && tileEntity.getDistanceSq(this.rendererDispatcher.renderInfo.getProjectedView().x, this.rendererDispatcher.renderInfo.getProjectedView().y, this.rendererDispatcher.renderInfo.getProjectedView().z) < 128d) {
+  public void render(CraftingStationTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+    if (te.getDistanceSq(this.rendererDispatcher.entityX, this.rendererDispatcher.entityY, this.rendererDispatcher.entityZ) < 128d){
 
       double shiftX;
       double shiftY;
       double shiftZ;
 
       if (this.itemRenderer == null) {
-        this.itemRenderer = new ItemRenderer(Minecraft.getInstance().textureManager, Minecraft.getInstance().getModelManager(), Minecraft.getInstance().getItemColors());
+        this.itemRenderer = new ItemRenderer(Minecraft.getMinecraft());
       }
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3;j++) {
-          ItemStack item = tileEntity.input.getStackInSlot(j + 3 * i);
+          ItemStack item = te.input.getStackInSlot(j + 3 * i);
           if (item.isEmpty())continue;
-          boolean isBlock = (item.getItem() instanceof BlockItem);
+          boolean isBlock = (item.getItem() instanceof ItemBlock);
           double blockScale = isBlock ? .5 : .31;
           shiftX = (isBlock ? 0.311 : .306) + .189 * j;
           shiftY = isBlock ? 1.0625 : 1.005;
           shiftZ = (isBlock ? 0.217 : .277) + .189 * i;
           GlStateManager.pushMatrix();
           GlStateManager.enableBlend();
-          GlStateManager.translated(x + shiftX, y + shiftY, z + shiftZ);
+          GlStateManager.translate(x + shiftX, y + shiftY, z + shiftZ);
           //if(!isBlock)
-          GlStateManager.rotated(90, 1, 0, 0);
+          GlStateManager.rotate(90, 1, 0, 0);
 
-          GlStateManager.scaled(blockScale, blockScale, blockScale);
+          GlStateManager.scale(blockScale, blockScale, blockScale);
 
-          this.itemRenderer.renderItem(item, ItemCameraTransforms.TransformType.GROUND);
+          this.itemRenderer.renderItem(Minecraft.getMinecraft().player,item, ItemCameraTransforms.TransformType.GROUND);
           GlStateManager.popMatrix();
         }
       }
