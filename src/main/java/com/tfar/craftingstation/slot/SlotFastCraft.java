@@ -1,6 +1,6 @@
-package com.tfar.examplemod.slot;
+package com.tfar.craftingstation.slot;
 
-import com.tfar.examplemod.CraftingStationContainer;
+import com.tfar.craftingstation.CraftingStationContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
@@ -9,6 +9,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+
+import javax.annotation.Nonnull;
 
 public class SlotFastCraft extends SlotCrafting {
 
@@ -19,6 +21,7 @@ public class SlotFastCraft extends SlotCrafting {
     this.container = container;
   }
 
+  @Nonnull
   @Override
   public ItemStack decrStackSize(int amount) {
     if (this.getHasStack()) {
@@ -31,7 +34,7 @@ public class SlotFastCraft extends SlotCrafting {
    * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
    */
   @Override
-  protected void onCrafting(ItemStack stack) {
+  protected void onCrafting(@Nonnull ItemStack stack) {
     if (this.amountCrafted > 0) {
       stack.onCrafting(this.player.world, this.player, this.amountCrafted);
       FMLCommonHandler.instance().firePlayerCraftingEvent(this.player, stack, craftMatrix);
@@ -40,8 +43,9 @@ public class SlotFastCraft extends SlotCrafting {
     this.amountCrafted = 0;
   }
 
+  @Nonnull
   @Override
-  public ItemStack onTake(EntityPlayer player, ItemStack stack) {
+  public ItemStack onTake(EntityPlayer player,@Nonnull ItemStack stack) {
     this.onCrafting(stack);
     ForgeHooks.setCraftingPlayer(player);
     NonNullList<ItemStack> list;

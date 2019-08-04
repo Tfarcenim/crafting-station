@@ -1,11 +1,8 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.tfar.examplemod.slot.SlotFastCraft;
-import com.tfar.examplemod.slot.WrapperSlot;
+import com.tfar.craftingstation.slot.SlotFastCraft;
+import com.tfar.craftingstation.slot.WrapperSlot;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
@@ -19,10 +16,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.SlotItemHandler;
 
-import java.util.Map;
-import java.util.Set;
-
+import javax.annotation.Nonnull;
 
 public class CraftingStationContainer extends Container implements CraftingStationTile.Listener {
   public final InventoryCrafting craftMatrix;
@@ -34,13 +30,10 @@ public class CraftingStationContainer extends Container implements CraftingStati
   public IRecipe lastRecipe;
   protected IRecipe lastLastRecipe;
 
-  public Container subContainer;
   public ITextComponent containerName;
 
-  protected Set<Container> shiftClickContainers = Sets.newHashSet();
-  protected Map<Integer, Container> slotContainerMap = Maps.newHashMap();
   public int subContainerSlotStart = -1;
-  public int[] range = new int[2];
+  public int subContainerSlotEnd = -1;
 
 
   public CraftingStationContainer(InventoryPlayer InventoryPlayer, World world, BlockPos pos, EntityPlayer player) {
@@ -48,9 +41,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.pos = pos;
     this.player = player;
     this.tileEntity = (CraftingStationTile) world.getTileEntity(pos);
-    assert tileEntity != null;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
-
 
     addOwnSlots();
 
@@ -73,23 +64,24 @@ public class CraftingStationContainer extends Container implements CraftingStati
         // try internal access first
         if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,null)) {
           IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-          if (handler == null) continue;
           inventoryTE = te;
         }
         // try sided access else
-  //      if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
-  //        if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
-  //          inventoryTE = te;
-   //         accessDir = dir.getOpposite();
-   //         break;
-   //       }
-     //   }
+        else if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
+          if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
+            inventoryTE = te;
+            accessDir = dir.getOpposite();
+            break;
+          }
+        }
       }
     }
 
     if(inventoryTE != null) {
-      addSubContainer(new SideContainerInventory(inventoryTE, accessDir, -3 - 18 * 6, 17, 6), false);
+
+      addSideContainerSlots(inventoryTE, accessDir, -3 - 18 * 6, 18, false);
       containerName = inventoryTE instanceof IInteractionObject ? ((IInteractionObject) inventoryTE).getDisplayName() : InventoryPlayer.getDisplayName();
+    //  scrollTo(0);
     }
     addPlayerSlots(InventoryPlayer);
     slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
@@ -97,26 +89,19 @@ public class CraftingStationContainer extends Container implements CraftingStati
     tileEntity.addListener(this);
   }
 
-  //side container
-  private void addSubContainer(Container subcontainer, boolean prefershift) {
-    if(subContainer == null) {
-      subContainerSlotStart = inventorySlots.size();
-    }
-    this.subContainer = subcontainer;
-
-    if(prefershift) {
-      shiftClickContainers.add(subcontainer);
-    }
-
-    int begin = inventorySlots.size();
-    for(Slot slot : subcontainer.inventorySlots) {
-      WrapperSlot wrapper = new WrapperSlot(slot);
+  private void addSideContainerSlots(TileEntity te,EnumFacing dir ,int xPos, int yPos,boolean prefershift){
+    subContainerSlotStart = inventorySlots.size();
+    IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
+    int slotCount = handler.getSlots();
+    for (int y = 0; y < (int)Math.ceil((double)slotCount / 6);y++)
+    for(int x = 0; x < 6;x++) {
+      int index = 6 * y + x;
+      if (index >= slotCount)continue;
+      int offset = y >= 9 ? -10000 : 0;
+      WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(handler,index,18 * x +xPos,18 * y + yPos + offset));
       addSlotToContainer(wrapper);
-      slotContainerMap.put(wrapper.slotNumber, subcontainer);
     }
-    int end = inventorySlots.size();
-    range[0]=begin;
-    range[1]=end;
+    subContainerSlotEnd = inventorySlots.size();
   }
 
   @Override
@@ -152,6 +137,18 @@ public class CraftingStationContainer extends Container implements CraftingStati
     }
   }
 
+
+  public void updateSlotPositions(int offset)
+  {
+    int index = 0;
+    for (int i = subContainerSlotStart; i < subContainerSlotEnd ; i++) {
+      Slot slot = inventorySlots.get(i);
+      int y = (index / 6) - offset;
+      slot.yPos = (y >= 9 || y < 0) ? -2000 : 18 + 18 * y;
+      index++;
+    }
+  }
+
   @Override
   public void tileEntityContentsChanged() {
     onCraftMatrixChanged(craftMatrix);
@@ -167,6 +164,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     return true;
   }
 
+  @Nonnull
   @Override
   public ItemStack transferStackInSlot(EntityPlayer player, int index) {
     // shamelessly copied from ContainerWorkbench
@@ -223,19 +221,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     return slot.inventory != craftResult && super.canMergeSlot(stack, slot);
   }
 
-  public int getOutputSlot() {
-    return 0;
-  }
-
-  public int getWidth() {
-    return this.craftMatrix.getWidth();
-  }
-
-  public int getHeight() {
-    return this.craftMatrix.getHeight();
-  }
-
-  public int getSize() {
-    return 10;
+  public int getRows(){
+    return subContainerSlotStart == -1 ? 0 :(subContainerSlotEnd - subContainerSlotStart)/6;
   }
 }

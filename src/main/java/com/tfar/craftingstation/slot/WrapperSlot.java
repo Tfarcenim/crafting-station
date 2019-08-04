@@ -1,4 +1,4 @@
-package com.tfar.examplemod.slot;
+package com.tfar.craftingstation.slot;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;

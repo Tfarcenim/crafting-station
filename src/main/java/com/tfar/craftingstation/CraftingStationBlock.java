@@ -1,4 +1,4 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -9,6 +9,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -26,6 +27,16 @@ public class CraftingStationBlock extends Block {
     player.addStat(StatList.CRAFTING_TABLE_INTERACTION);
     player.openGui(CraftingStation.INSTANCE, 0, world, pos.getX(), pos.getY(), pos.getZ());
     return true;
+  }
+
+  @Override
+  public boolean isOpaqueCube(IBlockState state) {
+    return false;
+  }
+
+  @Override
+  public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+    return false;
   }
 
   @Override

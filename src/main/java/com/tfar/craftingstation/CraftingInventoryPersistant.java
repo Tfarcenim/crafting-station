@@ -1,4 +1,4 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
@@ -8,8 +8,8 @@ import net.minecraftforge.items.ItemStackHandler;
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
 public class CraftingInventoryPersistant extends InventoryCrafting {
 
-  ItemStackHandler itemHandler;
-  Container eventHandler;
+  private ItemStackHandler itemHandler;
+  private Container eventHandler;
 
   CraftingInventoryPersistant(Container eventHandler, ItemStackHandler itemHandler) {
     super(eventHandler, 3, 3);

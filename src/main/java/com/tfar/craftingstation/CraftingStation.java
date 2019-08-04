@@ -1,18 +1,13 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
-import com.tfar.examplemod.client.CraftingStationTileSpecialRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -43,12 +38,6 @@ public class CraftingStation {
     NetworkRegistry.INSTANCE.registerGuiHandler(this,new GuiHandler());
 }
 
-@SubscribeEvent
-  public static void doClientStuff(final ModelRegistryEvent event) {
-    ClientRegistry.bindTileEntitySpecialRenderer(CraftingStationTile.class, new CraftingStationTileSpecialRenderer());
-    ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(Objects.crafting_station),0,new ModelResourceLocation(Item.getItemFromBlock(Objects.crafting_station).getRegistryName(), "inventory"));
-  }
-
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
   // Event bus for receiving Registry Events)
   @Mod.EventBusSubscriber
@@ -56,7 +45,7 @@ public class CraftingStation {
     @SubscribeEvent
     public static void block(final RegistryEvent.Register<Block> event) {
       // register a new block here
-      event.getRegistry().register(new CraftingStationBlock(Material.WOOD).setRegistryName("crafting_station"));
+      event.getRegistry().register(new CraftingStationBlock(Material.WOOD).setRegistryName("crafting_station").setTranslationKey("craftingstation:crafting_station").setHardness(2).setResistance(15));
     }
 
     @SubscribeEvent

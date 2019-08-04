@@ -1,5 +1,5 @@
 {
   "variants": {
-    "normal": { "model": "craftingstation:block/crafting_station" }
+    "normal": { "model": "craftingstation:crafting_station" }
   }
 }

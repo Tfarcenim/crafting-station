@@ -1,7 +1,6 @@
-package com.tfar.examplemod.client;
+package com.tfar.craftingstation.client;
 
-import com.tfar.examplemod.CraftingHandler;
-import com.tfar.examplemod.CraftingStationTile;
+import com.tfar.craftingstation.CraftingStationTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
@@ -12,15 +11,6 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 
 public class CraftingStationTileSpecialRenderer extends TileEntitySpecialRenderer<CraftingStationTile> { private ItemRenderer itemRenderer;
-
-  private static double level = 1.015;
-
-  private static double[][] shifts = {
-          {0.25F, level, 0.5F},
-      //    {0.75F, level, 0.5F},
-    //      {0.5F, level, 0.25F},
-  //        {0.5F, level, 0.75F}
-  };
 
   @Override
   public void render(CraftingStationTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {

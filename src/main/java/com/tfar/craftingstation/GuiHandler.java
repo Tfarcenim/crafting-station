@@ -1,6 +1,6 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
-import com.tfar.examplemod.client.CraftingStationScreen;
+import com.tfar.craftingstation.client.CraftingStationScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
