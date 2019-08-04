@@ -1,4 +1,4 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;

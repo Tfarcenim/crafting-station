@@ -1,18 +1,16 @@
-package com.tfar.examplemod.client;
+package com.tfar.craftingstation.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.tfar.examplemod.CraftingHandler;
-import com.tfar.examplemod.CraftingStationTile;
+import com.tfar.craftingstation.CraftingStationTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
 
-public class CraftingStationTileSpecialRenderer extends TileEntityRenderer<CraftingStationTile> { private ItemRenderer itemRenderer;
+public class CraftingStationTileSpecialRenderer extends TileEntityRenderer<CraftingStationTile> {
+  private ItemRenderer itemRenderer;
 
   private static double level = 1.015;
 
@@ -26,7 +24,7 @@ public class CraftingStationTileSpecialRenderer extends TileEntityRenderer<Craft
 
   @Override
   public void render(CraftingStationTile tileEntity, double x, double y, double z, float partialTicks, int destroyStage) {
-    if (!((CraftingHandler)tileEntity.input).getContents().isEmpty() && this.rendererDispatcher.renderInfo != null && tileEntity.getDistanceSq(this.rendererDispatcher.renderInfo.getProjectedView().x, this.rendererDispatcher.renderInfo.getProjectedView().y, this.rendererDispatcher.renderInfo.getProjectedView().z) < 128d) {
+    if (this.rendererDispatcher.renderInfo != null && tileEntity.getDistanceSq(this.rendererDispatcher.renderInfo.getProjectedView().x, this.rendererDispatcher.renderInfo.getProjectedView().y, this.rendererDispatcher.renderInfo.getProjectedView().z) < 128d) {
 
       double shiftX;
       double shiftY;

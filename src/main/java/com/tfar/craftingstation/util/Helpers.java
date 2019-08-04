@@ -1,4 +1,4 @@
-package com.tfar.examplemod.util;
+package com.tfar.craftingstation.util;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.shapes.VoxelShape;

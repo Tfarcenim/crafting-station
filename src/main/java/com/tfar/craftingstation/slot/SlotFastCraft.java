@@ -1,6 +1,6 @@
-package com.tfar.examplemod.slot;
+package com.tfar.craftingstation.slot;
 
-import com.tfar.examplemod.CraftingStationContainer;
+import com.tfar.craftingstation.CraftingStationContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;

@@ -1,7 +1,7 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
-import com.tfar.examplemod.client.CraftingStationScreen;
-import com.tfar.examplemod.client.CraftingStationTileSpecialRenderer;
+import com.tfar.craftingstation.client.CraftingStationScreen;
+import com.tfar.craftingstation.client.CraftingStationTileSpecialRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScreenManager;
@@ -38,20 +38,9 @@ public class CraftingStation {
   public CraftingStation() {
     // Register the setup method for modloading
     FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-    // Register the doClientStuff method for modloading
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-
-    // Register ourselves for server and other game events we are interested in
-    MinecraftForge.EVENT_BUS.register(this);
   }
 
   private void setup(final FMLCommonSetupEvent event) {
-  }
-
-  private void doClientStuff(final FMLClientSetupEvent event) {
-    ScreenManager.registerFactory(Objects.crafting_station_container, CraftingStationScreen::new);
-    DistExecutor.runWhenOn(Dist.CLIENT,() -> () -> ClientRegistry.bindTileEntitySpecialRenderer(CraftingStationTile.class, new CraftingStationTileSpecialRenderer()));
-
   }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
@@ -89,7 +78,6 @@ public class CraftingStation {
   public static class Objects {
     public static final Block crafting_station = null;
     public static final ContainerType<CraftingStationContainer> crafting_station_container = null;
-    public static final ContainerType<SideContainerInventory> side_container = null;
     public static final TileEntityType<CraftingStationTile> crafting_station_tile = null;
   }
 }

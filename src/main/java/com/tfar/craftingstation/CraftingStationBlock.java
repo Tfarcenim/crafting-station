@@ -1,12 +1,11 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
-import com.tfar.examplemod.util.Helpers;
+import com.tfar.craftingstation.util.Helpers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.stats.Stats;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -47,7 +46,6 @@ static   {
       TileEntity tileEntity = world.getTileEntity(pos);
       if (tileEntity instanceof INamedContainerProvider) {
         NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tileEntity, tileEntity.getPos());
-        player.addStat(Stats.OPEN_BARREL);
       } else {
         throw new IllegalStateException("Our named container provider is missing!");
       }

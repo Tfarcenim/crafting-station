@@ -1,11 +1,12 @@
-package com.tfar.examplemod;
+package com.tfar.craftingstation;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -23,7 +24,7 @@ public class CraftingStationTile extends TileEntity implements INamedContainerPr
 
   public CraftingStationTile() {
     super(CraftingStation.Objects.crafting_station_tile);
-    this.input = new CraftingHandler(this,9);
+    this.input = new ItemStackHandler(9);
     this.output = new ItemStackHandler();
   }
 
@@ -97,4 +98,26 @@ public class CraftingStationTile extends TileEntity implements INamedContainerPr
   public interface Listener {
     void tileEntityContentsChanged();
   }
+
+  @Override
+  public CompoundNBT getUpdateTag()
+  {
+    return write(new CompoundNBT());    // okay to send entire inventory on chunk load
+  }
+
+  @Override
+  public SUpdateTileEntityPacket getUpdatePacket()
+  {
+    CompoundNBT nbt = new CompoundNBT();
+    this.write(nbt);
+
+    return new SUpdateTileEntityPacket(getPos(), 1, nbt);
+  }
+
+  @Override
+  public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet)
+  {
+    this.read(packet.getNbtCompound());
+  }
 }
+
