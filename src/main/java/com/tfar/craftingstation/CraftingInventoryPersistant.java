@@ -14,8 +14,6 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   CraftingInventoryPersistant(Container eventHandler, ItemStackHandler itemHandler) {
     super(eventHandler, 3, 3);
 
-    assert itemHandler.getSlots() == 9;
-
     this.eventHandler = eventHandler;
     this.itemHandler = itemHandler;
   }

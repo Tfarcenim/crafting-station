@@ -9,6 +9,7 @@ import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -126,7 +127,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   private void addOwnSlots() {
     // crafting result
-    addSlot(new SlotFastCraft(this,player, craftMatrix, craftResult, 0, 124, 35));
+    addSlot(new CraftingResultSlot(player, craftMatrix, craftResult, 0, 124, 35));
 
     // crafting grid
     for (int y = 0; y < 3; y++) {

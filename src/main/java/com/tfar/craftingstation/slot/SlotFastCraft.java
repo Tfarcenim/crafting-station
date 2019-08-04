@@ -36,7 +36,6 @@ public class SlotFastCraft extends CraftingResultSlot {
       stack.onCrafting(this.player.world, this.player, this.amountCrafted);
       BasicEventHooks.firePlayerCraftingEvent(this.player, stack, field_75239_a);
     }
-
     this.amountCrafted = 0;
   }
 
@@ -45,8 +44,8 @@ public class SlotFastCraft extends CraftingResultSlot {
     this.onCrafting(stack);
     ForgeHooks.setCraftingPlayer(player);
     NonNullList<ItemStack> list;
-    if (container.lastRecipe != null && container.lastRecipe.matches(field_75239_a, container.world)) list = container.lastRecipe.getRemainingItems(field_75239_a);
-    else list = field_75239_a.stackList;
+    //if (container.lastRecipe != null && container.lastRecipe.matches(field_75239_a, container.world)) list = container.lastRecipe.getRemainingItems(field_75239_a);
+    list = field_75239_a.stackList;
     ForgeHooks.setCraftingPlayer(null);
 
     for (int i = 0; i < list.size(); ++i) {
