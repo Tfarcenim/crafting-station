@@ -46,6 +46,7 @@ public class LastRecipePacket  {
         ((CraftingStationScreen) Minecraft.getInstance().currentScreen).getContainer().updateLastRecipeFromServer((IRecipe<CraftingInventory>) r);
       }
     });
+    ctx.get().setPacketHandled(true);
   }
 
 }
