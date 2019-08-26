@@ -10,6 +10,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
 
   ItemStackHandler itemHandler;
   Container eventHandler;
+  private boolean doNotCallUpdates;
 
   CraftingInventoryPersistant(Container eventHandler, ItemStackHandler itemHandler) {
     super(eventHandler, 3, 3);
@@ -51,6 +52,10 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   public void setInventorySlotContents(int index, ItemStack stack) {
     itemHandler.setStackInSlot(index, stack);
     eventHandler.onCraftMatrixChanged(this);
+  }
+
+  public void setDoNotCallUpdates(boolean doNotCallUpdates) {
+    this.doNotCallUpdates = doNotCallUpdates;
   }
 
   @Override

@@ -2,6 +2,7 @@ package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.client.CraftingStationScreen;
 import com.tfar.craftingstation.client.CraftingStationTileSpecialRenderer;
+import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScreenManager;
@@ -41,6 +42,7 @@ public class CraftingStation {
   }
 
   private void setup(final FMLCommonSetupEvent event) {
+    PacketHandler.registerMessages(MODID);
   }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD

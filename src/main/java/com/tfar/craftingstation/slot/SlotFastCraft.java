@@ -1,74 +1,98 @@
+
 package com.tfar.craftingstation.slot;
 
+import com.tfar.craftingstation.CraftingInventoryPersistant;
 import com.tfar.craftingstation.CraftingStationContainer;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.hooks.BasicEventHooks;
 
+
+/**
+ *  SlotCraftingSucks from FastWorkbench adapted for the Crafting Station container (no change in functionality)
+ *  See: https://github.com/Shadows-of-Fire/FastWorkbench/blob/master/src/main/java/shadows/fastbench/gui/SlotCraftingSucks.java
+ *
+ *  Basically it ju
+ */
 public class SlotFastCraft extends CraftingResultSlot {
 
-  protected final CraftingStationContainer container;
+  private final CraftingStationContainer containerCraftingStation;
+  private final CraftingInventoryPersistant craftMatrix;
 
-  public SlotFastCraft(CraftingStationContainer container, PlayerEntity player, CraftingInventory inv, IInventory holder, int slotIndex, int xPosition, int yPosition) {
-    super(player, inv, holder, slotIndex, xPosition, yPosition);
-    this.container = container;
+  public SlotFastCraft(CraftingStationContainer containerCraftingStation, PlayerEntity player, CraftingInventoryPersistant craftingInventory, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition) {
+    super(player, craftingInventory, inventoryIn, slotIndex, xPosition, yPosition);
+    this.containerCraftingStation = containerCraftingStation;
+    this.craftMatrix = craftingInventory;
   }
 
   @Override
   public ItemStack decrStackSize(int amount) {
-    if (this.getHasStack()) {
-      this.amountCrafted += Math.min(amount, getStack().getCount());
+    if (this.getHasStack())
+    {
+      this.amountCrafted += Math.min(amount, this.getStack().getCount());
     }
-    return getStack();
+
+    return super.decrStackSize(amount);
   }
 
-  /**
-   * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
-   */
   @Override
   protected void onCrafting(ItemStack stack) {
     if (this.amountCrafted > 0) {
       stack.onCrafting(this.player.world, this.player, this.amountCrafted);
       BasicEventHooks.firePlayerCraftingEvent(this.player, stack, field_75239_a);
     }
+
     this.amountCrafted = 0;
   }
 
   @Override
-  public ItemStack onTake(PlayerEntity player, ItemStack stack) {
+  public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
     this.onCrafting(stack);
-    ForgeHooks.setCraftingPlayer(player);
-    NonNullList<ItemStack> list;
-    //if (container.lastRecipe != null && container.lastRecipe.matches(field_75239_a, container.world)) list = container.lastRecipe.getRemainingItems(field_75239_a);
-    list = field_75239_a.stackList;
-    ForgeHooks.setCraftingPlayer(null);
+    net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
+    /* CHANGE BEGINS HERE */
+    NonNullList<ItemStack> nonnulllist = containerCraftingStation.getRemainingItems();
+    /* END OF CHANGE */
+    net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 
-    for (int i = 0; i < list.size(); ++i) {
-      ItemStack itemstack = this.field_75239_a.getStackInSlot(i);
-      ItemStack itemstack1 = list.get(i);
+    // note: craftMatrix and this.craftMatrix are the same object!
+    craftMatrix.setDoNotCallUpdates(true);
 
-      if (!itemstack.isEmpty()) {
-        this.field_75239_a.decrStackSize(i, 1);
-        itemstack = this.field_75239_a.getStackInSlot(i);
+    for (int i = 0; i < nonnulllist.size(); ++i)
+    {
+      ItemStack itemstack = this.craftMatrix.getStackInSlot(i);
+      ItemStack itemstack1 = nonnulllist.get(i);
+
+      if (!itemstack.isEmpty())
+      {
+        this.craftMatrix.decrStackSize(i, 1);
+        itemstack = this.craftMatrix.getStackInSlot(i);
       }
 
-      if (!itemstack1.isEmpty()) {
-        if (itemstack.isEmpty()) {
-          this.field_75239_a.setInventorySlotContents(i, itemstack1);
-        } else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1)) {
+      if (!itemstack1.isEmpty())
+      {
+        if (itemstack.isEmpty())
+        {
+          this.craftMatrix.setInventorySlotContents(i, itemstack1);
+        }
+        else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
+        {
           itemstack1.grow(itemstack.getCount());
-          this.field_75239_a.setInventorySlotContents(i, itemstack1);
-        } else if (!this.player.inventory.addItemStackToInventory(itemstack1)) {
+          this.craftMatrix.setInventorySlotContents(i, itemstack1);
+        }
+        else if (!this.player.inventory.addItemStackToInventory(itemstack1))
+        {
           this.player.dropItem(itemstack1, false);
         }
       }
     }
 
+    craftMatrix.setDoNotCallUpdates(false);
+    containerCraftingStation.onCraftMatrixChanged(craftMatrix);
+
     return stack;
   }
+
 }

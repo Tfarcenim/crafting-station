@@ -19,6 +19,7 @@ import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
@@ -222,9 +223,9 @@ public class CraftingStationContainer extends Container implements CraftingStati
     return slot.inventory != craftResult && super.canMergeSlot(stack, slot);
   }
 
-  protected static void func_217066_a(int p_217066_0_, World p_217066_1_, PlayerEntity p_217066_2_, CraftingInventory p_217066_3_, CraftResultInventory p_217066_4_) {
+  protected static void func_217066_a(int p_217066_0_, World p_217066_1_, PlayerEntity player, CraftingInventory p_217066_3_, CraftResultInventory p_217066_4_) {
     if (!p_217066_1_.isRemote) {
-      ServerPlayerEntity lvt_5_1_ = (ServerPlayerEntity)p_217066_2_;
+      ServerPlayerEntity lvt_5_1_ = (ServerPlayerEntity)player;
       ItemStack lvt_6_1_ = ItemStack.EMPTY;
       Optional<ICraftingRecipe> lvt_7_1_ = p_217066_1_.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, p_217066_3_, p_217066_1_);
       if (lvt_7_1_.isPresent()) {
@@ -248,6 +249,20 @@ public class CraftingStationContainer extends Container implements CraftingStati
       index++;
     }
   }
+
+  public NonNullList<ItemStack> getRemainingItems() {
+    if(lastRecipe != null && lastRecipe.matches(craftMatrix, world)) {
+      return lastRecipe.getRemainingItems(craftMatrix);
+    }
+    return craftMatrix.stackList;
+  }
+
+  public void updateLastRecipeFromServer(IRecipe<CraftingInventory> recipe) {
+    lastRecipe = recipe;
+    // if no recipe, set to empty to prevent ghost outputs when another player grabs the result
+    this.craftResult.setInventorySlotContents(0, recipe != null ? recipe.getCraftingResult(craftMatrix) : ItemStack.EMPTY);
+  }
+
   public int getRows(){
     return subContainerSlotStart == -1 ? 0 :(subContainerSlotEnd - subContainerSlotStart)/6;
   }
