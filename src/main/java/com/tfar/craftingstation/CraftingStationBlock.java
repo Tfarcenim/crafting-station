@@ -13,6 +13,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.stream.IntStream;
+
+import static net.minecraft.inventory.InventoryHelper.spawnItemStack;
 
 public class CraftingStationBlock extends Block {
 
@@ -51,7 +54,17 @@ public class CraftingStationBlock extends Block {
   }
 
   @Override
-  public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player) {
-    super.onBlockHarvested(worldIn, pos, state, player);
+  public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+      TileEntity tileentity = worldIn.getTileEntity(pos);
+      if (tileentity instanceof CraftingStationTile) {
+        dropItems((CraftingStationTile)tileentity,worldIn, pos);
+        worldIn.updateComparatorOutputLevel(pos, this);
+      }
+      super.breakBlock(worldIn, pos, state);
+    }
+
+  public static void dropItems(CraftingStationTile table, World world, BlockPos pos) {
+    IntStream.range(0, table.input.getSlots()).mapToObj(i -> table.input.getStackInSlot(i)).filter(stack -> !stack.isEmpty()).forEach(stack -> spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack));
   }
 }
+

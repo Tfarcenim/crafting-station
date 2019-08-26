@@ -10,6 +10,7 @@ public class CraftingInventoryPersistant extends InventoryCrafting {
 
   private ItemStackHandler itemHandler;
   private Container eventHandler;
+  private boolean doNotCallUpdates;
 
   CraftingInventoryPersistant(Container eventHandler, ItemStackHandler itemHandler) {
     super(eventHandler, 3, 3);
@@ -52,7 +53,7 @@ public class CraftingInventoryPersistant extends InventoryCrafting {
   @Override
   public void setInventorySlotContents(int index, ItemStack stack) {
     itemHandler.setStackInSlot(index, stack);
-    eventHandler.onCraftMatrixChanged(this);
+    if (!doNotCallUpdates)eventHandler.onCraftMatrixChanged(this);
   }
 
   @Override
@@ -60,5 +61,14 @@ public class CraftingInventoryPersistant extends InventoryCrafting {
     for (int i = 0; i < itemHandler.getSlots(); i++) {
       itemHandler.setStackInSlot(i, ItemStack.EMPTY);
     }
+  }
+
+  /**
+   * If set to true no eventhandler.onCraftMatrixChanged calls will be made.
+   * This is used to prevent recipe check when changing the item slots when something is crafted
+   * (since each slot with an item is reduced by 1, it changes -> callback)
+   */
+  public void setDoNotCallUpdates(boolean doNotCallUpdates) {
+    this.doNotCallUpdates = doNotCallUpdates;
   }
 }

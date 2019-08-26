@@ -1,5 +1,6 @@
 package com.tfar.craftingstation;
 
+import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -36,6 +37,7 @@ public class CraftingStation {
   @Mod.EventHandler
   public void preInit(final FMLPreInitializationEvent event) {
     NetworkRegistry.INSTANCE.registerGuiHandler(this,new GuiHandler());
+    PacketHandler.registerMessages(MODID);
 }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
