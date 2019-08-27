@@ -43,8 +43,8 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   public ITextComponent containerName;
 
-  public int subContainerSlotStart = -1;
-  public int subContainerSlotEnd = -1;
+  public int subContainerSlotStart = 10;
+  public int subContainerSlotEnd = 46;
 
 
   public CraftingStationContainer(InventoryPlayer InventoryPlayer, World world, BlockPos pos, EntityPlayer player) {
@@ -102,7 +102,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
   }
 
   private void addSideContainerSlots(TileEntity te, EnumFacing dir, int xPos, int yPos){
-    subContainerSlotStart = inventorySlots.size();
+    subContainerSlotStart = 10;
     IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
     int slotCount = handler.getSlots();
     for (int y = 0; y < (int)Math.ceil((double)slotCount / 6);y++)
@@ -179,19 +179,13 @@ public class CraftingStationContainer extends Container implements CraftingStati
   @Nonnull
   @Override
   public ItemStack transferStackInSlot(EntityPlayer player, int index) {
-    // shamelessly copied from ContainerWorkbench
 
-    int playerMainStart = 10;
-    int playerMainEnd = 36;
-    int hotbarStart = 37;
-    int hotBarEnd = 46;
+    //shift click sucks
 
-    if (subContainerSlotStart != -1 && subContainerSlotEnd != -1){
-      playerMainStart = subContainerSlotEnd + 1;
-      playerMainEnd = playerMainStart + 26;
-      hotbarStart = playerMainEnd + 1;
-      hotBarEnd = hotbarStart + 9;
-    }
+    int hotBarEnd = this.inventorySlots.size() - 1;
+    int hotbarStart = hotBarEnd - 8;
+    int playerMainEnd = hotbarStart - 1;
+    int playerMainStart = playerMainEnd - 26;
 
     ItemStack itemstack = ItemStack.EMPTY;
     Slot slot = inventorySlots.get(index);
@@ -208,15 +202,15 @@ public class CraftingStationContainer extends Container implements CraftingStati
         }
 
         slot.onSlotChange(itemstack1, itemstack);
-      } else if (index >= 10 && index < 37) {
-        if (!mergeItemStack(itemstack1, 37, hotBarEnd, false)) {
+      } else if (index >= playerMainStart && index < playerMainEnd) {
+        if (!mergeItemStack(itemstack1, hotbarStart, hotBarEnd, false)) {
           return ItemStack.EMPTY;
         }
-      } else if (index >= 37 && index < 46) {
-        if (!mergeItemStack(itemstack1, 10, 37, false)) {
+      } else if (index >= hotbarStart && index < hotBarEnd) {
+        if (!mergeItemStack(itemstack1, playerMainStart, hotbarStart, false)) {
           return ItemStack.EMPTY;
         }
-      } else if (!mergeItemStack(itemstack1, 10, 46, false)) {
+      } else if (!mergeItemStack(itemstack1, playerMainStart, hotBarEnd, false)) {
         return ItemStack.EMPTY;
       }
 

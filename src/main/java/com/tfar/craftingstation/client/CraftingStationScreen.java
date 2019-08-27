@@ -46,9 +46,9 @@ public class CraftingStationScreen extends GuiContainer {
   protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
     fontRenderer.drawString(I18n.format("title.crafting_station"), 28, 6, 0x404040);
     fontRenderer.drawString(I18n.format("container.inventory"), 8, ySize - 96 + 2, 0x404040);
-    if (((CraftingStationContainer) inventorySlots).subContainerSlotStart != -1) {
-      this.fontRenderer.drawString(((CraftingStationContainer) inventorySlots).containerName.getFormattedText(), -110, 6, 4210752);
-    }
+    if (((CraftingStationContainer)this.inventorySlots).hasSideContainer)
+      this.fontRenderer.drawString(((CraftingStationContainer) inventorySlots)
+              .containerName.getFormattedText(), -110, 6, 4210752);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class CraftingStationScreen extends GuiContainer {
     drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
     int i = this.guiLeft;
     int j = (this.height - this.ySize) / 2;
-    if (((CraftingStationContainer) this.inventorySlots).subContainerSlotStart != -1) {
+    if (((CraftingStationContainer)this.inventorySlots).hasSideContainer){
       this.mc.getTextureManager().bindTexture(SECONDARY_GUI_TEXTURE);
       this.drawTexturedModalRect(i - 117, j, 0, 0, this.xSize, this.ySize + 18);
 
