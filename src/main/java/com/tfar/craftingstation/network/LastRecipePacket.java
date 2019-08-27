@@ -48,8 +48,7 @@ public class LastRecipePacket implements IMessage {
 
     private void handle(LastRecipePacket message, MessageContext ctx) {
       // This code is run on the server side. So you can do server-side calculations here
-      IThreadListener mainThread = (WorldServer) ctx.getServerHandler().player.world;
-      mainThread.addScheduledTask(() -> {
+      Minecraft.getMinecraft().addScheduledTask(() -> {
         Container container = Minecraft.getMinecraft().player.openContainer;
         if(container instanceof CraftingStationContainer) {
           ((CraftingStationContainer) container).updateLastRecipeFromServer(message.recipe);
@@ -57,5 +56,4 @@ public class LastRecipePacket implements IMessage {
       });
     }
   }
-
 }

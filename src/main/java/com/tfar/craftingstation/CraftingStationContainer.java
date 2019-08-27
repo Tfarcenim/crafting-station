@@ -11,6 +11,7 @@ import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
@@ -38,6 +39,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
   private final CraftingStationTile tileEntity;
   public IRecipe lastRecipe;
   protected IRecipe lastLastRecipe;
+  public boolean hasSideContainer;
 
   public ITextComponent containerName;
 
@@ -51,6 +53,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.player = player;
     this.tileEntity = (CraftingStationTile) world.getTileEntity(pos);
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
+    this.hasSideContainer = false;
 
     addOwnSlots();
 
@@ -87,8 +90,8 @@ public class CraftingStationContainer extends Container implements CraftingStati
     }
 
     if(inventoryTE != null) {
-
-      addSideContainerSlots(inventoryTE, accessDir, -3 - 18 * 6, 18, false);
+      this.hasSideContainer = true;
+      addSideContainerSlots(inventoryTE, accessDir, -3 - 18 * 6, 18);
       containerName = inventoryTE instanceof IInteractionObject ? ((IInteractionObject) inventoryTE).getDisplayName() : InventoryPlayer.getDisplayName();
     //  scrollTo(0);
     }
@@ -98,7 +101,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     tileEntity.addListener(this);
   }
 
-  private void addSideContainerSlots(TileEntity te,EnumFacing dir ,int xPos, int yPos,boolean prefershift){
+  private void addSideContainerSlots(TileEntity te, EnumFacing dir, int xPos, int yPos){
     subContainerSlotStart = inventorySlots.size();
     IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
     int slotCount = handler.getSlots();
@@ -178,6 +181,18 @@ public class CraftingStationContainer extends Container implements CraftingStati
   public ItemStack transferStackInSlot(EntityPlayer player, int index) {
     // shamelessly copied from ContainerWorkbench
 
+    int playerMainStart = 10;
+    int playerMainEnd = 36;
+    int hotbarStart = 37;
+    int hotBarEnd = 46;
+
+    if (subContainerSlotStart != -1 && subContainerSlotEnd != -1){
+      playerMainStart = subContainerSlotEnd + 1;
+      playerMainEnd = playerMainStart + 26;
+      hotbarStart = playerMainEnd + 1;
+      hotBarEnd = hotbarStart + 9;
+    }
+
     ItemStack itemstack = ItemStack.EMPTY;
     Slot slot = inventorySlots.get(index);
 
@@ -188,13 +203,13 @@ public class CraftingStationContainer extends Container implements CraftingStati
       if (index == 0) {
         itemstack1.getItem().onCreated(itemstack1, world, player);
 
-        if (!mergeItemStack(itemstack1, 10, 46, true)) {
+        if (!mergeItemStack(itemstack1, playerMainStart, hotBarEnd, true)) {
           return ItemStack.EMPTY;
         }
 
         slot.onSlotChange(itemstack1, itemstack);
       } else if (index >= 10 && index < 37) {
-        if (!mergeItemStack(itemstack1, 37, 46, false)) {
+        if (!mergeItemStack(itemstack1, 37, hotBarEnd, false)) {
           return ItemStack.EMPTY;
         }
       } else if (index >= 37 && index < 46) {
@@ -291,7 +306,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
   private void syncResultToAllOpenWindows(final ItemStack stack, List<EntityPlayerMP> players) {
     players.forEach(otherPlayer -> {
       otherPlayer.openContainer.putStackInSlot(SLOT_RESULT, stack);
-      //otherPlayer.connection.sendPacket(new SPacketSetSlot(otherPlayer.openContainer.windowId, SLOT_RESULT, stack));
+      otherPlayer.connection.sendPacket(new SPacketSetSlot(otherPlayer.openContainer.windowId, SLOT_RESULT, stack));
     });
   }
 
