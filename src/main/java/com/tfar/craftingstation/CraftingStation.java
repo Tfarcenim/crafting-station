@@ -6,10 +6,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -38,7 +40,12 @@ public class CraftingStation {
   public void preInit(final FMLPreInitializationEvent event) {
     NetworkRegistry.INSTANCE.registerGuiHandler(this,new GuiHandler());
     PacketHandler.registerMessages(MODID);
-}
+    NBTTagCompound tagCompound = new NBTTagCompound();
+    tagCompound.setString("ContainerClass", CraftingStationContainer.class.getName());
+    tagCompound.setString("AlignToGrid", "left");
+    FMLInterModComms.sendMessage("craftingtweaks", "RegisterProvider", tagCompound);
+
+  }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
   // Event bus for receiving Registry Events)

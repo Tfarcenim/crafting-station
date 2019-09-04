@@ -75,7 +75,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
         // try internal access first
         if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,null)) {
-          IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
           inventoryTE = te;
         }
         // try sided access else
@@ -91,7 +90,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
     if(inventoryTE != null) {
       this.hasSideContainer = true;
-      addSideContainerSlots(inventoryTE, accessDir, -3 - 18 * 6, 18);
+      addSideContainerSlots(inventoryTE, accessDir, -125, 18);
       containerName = inventoryTE instanceof IInteractionObject ? ((IInteractionObject) inventoryTE).getDisplayName() : InventoryPlayer.getDisplayName();
     //  scrollTo(0);
     }
@@ -119,7 +118,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
   @Override
   public void onContainerClosed(EntityPlayer player) {
     tileEntity.removeListener(this);
-
     super.onContainerClosed(player);
   }
 
@@ -150,8 +148,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
   }
 
 
-  public void updateSlotPositions(int offset)
-  {
+  public void updateSlotPositions(int offset) {
     int index = 0;
     for (int i = subContainerSlotStart; i < subContainerSlotEnd ; i++) {
       Slot slot = inventorySlots.get(i);
@@ -159,6 +156,10 @@ public class CraftingStationContainer extends Container implements CraftingStati
       slot.yPos = (y >= 9 || y < 0) ? -2000 : 18 + 18 * y;
       index++;
     }
+  }
+
+  public int getSubContainerSize(){
+    return this.hasSideContainer ? subContainerSlotEnd - subContainerSlotStart : 0;
   }
 
   @Override
