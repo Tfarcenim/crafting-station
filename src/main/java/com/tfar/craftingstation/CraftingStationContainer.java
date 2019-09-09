@@ -43,8 +43,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   public ITextComponent containerName;
 
-  public int subContainerSlotStart = 10;
-  public int subContainerSlotEnd = 46;
+  public int subContainerSize = 0;
 
 
   public CraftingStationContainer(InventoryPlayer InventoryPlayer, World world, BlockPos pos, EntityPlayer player) {
@@ -101,18 +100,16 @@ public class CraftingStationContainer extends Container implements CraftingStati
   }
 
   private void addSideContainerSlots(TileEntity te, EnumFacing dir, int xPos, int yPos){
-    subContainerSlotStart = 10;
     IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
-    int slotCount = handler.getSlots();
-    for (int y = 0; y < (int)Math.ceil((double)slotCount / 6);y++)
+    this.subContainerSize = handler.getSlots();
+    for (int y = 0; y < (int)Math.ceil((double)subContainerSize / 6);y++)
     for(int x = 0; x < 6;x++) {
       int index = 6 * y + x;
-      if (index >= slotCount)continue;
+      if (index >= subContainerSize)continue;
       int offset = y >= 9 ? -10000 : 0;
       WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(handler,index,18 * x +xPos,18 * y + yPos + offset));
       addSlotToContainer(wrapper);
     }
-    subContainerSlotEnd = inventorySlots.size();
   }
 
   @Override
@@ -149,17 +146,16 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
 
   public void updateSlotPositions(int offset) {
-    int index = 0;
-    for (int i = subContainerSlotStart; i < subContainerSlotEnd ; i++) {
+
+    for (int i = 10; i < subContainerSize + 10; i++) {
       Slot slot = inventorySlots.get(i);
-      int y = (index / 6) - offset;
-      slot.yPos = (y >= 9 || y < 0) ? -2000 : 18 + 18 * y;
-      index++;
+      int index = ((i-10) / 6) - offset;
+      slot.yPos = (index >= 9 || index < 0) ? -2000 : 18 + 18 * index;
     }
   }
 
   public int getSubContainerSize(){
-    return this.hasSideContainer ? subContainerSlotEnd - subContainerSlotStart : 0;
+    return this.subContainerSize;
   }
 
   @Override
@@ -194,27 +190,26 @@ public class CraftingStationContainer extends Container implements CraftingStati
     if (slot != null && slot.getHasStack()) {
       ItemStack itemstack1 = slot.getStack();
       itemstack = itemstack1.copy();
-
+      //shiftclicking crafting slot
       if (index == 0) {
         itemstack1.getItem().onCreated(itemstack1, world, player);
 
-        if (!mergeItemStack(itemstack1, playerMainStart, hotBarEnd, true)) {
+        if (!mergeItemStack(itemstack1, 10, hotBarEnd, true)) {
           return ItemStack.EMPTY;
         }
 
         slot.onSlotChange(itemstack1, itemstack);
-      } else if (index >= playerMainStart && index < playerMainEnd) {
-        if (!mergeItemStack(itemstack1, hotbarStart, hotBarEnd, false)) {
+        //shiftclicking in main inv
+      } else if (index >= playerMainStart && index <= hotBarEnd) {
+        if (!mergeItemStack(itemstack1, 10, playerMainStart, false)) {
           return ItemStack.EMPTY;
         }
-      } else if (index >= hotbarStart && index < hotBarEnd) {
-        if (!mergeItemStack(itemstack1, playerMainStart, hotbarStart, false)) {
+        //shiftclicking in side container
+      } else if (index >= 10 && index < playerMainStart) {
+        if (!mergeItemStack(itemstack1, playerMainStart, hotBarEnd, false)) {
           return ItemStack.EMPTY;
         }
-      } else if (!mergeItemStack(itemstack1, playerMainStart, hotBarEnd, false)) {
-        return ItemStack.EMPTY;
       }
-
       if (itemstack1.isEmpty()) {
         slot.putStack(ItemStack.EMPTY);
       } else {
@@ -324,6 +319,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
   }
 
   public int getRows(){
-    return subContainerSlotStart == -1 ? 0 :(subContainerSlotEnd - subContainerSlotStart)/6;
+    return (int)Math.ceil((double)subContainerSize/6);
   }
 }

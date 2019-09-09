@@ -25,7 +25,9 @@ public class CraftingStationScreen extends GuiContainer {
   private double currentScroll;
 
   boolean isScrolling = false;
-  /** True if the left mouse button was held down last time drawScreen was called. */
+  /**
+   * True if the left mouse button was held down last time drawScreen was called.
+   */
   private boolean wasClicking;
   private final int realRows;
   private int topRow;
@@ -67,7 +69,7 @@ public class CraftingStationScreen extends GuiContainer {
 
     if (this.isScrolling && mouseX <= k2 && mouseX >= k1) {
       this.currentScroll = (mouseY - j1) / (j2 - j1 - 0f);
-      currentScroll = MathHelper.clamp(currentScroll,0,1);
+      currentScroll = MathHelper.clamp(currentScroll, 0, 1);
       scrollTo(currentScroll);
     }
 
@@ -81,7 +83,7 @@ public class CraftingStationScreen extends GuiContainer {
     fontRenderer.drawString(I18n.format("container.inventory"), 8, ySize - 96 + 2, 0x404040);
     if (((CraftingStationContainer) this.inventorySlots).hasSideContainer)
       this.fontRenderer.drawString(((CraftingStationContainer) inventorySlots)
-              .containerName.getFormattedText(), -110, 6, 4210752);
+              .containerName.getFormattedText(), -125, 6, 0x404040);
   }
 
   @Override
@@ -91,7 +93,6 @@ public class CraftingStationScreen extends GuiContainer {
     mc.getTextureManager().bindTexture(backgroundTexture);
     drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
     int i = this.guiLeft;
-
 
     int i1 = i - 16;
     int i2 = i1 + 14;
@@ -104,8 +105,8 @@ public class CraftingStationScreen extends GuiContainer {
       this.mc.getTextureManager().bindTexture(SCROLLBAR_BACKGROUND_AND_TAB);
       int totalSlots = ((CraftingStationContainer) this.inventorySlots).getSubContainerSize();
       int slotsToDraw = 54;
-      if (totalSlots <= slotsToDraw) slotsToDraw = totalSlots;
-      else if (hasScrollbar() && topRow == this.realRows - 8 && totalSlots % 6 != 0)
+      if (totalSlots < slotsToDraw) slotsToDraw = totalSlots;
+      else if (hasScrollbar() && topRow == this.realRows - 9 && totalSlots % 6 != 0)
         slotsToDraw = 54 - 6 + totalSlots % 6;
 
       for (int i3 = 0; i3 < slotsToDraw; i3++) {
@@ -114,14 +115,14 @@ public class CraftingStationScreen extends GuiContainer {
         drawTexturedModalRect(i + j1 * 18 - 126, 18 * k1 + j + 17, 8, 17, 18, 18);
       }
 
-      if (this.hasScrollbar()){
+      if (this.hasScrollbar()) {
         drawTexturedModalRect(i - 17, j + 17, 174, 17, 14, 100);
         drawTexturedModalRect(i - 17, j + 68, 174, 18, 14, 111);
         this.mc.getTextureManager().bindTexture(SCROLLBAR);
         int k = (int) (j + 18 + 145 * currentScroll);
 
         if (wasClicking && mouseX <= i2 && mouseX >= i1)
-        drawTexturedModalRect(i - 16, k, 244, 0, 12, 15);
+          drawTexturedModalRect(i - 16, k, 244, 0, 12, 15);
         else drawTexturedModalRect(i - 16, k, 244 - 12, 0, 12, 15);
       }
 
@@ -138,7 +139,7 @@ public class CraftingStationScreen extends GuiContainer {
    */
   public void handleMouseInput() throws IOException {
     super.handleMouseInput();
-    int scrollDelta = - Mouse.getEventDWheel();
+    int scrollDelta = -Mouse.getEventDWheel();
 
     if (scrollDelta != 0 && this.hasScrollbar()) {
 
@@ -149,7 +150,7 @@ public class CraftingStationScreen extends GuiContainer {
       if (scrollDelta < 0) {
         scrollDelta = -1;
       }
-      setTopRow(topRow + scrollDelta,false);
+      setTopRow(topRow + scrollDelta, false);
     }
   }
 
@@ -160,18 +161,18 @@ public class CraftingStationScreen extends GuiContainer {
 
   @Override
   protected void mouseReleased(int mouseX, int mouseY, int state) {
-    super.mouseReleased(mouseX,mouseY,state);
+    super.mouseReleased(mouseX, mouseY, state);
   }
 
-  private void scrollTo(double scroll){
-    setTopRow((int) Math.round((realRows - 8) * scroll),true);
+  private void scrollTo(double scroll) {
+    setTopRow((int) Math.round((realRows - 9) * scroll), true);
   }
 
-    private void setTopRow(int value,boolean smooth) {
+  private void setTopRow(int value, boolean smooth) {
     topRow = value;
     if (topRow < 0) topRow = 0;
-    else if (topRow > realRows - 8) topRow = realRows - 8;
+    else if (topRow > realRows - 9) topRow = realRows - 9;
     ((CraftingStationContainer) inventorySlots).updateSlotPositions(topRow);
-    if (!smooth)this.currentScroll = (double)topRow / (this.realRows - 8);
+    if (!smooth) this.currentScroll = (double) topRow / (this.realRows - 9);
   }
 }
