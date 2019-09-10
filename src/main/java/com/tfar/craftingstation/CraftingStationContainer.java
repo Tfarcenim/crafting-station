@@ -175,59 +175,214 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   @Nonnull
   @Override
-  public ItemStack transferStackInSlot(EntityPlayer player, int index) {
+  public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+    Slot slot = this.inventorySlots.get(index);
 
-    //shift click sucks
+    if(slot == null || !slot.getHasStack()) {
+      return ItemStack.EMPTY;
+    }
 
-    int hotBarEnd = this.inventorySlots.size() - 1;
-    int hotbarStart = hotBarEnd - 8;
-    int playerMainEnd = hotbarStart - 1;
-    int playerMainStart = playerMainEnd - 26;
+    ItemStack ret = slot.getStack().copy();
+    ItemStack stack = slot.getStack().copy();
 
-    ItemStack itemstack = ItemStack.EMPTY;
-    Slot slot = inventorySlots.get(index);
+    boolean nothingDone = true;
 
-    if (slot != null && slot.getHasStack()) {
+    //is this the crafting slot?
+    if (index == 0){
+
+      if (hasSideContainer)
+        nothingDone = refillTileInventory(stack);
+      // Try moving module -> player inventory
+      nothingDone &= moveToPlayerInventory(stack);
+
+      // Try moving module -> tile inventory
+      if (hasSideContainer)
+        nothingDone &= mergeItemStackMove(stack,10,10 + subContainerSize,false);
+    }
+
+    // Is the slot an input slot??
+    else if(index < 10) {
+      if (hasSideContainer)
+        nothingDone = refillTileInventory(stack);
+      // Try moving module -> player inventory
+      nothingDone &= moveToPlayerInventory(stack);
+
+      // Try moving module -> tile inventory
+      if (hasSideContainer)
+        nothingDone &= mergeItemStackMove(stack,10,10 + subContainerSize,false);
+    }
+    // Is the slot from the tile?
+    else if(index < 10 + subContainerSize && hasSideContainer) {
+      // Try moving tile -> preferred modules
+      nothingDone = moveToCraftingStation(stack);
+
+      // Try moving module -> player inventory
+      nothingDone &= moveToPlayerInventory(stack);
+    }
+    // Slot is from the player inventory
+    else if(index >= 10 + subContainerSize) {
+      // try moving player -> modules
+      nothingDone = moveToCraftingStation(stack);
+
+      // Try moving player -> tile inventory
+      if (hasSideContainer)
+      nothingDone &= moveToTileInventory(stack);
+    }
+    // you violated some assumption or something. Shame on you.
+    else {
+      return ItemStack.EMPTY;
+    }
+
+    if(nothingDone) {
+      return ItemStack.EMPTY;
+    }
+    return notifySlotAfterTransfer(playerIn, stack, ret, slot);
+  }
+
+  @Nonnull
+  protected ItemStack notifySlotAfterTransfer(EntityPlayer player, @Nonnull ItemStack stack, @Nonnull ItemStack original, Slot slot) {
+    // notify slot
+    slot.onSlotChange(stack, original);
+
+    if(stack.getCount() == original.getCount()) {
+      return ItemStack.EMPTY;
+    }
+
+    // update slot we pulled from
+    slot.putStack(stack);
+    slot.onTake(player, stack);
+
+    if(slot.getHasStack() && slot.getStack().isEmpty()) {
+      slot.putStack(ItemStack.EMPTY);
+    }
+
+    return original;
+  }
+
+  protected boolean moveToTileInventory(@Nonnull ItemStack itemstack) {
+    return !this.mergeItemStack(itemstack, 10, 10 + subContainerSize, false);
+  }
+
+  protected boolean moveToPlayerInventory(@Nonnull ItemStack itemstack) {
+    return !this.mergeItemStack(itemstack, 10 + subContainerSize, this.inventorySlots.size(), true);
+  }
+
+  protected boolean refillTileInventory(@Nonnull ItemStack itemStack){
+    return this.mergeItemStackRefill(itemStack,10,10 + subContainerSize,false);
+  }
+
+  protected boolean moveToCraftingStation(@Nonnull ItemStack itemstack) {
+    return !this.mergeItemStack(itemstack, 1, 10, false);
+  }
+
+  // Fix for a vanilla bug: doesn't take Slot.getMaxStackSize into account
+  @Override
+  protected boolean mergeItemStack(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    boolean ret = mergeItemStackRefill(stack, startIndex, endIndex, useEndIndex);
+    if(!stack.isEmpty()) ret |= mergeItemStackMove(stack, startIndex, endIndex, useEndIndex);
+    return ret;
+  }
+
+  // only refills items that are already present
+  protected boolean mergeItemStackRefill(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    if(stack.isEmpty()) return false;
+
+    boolean flag1 = false;
+    int k = startIndex;
+
+    if(useEndIndex) {
+      k = endIndex - 1;
+    }
+
+    Slot slot;
+    ItemStack stack1;
+
+    if(stack.isStackable()) {
+      while(!stack.isEmpty() && ((!useEndIndex && (k < endIndex)) || (useEndIndex && (k >= startIndex)))) {
+        slot = this.inventorySlots.get(k);
+        stack1 = slot.getStack();
+
+        if(!stack1.isEmpty()
+                && stack1.getItem() == stack.getItem()
+                && (!stack.getHasSubtypes() || stack.getMetadata() == stack1.getMetadata())
+                && ItemStack.areItemStackTagsEqual(stack, stack1)
+                && this.canMergeSlot(stack, slot)) {
+          int l = stack1.getCount() + stack.getCount();
+          int limit = Math.min(stack.getMaxStackSize(), slot.getItemStackLimit(stack));
+
+          if(l <= limit) {
+            stack.setCount(0);
+            stack1.setCount(l);
+            slot.onSlotChanged();
+            flag1 = true;
+          }
+          else if(stack1.getCount() < limit) {
+            stack.shrink(limit - stack1.getCount());
+            stack1.setCount(limit);
+            slot.onSlotChanged();
+            flag1 = true;
+          }
+        }
+
+        if(useEndIndex) {
+          --k;
+        }
+        else {
+          ++k;
+        }
+      }
+    }
+    return flag1;
+  }
+
+  // only moves items into empty slots
+  protected boolean mergeItemStackMove(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    if(stack.isEmpty()) return false;
+
+    boolean flag1 = false;
+    int k;
+
+    if(useEndIndex) {
+      k = endIndex - 1;
+    }
+    else {
+      k = startIndex;
+    }
+
+    while(!useEndIndex && k < endIndex || useEndIndex && k >= startIndex) {
+      Slot slot = this.inventorySlots.get(k);
       ItemStack itemstack1 = slot.getStack();
-      itemstack = itemstack1.copy();
-      //shiftclicking crafting slot
-      if (index == 0) {
-        itemstack1.getItem().onCreated(itemstack1, world, player);
 
-        if (!mergeItemStack(itemstack1, 10, hotBarEnd, true)) {
-          return ItemStack.EMPTY;
+      if(itemstack1.isEmpty() && slot.isItemValid(stack) && this.canMergeSlot(stack, slot)) // Forge: Make sure to respect isItemValid in the slot.
+      {
+        int limit = slot.getItemStackLimit(stack);
+        ItemStack stack2 = stack.copy();
+        if(stack2.getCount() > limit) {
+          stack2.setCount(limit);
+          stack.shrink(limit);
         }
-
-        slot.onSlotChange(itemstack1, itemstack);
-        //shiftclicking in main inv
-      } else if (index >= playerMainStart && index <= hotBarEnd) {
-        if (!mergeItemStack(itemstack1, 10, playerMainStart, false)) {
-          return ItemStack.EMPTY;
+        else {
+          stack.setCount(0);
         }
-        //shiftclicking in side container
-      } else if (index >= 10 && index < playerMainStart) {
-        if (!mergeItemStack(itemstack1, playerMainStart, hotBarEnd, false)) {
-          return ItemStack.EMPTY;
-        }
-      }
-      if (itemstack1.isEmpty()) {
-        slot.putStack(ItemStack.EMPTY);
-      } else {
+        slot.putStack(stack2);
         slot.onSlotChanged();
+        flag1 = true;
+
+        if(stack.isEmpty()) {
+          break;
+        }
       }
 
-      if (itemstack1.getCount() == itemstack.getCount()) {
-        return ItemStack.EMPTY;
+      if(useEndIndex) {
+        --k;
       }
-
-      ItemStack itemstack2 = slot.onTake(player, itemstack1);
-
-      if (index == 0) {
-        player.dropItem(itemstack2, false);
+      else {
+        ++k;
       }
     }
 
-    return itemstack;
+
+    return flag1;
   }
 
   private void syncRecipeToAllOpenWindows(final IRecipe lastRecipe, List<EntityPlayerMP> players) {
