@@ -109,10 +109,12 @@ public class CraftingStationScreen extends GuiContainer {
       else if (hasScrollbar() && topRow == this.realRows - 9 && totalSlots % 6 != 0)
         slotsToDraw = 54 - 6 + totalSlots % 6;
 
+      int offset = hasScrollbar() ? -126 : -118;
+
       for (int i3 = 0; i3 < slotsToDraw; i3++) {
         int j1 = i3 % 6;
         int k1 = i3 / 6;
-        drawTexturedModalRect(i + j1 * 18 - 126, 18 * k1 + j + 17, 8, 17, 18, 18);
+        drawTexturedModalRect(i + j1 * 18 + offset, 18 * k1 + j + 17, 8, 17, 18, 18);
       }
 
       if (this.hasScrollbar()) {

@@ -102,6 +102,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
   private void addSideContainerSlots(TileEntity te, EnumFacing dir, int xPos, int yPos){
     IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
     this.subContainerSize = handler.getSlots();
+    if (!needsScroll())xPos += 8;
     for (int y = 0; y < (int)Math.ceil((double)subContainerSize / 6);y++)
     for(int x = 0; x < 6;x++) {
       int index = 6 * y + x;
@@ -465,6 +466,10 @@ public class CraftingStationContainer extends Container implements CraftingStati
       return lastRecipe.getRemainingItems(craftMatrix);
     }
     return craftMatrix.stackList;
+  }
+
+  public boolean needsScroll(){
+    return this.hasSideContainer && this.subContainerSize > 54;
   }
 
   public void updateLastRecipeFromServer(IRecipe recipe) {
