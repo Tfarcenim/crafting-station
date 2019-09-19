@@ -1,6 +1,5 @@
 package com.tfar.craftingstation;
 
-import com.tfar.craftingstation.slot.SlotFastCraft;
 import com.tfar.craftingstation.slot.WrapperSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -28,6 +27,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public class CraftingStationContainer extends Container implements CraftingStationTile.Listener {
@@ -42,8 +42,8 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   public ITextComponent containerName;
 
-  public int subContainerSlotStart = -1;
-  public int subContainerSlotEnd = -1;
+  public int subContainerSize = 0;
+  public boolean hasSideContainer;
 
 
   public CraftingStationContainer(int id, PlayerInventory playerInventory, World world, BlockPos pos, PlayerEntity player) {
@@ -55,7 +55,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.tileEntity = (CraftingStationTile) world.getTileEntity(pos);
     assert tileEntity != null;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
-
+    this.hasSideContainer = false;
 
     addOwnSlots();
 
@@ -95,7 +95,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     }
 
     if(inventoryTE != null) {
-      addSideContainerSlots(inventoryTE, accessDir, -3 - 18 * 6, 17);
+      addSideContainerSlots(inventoryTE, accessDir, -125, 17);
       containerName = inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
     }
     addPlayerSlots(playerInventory);
@@ -105,18 +105,19 @@ public class CraftingStationContainer extends Container implements CraftingStati
   }
 
   private void addSideContainerSlots(TileEntity te,Direction dir ,int xPos, int yPos){
-    subContainerSlotStart = inventorySlots.size();
-    IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).orElse(null);
-    int slotCount = handler.getSlots();
-    for (int y = 0; y < (int)Math.ceil((double)slotCount / 6);y++)
-      for(int x = 0; x < 6;x++) {
-        int index = 6 * y + x;
-        if (index >= slotCount)continue;
-        int offset = y >= 9 ? -10000 : 0;
-        WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(handler,index,18 * x +xPos,18 * y + yPos + offset));
-        addSlot(wrapper);
-      }
-    subContainerSlotEnd = inventorySlots.size();
+    hasSideContainer = true;
+    te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent((h) -> {
+      this.subContainerSize = h.getSlots();
+      int offsetx =  (needsScroll())? 0 : 8;
+      for (int y = 0; y < (int) Math.ceil((double) subContainerSize / 6); y++)
+        for (int x = 0; x < 6; x++) {
+          int index = 6 * y + x;
+          if (index >= subContainerSize) continue;
+          int offsety = y >= 9 ? -10000 : 0;
+          WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(h, index, 18 * x + xPos + offsetx, 18 * y + yPos + offsety));
+          addSlot(wrapper);
+        }
+    });
   }
 
   @Override
@@ -167,56 +168,217 @@ public class CraftingStationContainer extends Container implements CraftingStati
     return true;
   }
 
+  @Nonnull
   @Override
-  public ItemStack transferStackInSlot(PlayerEntity player, int index) {
-    // shamelessly copied from ContainerWorkbench
+  public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    Slot slot = this.inventorySlots.get(index);
 
-    ItemStack itemstack = ItemStack.EMPTY;
-    Slot slot = inventorySlots.get(index);
+    if(slot == null || !slot.getHasStack()) {
+      return ItemStack.EMPTY;
+    }
 
-    if (slot != null && slot.getHasStack()) {
+    ItemStack ret = slot.getStack().copy();
+    ItemStack stack = slot.getStack().copy();
+
+    boolean nothingDone = true;
+
+    //is this the crafting slot?
+    if (index == 0){
+
+      if (hasSideContainer)
+        nothingDone = refillTileInventory(stack);
+      // Try moving module -> player inventory
+      nothingDone &= moveToPlayerInventory(stack);
+
+      // Try moving module -> tile inventory
+      if (hasSideContainer)
+        nothingDone &= mergeItemStackMove(stack,10,10 + subContainerSize,false);
+    }
+
+    // Is the slot an input slot??
+    else if(index < 10) {
+      if (hasSideContainer)
+        nothingDone = refillTileInventory(stack);
+      // Try moving module -> player inventory
+      nothingDone &= moveToPlayerInventory(stack);
+
+      // Try moving module -> tile inventory
+      if (hasSideContainer)
+        nothingDone &= mergeItemStackMove(stack,10,10 + subContainerSize,false);
+    }
+    // Is the slot from the tile?
+    else if(index < 10 + subContainerSize && hasSideContainer) {
+      // Try moving tile -> preferred modules
+      nothingDone = moveToCraftingStation(stack);
+
+      // Try moving module -> player inventory
+      nothingDone &= moveToPlayerInventory(stack);
+    }
+    // Slot is from the player inventory
+    else if(index >= 10 + subContainerSize) {
+      // try moving player -> modules
+      nothingDone = moveToCraftingStation(stack);
+
+      // Try moving player -> tile inventory
+      if (hasSideContainer)
+        nothingDone &= moveToTileInventory(stack);
+    }
+    // you violated some assumption or something. Shame on you.
+    else {
+      return ItemStack.EMPTY;
+    }
+
+    if(nothingDone) {
+      return ItemStack.EMPTY;
+    }
+    return notifySlotAfterTransfer(playerIn, stack, ret, slot);
+  }
+
+  @Nonnull
+  protected ItemStack notifySlotAfterTransfer(PlayerEntity player, @Nonnull ItemStack stack, @Nonnull ItemStack original, Slot slot) {
+    // notify slot
+    slot.onSlotChange(stack, original);
+
+    if(stack.getCount() == original.getCount()) {
+      return ItemStack.EMPTY;
+    }
+
+    // update slot we pulled from
+    slot.putStack(stack);
+    slot.onTake(player, stack);
+
+    if(slot.getHasStack() && slot.getStack().isEmpty()) {
+      slot.putStack(ItemStack.EMPTY);
+    }
+
+    return original;
+  }
+
+  protected boolean moveToTileInventory(@Nonnull ItemStack itemstack) {
+    return !this.mergeItemStack(itemstack, 10, 10 + subContainerSize, false);
+  }
+
+  protected boolean moveToPlayerInventory(@Nonnull ItemStack itemstack) {
+    return !this.mergeItemStack(itemstack, 10 + subContainerSize, this.inventorySlots.size(), true);
+  }
+
+  protected boolean refillTileInventory(@Nonnull ItemStack itemStack){
+    return this.mergeItemStackRefill(itemStack,10,10 + subContainerSize,false);
+  }
+
+  protected boolean moveToCraftingStation(@Nonnull ItemStack itemstack) {
+    return !this.mergeItemStack(itemstack, 1, 10, false);
+  }
+
+  // Fix for a vanilla bug: doesn't take Slot.getMaxStackSize into account
+  @Override
+  protected boolean mergeItemStack(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    boolean ret = mergeItemStackRefill(stack, startIndex, endIndex, useEndIndex);
+    if(!stack.isEmpty()) ret |= mergeItemStackMove(stack, startIndex, endIndex, useEndIndex);
+    return ret;
+  }
+
+  // only refills items that are already present
+  protected boolean mergeItemStackRefill(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    if(stack.isEmpty()) return false;
+
+    boolean flag1 = false;
+    int k = startIndex;
+
+    if(useEndIndex) {
+      k = endIndex - 1;
+    }
+
+    Slot slot;
+    ItemStack stack1;
+
+    if(stack.isStackable()) {
+      while(!stack.isEmpty() && ((!useEndIndex && (k < endIndex)) || (useEndIndex && (k >= startIndex)))) {
+        slot = this.inventorySlots.get(k);
+        stack1 = slot.getStack();
+
+        if(!stack1.isEmpty()
+                && stack1.getItem() == stack.getItem()
+                && ItemStack.areItemStackTagsEqual(stack, stack1)
+                && this.canMergeSlot(stack, slot)) {
+          int l = stack1.getCount() + stack.getCount();
+          int limit = Math.min(stack.getMaxStackSize(), slot.getItemStackLimit(stack));
+
+          if(l <= limit) {
+            stack.setCount(0);
+            stack1.setCount(l);
+            slot.onSlotChanged();
+            flag1 = true;
+          }
+          else if(stack1.getCount() < limit) {
+            stack.shrink(limit - stack1.getCount());
+            stack1.setCount(limit);
+            slot.onSlotChanged();
+            flag1 = true;
+          }
+        }
+
+        if(useEndIndex) {
+          --k;
+        }
+        else {
+          ++k;
+        }
+      }
+    }
+    return flag1;
+  }
+
+  // only moves items into empty slots
+  protected boolean mergeItemStackMove(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    if(stack.isEmpty()) return false;
+
+    boolean flag1 = false;
+    int k;
+
+    if(useEndIndex) {
+      k = endIndex - 1;
+    }
+    else {
+      k = startIndex;
+    }
+
+    while(!useEndIndex && k < endIndex || useEndIndex && k >= startIndex) {
+      Slot slot = this.inventorySlots.get(k);
       ItemStack itemstack1 = slot.getStack();
-      itemstack = itemstack1.copy();
 
-      if (index == 0) {
-        itemstack1.getItem().onCreated(itemstack1, world, player);
-
-        if (!mergeItemStack(itemstack1, 10, 46, true)) {
-          return ItemStack.EMPTY;
+      if(itemstack1.isEmpty() && slot.isItemValid(stack) && this.canMergeSlot(stack, slot)) // Forge: Make sure to respect isItemValid in the slot.
+      {
+        int limit = slot.getItemStackLimit(stack);
+        ItemStack stack2 = stack.copy();
+        if(stack2.getCount() > limit) {
+          stack2.setCount(limit);
+          stack.shrink(limit);
         }
-
-        slot.onSlotChange(itemstack1, itemstack);
-      } else if (index >= 10 && index < 37) {
-        if (!mergeItemStack(itemstack1, 37, 46, false)) {
-          return ItemStack.EMPTY;
+        else {
+          stack.setCount(0);
         }
-      } else if (index >= 37 && index < 46) {
-        if (!mergeItemStack(itemstack1, 10, 37, false)) {
-          return ItemStack.EMPTY;
-        }
-      } else if (!mergeItemStack(itemstack1, 10, 46, false)) {
-        return ItemStack.EMPTY;
-      }
-
-      if (itemstack1.isEmpty()) {
-        slot.putStack(ItemStack.EMPTY);
-      } else {
+        slot.putStack(stack2);
         slot.onSlotChanged();
+        flag1 = true;
+
+        if(stack.isEmpty()) {
+          break;
+        }
       }
 
-      if (itemstack1.getCount() == itemstack.getCount()) {
-        return ItemStack.EMPTY;
+      if(useEndIndex) {
+        --k;
       }
-
-      ItemStack itemstack2 = slot.onTake(player, itemstack1);
-
-      if (index == 0) {
-        player.dropItem(itemstack2, false);
+      else {
+        ++k;
       }
     }
 
-    return itemstack;
+
+    return flag1;
   }
+
 
   @Override
   public boolean canMergeSlot(ItemStack stack, Slot slot) {
@@ -239,14 +401,12 @@ public class CraftingStationContainer extends Container implements CraftingStati
       lvt_5_1_.connection.sendPacket(new SSetSlotPacket(p_217066_0_, 0, lvt_6_1_));
     }
   }
-  public void updateSlotPositions(int offset)
-  {
-    int index = 0;
-    for (int i = subContainerSlotStart; i < subContainerSlotEnd ; i++) {
+  public void updateSlotPositions(int offset) {
+
+    for (int i = 10; i < subContainerSize + 10; i++) {
       Slot slot = inventorySlots.get(i);
-      int y = (index / 6) - offset;
-      slot.yPos = (y >= 9 || y < 0) ? -2000 : 17 + 18 * y;
-      index++;
+      int index = (i - 10) / 6 - offset;
+      slot.yPos = (index >= 9 || index < 0) ? -10000 : 18 + 18 * index;
     }
   }
 
@@ -263,7 +423,11 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.craftResult.setInventorySlotContents(0, recipe != null ? recipe.getCraftingResult(craftMatrix) : ItemStack.EMPTY);
   }
 
+  public boolean needsScroll(){
+    return this.subContainerSize > 54;
+  }
+
   public int getRows(){
-    return subContainerSlotStart == -1 ? 0 :(subContainerSlotEnd - subContainerSlotStart)/6;
+    return (int)Math.ceil((double)subContainerSize/6);
   }
 }
