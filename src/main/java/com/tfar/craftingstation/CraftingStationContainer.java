@@ -406,7 +406,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     for (int i = 10; i < subContainerSize + 10; i++) {
       Slot slot = inventorySlots.get(i);
       int index = (i - 10) / 6 - offset;
-      slot.yPos = (index >= 9 || index < 0) ? -10000 : 18 + 18 * index;
+      slot.yPos = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
     }
   }
 

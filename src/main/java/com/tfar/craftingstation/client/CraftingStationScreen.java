@@ -26,7 +26,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
    */
   private double currentScroll;
 
-  boolean isScrolling = false;
+  private boolean isScrolling = false;
 
   private final int realRows;
   private int topRow;
@@ -44,7 +44,6 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     renderHoveredToolTip(mouseX, mouseY);
   }
 
-
   protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
     this.font.drawString(this.title.getFormattedText(), 28.0F, 6.0F, 4210752);
     this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8.0F, (float) (this.ySize - 96 + 2), 4210752);
@@ -56,7 +55,6 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   @Override
   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
     GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-    //if (Minecraft.getSystemTime() % 25 == 0)System.out.println(currentScroll);
     minecraft.getTextureManager().bindTexture(CRAFTING_TABLE_GUI_TEXTURES);
     blit(guiLeft, guiTop, 0, 0, xSize, ySize);
     int i = this.guiLeft;
@@ -85,10 +83,10 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       }
 
       if (this.hasScrollbar()) {
-        blit(i - 17, j + 17, 174, 17, 14, 100);
+        blit(i - 17, j + 16, 174, 17, 14, 100);
         blit(i - 17, j + 68, 174, 18, 14, 111);
         this.minecraft.getTextureManager().bindTexture(SCROLLBAR);
-        int k = (int) (j + 18 + 145 * currentScroll);
+        int k = (int) (j + 17 + 146 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)
           blit(i - 16, k, 244, 0, 12, 15);
@@ -100,30 +98,32 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
 
   @Override
   public boolean mouseClicked(double mouseX, double mouseY, int scroll) {
-    if (scroll != 0) {
-      double d0 = mouseX - (double)this.guiLeft;
-      double d1 = mouseY - (double)this.guiTop;
-
-     // if (selectedTabIndex != ItemGroup.INVENTORY.getIndex() && this.func_195376_a(p_mouseClicked_1_, p_mouseClicked_3_)) {
-        this.isScrolling = this.hasScrollbar();
-        return true;
-     // }
-    }
+    this.isScrolling = this.hasScrollbar();
     return super.mouseClicked(mouseX,mouseY,scroll);
   }
 
   @Override
-  public boolean mouseDragged(double p_mouseDragged_1_, double p_mouseDragged_3_, int p_mouseDragged_5_, double p_mouseDragged_6_, double p_mouseDragged_8_) {
-    return super.mouseDragged(p_mouseDragged_1_, p_mouseDragged_3_, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
+  public boolean mouseDragged(double mouseX, double mouseY, int p_mouseDragged_5_, double p_mouseDragged_6_, double p_mouseDragged_8_) {
+    if (this.isScrolling){
+      int j = this.guiTop;
+      int j1 = j + 24;
+      int j2 = j1 + 145;
+      int k = this.guiLeft;
+      int k1 = k - 16;
+      int k2 = k1 + 14;
+
+      if (mouseX <= k2 && mouseX >= k1) {
+        this.currentScroll = (mouseY - j1) / (j2 - j1 - 0f);
+        currentScroll = MathHelper.clamp(currentScroll, 0, 1);
+        scrollTo(currentScroll);
+      }
+    }
+    return super.mouseDragged(mouseX, mouseY, p_mouseDragged_5_, p_mouseDragged_6_, p_mouseDragged_8_);
   }
 
   @Override
   public boolean mouseReleased(double mouseX, double mouseY, int scroll) {
-    if (scroll == 0) {
-      double d0 = mouseX - (double)this.guiLeft;
-      double d1 = mouseY - (double)this.guiTop;
-      this.isScrolling = false;
-    }
+    this.isScrolling = false;
     return super.mouseReleased(mouseX, mouseY, scroll);
   }
 
@@ -132,10 +132,10 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   @Override
-  public boolean mouseScrolled(double p_mouseScrolled_1_, double p_mouseScrolled_3_, double scrollDelta) {
+  public boolean mouseScrolled(double mouseX, double mouseY, double scrollDelta) {
 
     if (this.hasScrollbar()) {
-      scrollTo(currentScroll);
+      setTopRow((int) (topRow - scrollDelta), false);
       return true;
     }
     return false;
@@ -150,6 +150,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     if (topRow < 0) topRow = 0;
     else if (topRow > realRows - 9) topRow = realRows - 9;
     container.updateSlotPositions(topRow);
+    if (!smooth) this.currentScroll = (double) topRow / (this.realRows - 9);
   }
 }
 

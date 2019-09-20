@@ -1,27 +1,20 @@
 package com.tfar.craftingstation;
 
-import com.tfar.craftingstation.client.CraftingStationScreen;
-import com.tfar.craftingstation.client.CraftingStationTileSpecialRenderer;
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.logging.log4j.LogManager;
@@ -43,6 +36,10 @@ public class CraftingStation {
 
   private void setup(final FMLCommonSetupEvent event) {
     PacketHandler.registerMessages(MODID);
+   /* CompoundNBT tagCompound = new CompoundNBT();
+    tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
+    tagCompound.putString("AlignToGrid", "left");
+    InterModComms.sendTo("craftingtweaks", "RegisterProvider", tagCompound);*/
   }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
