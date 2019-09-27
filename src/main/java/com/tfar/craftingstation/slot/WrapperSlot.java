@@ -9,6 +9,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Used to wrap the slots inside Modules/Subcontainers
  */
@@ -75,8 +77,8 @@ import javax.annotation.Nonnull;
       return parent.getItemStackLimit(stack);
     }
 
+    //clientonly
     @Override
-    @OnlyIn(Dist.CLIENT)
     public String getSlotTexture() {
       return parent.getSlotTexture();
     }
@@ -98,7 +100,7 @@ import javax.annotation.Nonnull;
       parent.setBackgroundName(name);
     }
 
-    @Nonnull
+    @Nullable
     @Override
     public TextureAtlasSprite getBackgroundSprite() {
       return parent.getBackgroundSprite();
@@ -109,7 +111,7 @@ import javax.annotation.Nonnull;
       parent.setBackgroundLocation(texture);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    //clientonly
     @Override
     public boolean isEnabled() {
       return parent.isEnabled();

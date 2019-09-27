@@ -3,6 +3,8 @@ package com.tfar.craftingstation.client;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
+import com.tfar.craftingstation.network.CClearPacket;
+import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.ImageButton;
@@ -35,6 +37,12 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     super(p_i51094_1_, p_i51094_2_, p_i51094_3_);
     realRows = p_i51094_1_.getRows();
     topRow = 0;
+  }
+
+  @Override
+  protected void init() {
+    super.init();
+    this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new CClearPacket())));
   }
 
   @Override
@@ -84,9 +92,9 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
 
       if (this.hasScrollbar()) {
         blit(i - 17, j + 16, 174, 17, 14, 100);
-        blit(i - 17, j + 68, 174, 18, 14, 111);
+        blit(i - 17, j + 67, 174, 18, 14, 111);
         this.minecraft.getTextureManager().bindTexture(SCROLLBAR);
-        int k = (int) (j + 17 + 146 * currentScroll);
+        int k = (int) (j + 17 + 145 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)
           blit(i - 16, k, 244, 0, 12, 15);
@@ -134,7 +142,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   @Override
   public boolean mouseScrolled(double mouseX, double mouseY, double scrollDelta) {
 
-    if (this.hasScrollbar()) {
+    if (this.hasScrollbar() && mouseX < guiLeft && mouseX > guiLeft - 20) {
       setTopRow((int) (topRow - scrollDelta), false);
       return true;
     }

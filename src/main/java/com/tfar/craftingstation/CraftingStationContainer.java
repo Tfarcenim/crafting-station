@@ -28,6 +28,8 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class CraftingStationContainer extends Container implements CraftingStationTile.Listener {
@@ -62,6 +64,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     // detect te
     TileEntity inventoryTE = null;
     Direction accessDir = null;
+    List<TileEntity> tileEntities = new ArrayList<>();
     for(Direction dir : Direction.values()) {
       BlockPos neighbor = pos.offset(dir);
 
@@ -76,13 +79,8 @@ public class CraftingStationContainer extends Container implements CraftingStati
   //      }
 
         // try internal access first
-        LazyOptional<IItemHandler> maybe = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-
-        IItemHandler handler = maybe.orElse(null);
-
-        if (handler == null)continue;
-
-        inventoryTE = te;
+        if (!te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).isPresent())continue;
+        tileEntities.add(te);
         // try sided access else
   //      if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
   //        if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
@@ -91,6 +89,18 @@ public class CraftingStationContainer extends Container implements CraftingStati
    //         break;
    //       }
      //   }
+      }
+    }
+
+    if (!tileEntities.isEmpty()) {
+      int size = 0;
+      for (TileEntity tileEntity : tileEntities){
+        final int[] teSize = new int[1];
+        tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,accessDir).ifPresent(handler -> teSize[0] = handler.getSlots());
+        if (teSize[0] > size){
+          size = teSize[0];
+          inventoryTE = tileEntity;
+        }
       }
     }
 
