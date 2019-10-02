@@ -13,10 +13,8 @@ public class ClearButton extends Button {
 
 
   @Override
-  public void render(int mouseX, int mouseY, float partialTicks)
-  {
-    if (visible)
-    {
+  public void render(int mouseX, int mouseY, float partialTicks) {
+    if (visible) {
       Minecraft minecraft = Minecraft.getInstance();
       minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
 
