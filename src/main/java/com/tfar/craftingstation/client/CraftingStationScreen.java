@@ -15,6 +15,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.fml.ModList;
 
 public class CraftingStationScreen extends ContainerScreen<CraftingStationContainer> {
   public static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
@@ -42,7 +43,10 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   @Override
   protected void init() {
     super.init();
-    this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new CClearPacket())));
+
+    if (!ModList.get().isLoaded("craftingtweaks")) {
+      this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new CClearPacket())));
+    }
   }
 
   @Override

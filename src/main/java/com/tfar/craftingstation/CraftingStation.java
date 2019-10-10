@@ -15,6 +15,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.logging.log4j.LogManager;
@@ -32,14 +33,21 @@ public class CraftingStation {
   public CraftingStation() {
     // Register the setup method for modloading
     FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
   }
 
   private void setup(final FMLCommonSetupEvent event) {
     PacketHandler.registerMessages(MODID);
-   /* CompoundNBT tagCompound = new CompoundNBT();
-    tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
-    tagCompound.putString("AlignToGrid", "left");
-    InterModComms.sendTo("craftingtweaks", "RegisterProvider", tagCompound);*/
+  }
+
+  private void enqueueIMC(final InterModEnqueueEvent event)
+  {
+    InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
+      CompoundNBT tagCompound = new CompoundNBT();
+      tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
+      tagCompound.putString("AlignToGrid", "left");
+      return tagCompound;
+    });
   }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
