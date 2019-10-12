@@ -9,9 +9,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -42,11 +44,13 @@ public class CraftingStation {
 
   private void enqueueIMC(final InterModEnqueueEvent event)
   {
-    InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
-      CompoundNBT tagCompound = new CompoundNBT();
-      tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
-      tagCompound.putString("AlignToGrid", "left");
-      return tagCompound;
+    DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+      InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
+        CompoundNBT tagCompound = new CompoundNBT();
+        tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
+        tagCompound.putString("AlignToGrid", "left");
+        return tagCompound;
+      });
     });
   }
 
