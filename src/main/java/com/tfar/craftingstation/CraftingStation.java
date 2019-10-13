@@ -44,13 +44,11 @@ public class CraftingStation {
 
   private void enqueueIMC(final InterModEnqueueEvent event)
   {
-    DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-      InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
-        CompoundNBT tagCompound = new CompoundNBT();
-        tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
-        tagCompound.putString("AlignToGrid", "left");
-        return tagCompound;
-      });
+    InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
+      CompoundNBT tagCompound = new CompoundNBT();
+      tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
+      tagCompound.putString("AlignToGrid", "left");
+      return tagCompound;
     });
   }
 
