@@ -3,6 +3,7 @@ package com.tfar.craftingstation;
 import com.tfar.craftingstation.util.Helpers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.ItemEntity;
@@ -14,11 +15,14 @@ import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -40,13 +44,14 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   protected static final VoxelShape shape;
 
   public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+  public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
 
 
   private static final Random RANDOM = new Random();
 
   public CraftingStationBlock(Properties p_i48440_1_) {
     super(p_i48440_1_);
-    this.stateContainer.getBaseState().with(WATERLOGGED, false);
+    this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(WATERLOGGED, false);
   }
 
   static {
@@ -77,7 +82,7 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   @Override
   public INamedContainerProvider getContainer(BlockState state, World world, BlockPos pos) {
     TileEntity te = world.getTileEntity(pos);
-    return te instanceof CraftingStationTile ? (INamedContainerProvider) te : null;
+    return te instanceof CraftingStationBlockEntity ? (INamedContainerProvider) te : null;
   }
 
   @Override
@@ -88,22 +93,22 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   @Nullable
   @Override
   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-    return new CraftingStationTile();
+    return new CraftingStationBlockEntity();
   }
 
   @Override
   public void onReplaced(BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
     if (state.getBlock() != newState.getBlock()) {
       TileEntity tileentity = worldIn.getTileEntity(pos);
-      if (tileentity instanceof CraftingStationTile) {
-        dropItems((CraftingStationTile) tileentity, worldIn, pos);
+      if (tileentity instanceof CraftingStationBlockEntity) {
+        dropItems((CraftingStationBlockEntity) tileentity, worldIn, pos);
         worldIn.updateComparatorOutputLevel(pos, this);
       }
       super.onReplaced(state, worldIn, pos, newState, isMoving);
     }
   }
 
-  public static void dropItems(CraftingStationTile table, World world, BlockPos pos) {
+  public static void dropItems(CraftingStationBlockEntity table, World world, BlockPos pos) {
     IntStream.range(0, table.input.getSlots()).mapToObj(i -> table.input.getStackInSlot(i)).filter(stack -> !stack.isEmpty()).forEach(stack -> spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack));
   }
 
@@ -124,24 +129,26 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   @Override
-  public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
-    return state.getShape(worldIn, pos);
-  }
-
-  @Override
-  public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-    return this.getShape(state, worldIn, pos, context);
-  }
-
-  @Override
   public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
     return shape;
   }
 
-  protected void fillStateContainer(StateContainer.Builder<Block, BlockState> p_206840_1_) {
-    p_206840_1_.add(WATERLOGGED);
+  @Nonnull
+  public BlockState rotate(BlockState p_185499_1_, Rotation p_185499_2_) {
+    return p_185499_1_.with(FACING, p_185499_2_.rotate(p_185499_1_.get(FACING)));
   }
 
+  @Nonnull
+  public BlockState mirror(BlockState p_185471_1_, Mirror p_185471_2_) {
+    return p_185471_1_.rotate(p_185471_2_.toRotation(p_185471_1_.get(FACING)));
+  }
+
+  protected void fillStateContainer(StateContainer.Builder<Block, BlockState> p_206840_1_) {
+    p_206840_1_.add(WATERLOGGED);
+    p_206840_1_.add(FACING);
+  }
+
+  @Nonnull
   public IFluidState getFluidState(BlockState p_204507_1_) {
     return p_204507_1_.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(p_204507_1_);
   }
@@ -151,7 +158,6 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
     IWorld lvt_2_1_ = p_196258_1_.getWorld();
     BlockPos lvt_3_1_ = p_196258_1_.getPos();
     boolean lvt_4_1_ = lvt_2_1_.getFluidState(lvt_3_1_).getFluid() == Fluids.WATER;
-    return this.getDefaultState().with(WATERLOGGED, lvt_4_1_);
+    return this.getDefaultState().with(FACING, p_196258_1_.getPlacementHorizontalFacing().getOpposite()).with(WATERLOGGED, lvt_4_1_);
   }
-
 }

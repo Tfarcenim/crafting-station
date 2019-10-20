@@ -82,13 +82,13 @@ public class CraftingStation {
 
     @SubscribeEvent
     public static void tile(final RegistryEvent.Register<TileEntityType<?>> event){
-      event.getRegistry().register(TileEntityType.Builder.create(CraftingStationTile::new, Objects.crafting_station).build(null).setRegistryName("crafting_station_tile"));
+      event.getRegistry().register(TileEntityType.Builder.create(CraftingStationBlockEntity::new, Objects.crafting_station).build(null).setRegistryName("crafting_station_tile"));
     }
   }
   @ObjectHolder(MODID)
   public static class Objects {
     public static final Block crafting_station = null;
     public static final ContainerType<CraftingStationContainer> crafting_station_container = null;
-    public static final TileEntityType<CraftingStationTile> crafting_station_tile = null;
+    public static final TileEntityType<CraftingStationBlockEntity> crafting_station_tile = null;
   }
 }

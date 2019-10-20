@@ -17,12 +17,12 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CraftingStationTile extends TileEntity implements INamedContainerProvider {
+public class CraftingStationBlockEntity extends TileEntity implements INamedContainerProvider {
 
   public ItemStackHandler input;
   public ItemStackHandler output;
 
-  public CraftingStationTile() {
+  public CraftingStationBlockEntity() {
     super(CraftingStation.Objects.crafting_station_tile);
     this.input = new ItemStackHandler(9);
     this.output = new ItemStackHandler();

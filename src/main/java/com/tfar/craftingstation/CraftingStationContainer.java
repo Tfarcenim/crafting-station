@@ -22,9 +22,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
@@ -32,13 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CraftingStationContainer extends Container implements CraftingStationTile.Listener {
+public class CraftingStationContainer extends Container implements CraftingStationBlockEntity.Listener {
   public final CraftingInventory craftMatrix;
   public final CraftResultInventory craftResult = new CraftResultInventory();
   public final World world;
   private final BlockPos pos;
   private final PlayerEntity player;
-  private final CraftingStationTile tileEntity;
+  private final CraftingStationBlockEntity tileEntity;
   public IRecipe<CraftingInventory> lastRecipe;
   protected IRecipe<CraftingInventory> lastLastRecipe;
 
@@ -54,7 +52,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.world = world;
     this.pos = pos;
     this.player = player;
-    this.tileEntity = (CraftingStationTile) world.getTileEntity(pos);
+    this.tileEntity = (CraftingStationBlockEntity) world.getTileEntity(pos);
     assert tileEntity != null;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
     this.hasSideContainer = false;
@@ -69,7 +67,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
       BlockPos neighbor = pos.offset(dir);
 
       TileEntity te = world.getTileEntity(neighbor);
-      if(te != null && !(te instanceof CraftingStationTile)) {
+      if(te != null && !(te instanceof CraftingStationBlockEntity)) {
         // if blacklisted, skip checks entirely
     //    if(blacklisted(te.getClass())) {
       //    continue;
