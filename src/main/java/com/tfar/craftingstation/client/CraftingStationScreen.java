@@ -5,13 +5,9 @@ import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
 import com.tfar.craftingstation.network.CClearPacket;
 import com.tfar.craftingstation.network.PacketHandler;
-import net.minecraft.client.gui.recipebook.RecipeBookGui;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.button.ImageButton;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -20,7 +16,8 @@ import net.minecraftforge.fml.ModList;
 public class CraftingStationScreen extends ContainerScreen<CraftingStationContainer> {
   public static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
 
-  private static final ResourceLocation SCROLLBAR = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
+  public static final ResourceLocation SCROLLBAR_AND_TAB = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
+
   private static final ResourceLocation SCROLLBAR_BACKGROUND_AND_TAB = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
 
   public static final ResourceLocation SECONDARY_GUI_TEXTURE = new ResourceLocation(CraftingStation.MODID, "textures/gui/secondary.png");
@@ -43,10 +40,20 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   @Override
   protected void init() {
     super.init();
-
+    if (this.container.hasSideContainers) {
+      for (int i = 0; i < container.containerStarts.size(); i++) {
+        addButton(new TabButton(guiLeft - 120 + 20 * i, guiTop - 22, 22, 22, button -> {
+          changeContainer(((TabButton)button).index);
+        },i,container.blocks.get(i)));
+      }
+    }
     if (!ModList.get().isLoaded("craftingtweaks")) {
       this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new CClearPacket())));
     }
+  }
+
+  public void changeContainer(int container){
+    this.container.changeContainer(container);
   }
 
   @Override
@@ -59,8 +66,8 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
     this.font.drawString(this.title.getFormattedText(), 28.0F, 6.0F, 4210752);
     this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8.0F, (float) (this.ySize - 96 + 2), 4210752);
-    if (container.hasSideContainer){
-      this.font.drawString(container.containerName.getFormattedText(),-120,6,4210752);
+    if (container.hasSideContainers){
+      this.font.drawString(container.containerNames.get(container.currentContainer).getFormattedText(),-120,6,4210752);
     }
   }
 
@@ -75,12 +82,13 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     int i2 = i1 + 14;
 
     int j = (this.height - this.ySize) / 2;
-    if (this.container.hasSideContainer) {
+    if (this.container.hasSideContainers) {
+      //draw background
       this.minecraft.getTextureManager().bindTexture(SECONDARY_GUI_TEXTURE);
       this.blit(i - 130, j, 0, 0, this.xSize, this.ySize + 18);
 
       this.minecraft.getTextureManager().bindTexture(SCROLLBAR_BACKGROUND_AND_TAB);
-      int totalSlots = this.container.subContainerSize;
+      int totalSlots = this.container.getSlotCount();
       int slotsToDraw = 54;
       if (totalSlots < slotsToDraw) slotsToDraw = totalSlots;
       else if (hasScrollbar() && topRow == this.realRows - 9 && totalSlots % 6 != 0)
@@ -97,7 +105,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       if (this.hasScrollbar()) {
         blit(i - 17, j + 16, 174, 17, 14, 100);
         blit(i - 17, j + 67, 174, 18, 14, 111);
-        this.minecraft.getTextureManager().bindTexture(SCROLLBAR);
+        this.minecraft.getTextureManager().bindTexture(SCROLLBAR_AND_TAB);
         int k = (int) (j + 17 + 145 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)

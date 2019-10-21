@@ -158,6 +158,6 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
     IWorld lvt_2_1_ = p_196258_1_.getWorld();
     BlockPos lvt_3_1_ = p_196258_1_.getPos();
     boolean lvt_4_1_ = lvt_2_1_.getFluidState(lvt_3_1_).getFluid() == Fluids.WATER;
-    return this.getDefaultState().with(FACING, p_196258_1_.getPlacementHorizontalFacing().getOpposite()).with(WATERLOGGED, lvt_4_1_);
+    return this.getDefaultState().with(FACING, p_196258_1_.getPlacementHorizontalFacing()).with(WATERLOGGED, lvt_4_1_);
   }
 }

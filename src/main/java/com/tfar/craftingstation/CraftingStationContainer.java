@@ -21,9 +21,12 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -39,11 +42,14 @@ public class CraftingStationContainer extends Container implements CraftingStati
   private final CraftingStationBlockEntity tileEntity;
   public IRecipe<CraftingInventory> lastRecipe;
   protected IRecipe<CraftingInventory> lastLastRecipe;
+  public final List<Pair<Integer,Integer>> containerStarts = new ArrayList<>();
+  public final List<ItemStack> blocks = new ArrayList<>();
 
-  public ITextComponent containerName;
+  public final List<ITextComponent> containerNames = new ArrayList<>();
 
   public int subContainerSize = 0;
-  public boolean hasSideContainer;
+  public boolean hasSideContainers;
+  public int currentContainer = 0;
 
 
   public CraftingStationContainer(int id, PlayerInventory playerInventory, World world, BlockPos pos, PlayerEntity player) {
@@ -55,12 +61,11 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.tileEntity = (CraftingStationBlockEntity) world.getTileEntity(pos);
     assert tileEntity != null;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
-    this.hasSideContainer = false;
+    this.hasSideContainers = false;
 
     addOwnSlots();
 
     // detect te
-    TileEntity inventoryTE = null;
     Direction accessDir = null;
     List<TileEntity> tileEntities = new ArrayList<>();
     for(Direction dir : Direction.values()) {
@@ -77,8 +82,10 @@ public class CraftingStationContainer extends Container implements CraftingStati
   //      }
 
         // try internal access first
-        if (!te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).isPresent())continue;
-        tileEntities.add(te);
+        if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).isPresent()){
+          tileEntities.add(te);
+          blocks.add(new ItemStack(world.getBlockState(neighbor).getBlock()));
+        }
         // try sided access else
   //      if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
   //        if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite()) instanceof IItemHandlerModifiable) {
@@ -91,20 +98,13 @@ public class CraftingStationContainer extends Container implements CraftingStati
     }
 
     if (!tileEntities.isEmpty()) {
-      int size = 0;
       for (TileEntity tileEntity : tileEntities){
-        final int[] teSize = new int[1];
-        tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,accessDir).ifPresent(handler -> teSize[0] = handler.getSlots());
-        if (teSize[0] > size){
-          size = teSize[0];
-          inventoryTE = tileEntity;
-        }
+        tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(this::accept);
       }
     }
 
-    if(inventoryTE != null) {
-      addSideContainerSlots(inventoryTE, accessDir, -125, 17);
-      containerName = inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
+    if(!tileEntities.isEmpty()) {
+      addSideContainerSlots(tileEntities, accessDir, -125, 17);
     }
     addPlayerSlots(playerInventory);
     func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
@@ -112,26 +112,36 @@ public class CraftingStationContainer extends Container implements CraftingStati
     tileEntity.addListener(this);
   }
 
-  private void addSideContainerSlots(TileEntity te,Direction dir ,int xPos, int yPos){
-    hasSideContainer = true;
-    te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent((h) -> {
-      this.subContainerSize = h.getSlots();
-      int offsetx =  (needsScroll())? 0 : 8;
-      for (int y = 0; y < (int) Math.ceil((double) subContainerSize / 6); y++)
-        for (int x = 0; x < 6; x++) {
-          int index = 6 * y + x;
-          if (index >= subContainerSize) continue;
-          int offsety = y >= 9 ? -10000 : 0;
-          WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(h, index, 18 * x + xPos + offsetx, 18 * y + yPos + offsety));
-          addSlot(wrapper);
-        }
-    });
+  private void addSideContainerSlots(List<TileEntity> tes,Direction dir ,int xPos, int yPos){
+    hasSideContainers = true;
+    for (int i = 0; i < tes.size(); i++) {
+      TileEntity te = tes.get(i);
+      containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider)te).getDisplayName() : new StringTextComponent("placeholder"));//inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
+      final int number = i;
+      te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent((h) -> {
+        int size = h.getSlots();
+        this.subContainerSize += size;
+        int offsetx = (needsScroll()) ? 0 : 8;
+        for (int y = 0; y < (int) Math.ceil((double)size / 6); y++)
+          for (int x = 0; x < 6; x++) {
+            int index = 6 * y + x;
+            if (index >= size) continue;
+            boolean hidden = y >= 9 || number != 0;
+            WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(h, index, 18 * x + xPos + offsetx, 18 * y + yPos));
+            if (hidden)hideSlot(wrapper);
+            addSlot(wrapper);
+          }
+      });
+    }
+  }
+
+  public void hideSlot(Slot slot){
+    slot.yPos = Integer.MAX_VALUE;
   }
 
   @Override
   public void onContainerClosed(PlayerEntity player) {
     tileEntity.removeListener(this);
-
     super.onContainerClosed(player);
   }
 
@@ -193,29 +203,29 @@ public class CraftingStationContainer extends Container implements CraftingStati
     //is this the crafting slot?
     if (index == 0){
 
-      if (hasSideContainer)
+      if (hasSideContainers)
         nothingDone = refillTileInventory(stack);
       // Try moving module -> player inventory
       nothingDone &= moveToPlayerInventory(stack);
 
       // Try moving module -> tile inventory
-      if (hasSideContainer)
+      if (hasSideContainers)
         nothingDone &= mergeItemStackMove(stack,10,10 + subContainerSize,false);
     }
 
     // Is the slot an input slot??
     else if(index < 10) {
-      if (hasSideContainer)
+      if (hasSideContainers)
         nothingDone = refillTileInventory(stack);
       // Try moving module -> player inventory
       nothingDone &= moveToPlayerInventory(stack);
 
       // Try moving module -> tile inventory
-      if (hasSideContainer)
+      if (hasSideContainers)
         nothingDone &= mergeItemStackMove(stack,10,10 + subContainerSize,false);
     }
     // Is the slot from the tile?
-    else if(index < 10 + subContainerSize && hasSideContainer) {
+    else if(index < 10 + subContainerSize && hasSideContainers) {
       // Try moving tile -> preferred modules
       nothingDone = moveToCraftingStation(stack);
 
@@ -228,7 +238,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
       nothingDone = moveToCraftingStation(stack);
 
       // Try moving player -> tile inventory
-      if (hasSideContainer)
+      if (hasSideContainers)
         nothingDone &= moveToTileInventory(stack);
     }
     // you violated some assumption or something. Shame on you.
@@ -410,12 +420,29 @@ public class CraftingStationContainer extends Container implements CraftingStati
     }
   }
   public void updateSlotPositions(int offset) {
-
-    for (int i = 10; i < subContainerSize + 10; i++) {
+    Pair<Integer,Integer> range = containerStarts.get(currentContainer);
+    int start = range.getLeft();
+    for (int i = start; i < range.getRight(); i++) {
       Slot slot = inventorySlots.get(i);
-      int index = (i - 10) / 6 - offset;
+      int index = (i - start) / 6 - offset;
       slot.yPos = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
     }
+  }
+
+  public void changeContainer(int newContainer){
+    this.currentContainer = newContainer;
+     Pair<Integer,Integer> range = containerStarts.get(currentContainer);
+     int start = range.getLeft();
+     int finish = range.getRight();
+     for (int i = 10; i < subContainerSize + 10; i++){
+       Slot slot = this.inventorySlots.get(i);
+       if (slot instanceof WrapperSlot && (i < start || i >= finish))hideSlot(slot);
+     }
+     for (int i = start; i < finish;i++){
+       Slot slot = inventorySlots.get(i);
+       int index = (i - start) / 6;
+       slot.yPos = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
+     }
   }
 
   public NonNullList<ItemStack> getRemainingItems() {
@@ -432,10 +459,29 @@ public class CraftingStationContainer extends Container implements CraftingStati
   }
 
   public boolean needsScroll(){
-    return this.subContainerSize > 54;
+    return getSlotCount() > 54;
   }
 
   public int getRows(){
-    return (int)Math.ceil((double)subContainerSize/6);
+    return (int)Math.ceil((double)getSlotCount()/6);
+  }
+
+  public int getSlotCount(){
+    if (containerStarts.isEmpty())return 0;
+    Pair<Integer,Integer> range = containerStarts.get(currentContainer);
+    return range.getRight() - range.getLeft();
+  }
+
+  private void accept(IItemHandler handler) {
+    if (containerStarts.size() == 0){
+      int left = 10;
+      int right = handler.getSlots() + left;
+      containerStarts.add(Pair.of(left,right));
+      return;
+    }
+
+    int left = containerStarts.get(containerStarts.size() - 1).getRight();
+    int right = handler.getSlots() + left;
+    containerStarts.add(Pair.of(left,right));
   }
 }
