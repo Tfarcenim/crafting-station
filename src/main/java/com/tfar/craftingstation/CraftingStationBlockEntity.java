@@ -1,5 +1,6 @@
 package com.tfar.craftingstation;
 
+import com.tfar.craftingstation.util.CraftingStationItemHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -19,12 +20,12 @@ import java.util.List;
 
 public class CraftingStationBlockEntity extends TileEntity implements INamedContainerProvider {
 
-  public ItemStackHandler input;
+  public CraftingStationItemHandler input;
   public ItemStackHandler output;
 
   public CraftingStationBlockEntity() {
     super(CraftingStation.Objects.crafting_station_tile);
-    this.input = new ItemStackHandler(9);
+    this.input = new CraftingStationItemHandler(9);
     this.output = new ItemStackHandler();
   }
 
@@ -60,25 +61,7 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
   public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) {
     return new CraftingStationContainer(id, playerInventory, world, pos,player);
   }
-  private List<Listener> listeners = new ArrayList<>();
-
-  protected ItemStackHandler newItemHandler() {
-    return new ItemStackHandler(9) {
-      @Override
-      protected void onContentsChanged(int slot) {
-        super.onContentsChanged(slot);
-
-        contentsChanged();
-      }
-
-      @Override
-      protected void onLoad() {
-        super.onLoad();
-
-        contentsChanged();
-      }
-    };
-  }
+  /*private List<Listener> listeners = new ArrayList<>();
 
   public void addListener(Listener listener) {
     listeners.add(listener);
@@ -88,16 +71,8 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
     listeners.remove(listener);
   }
 
-  public void contentsChanged() {
-    if (world == null)
-      return; // not loaded yet
-    markDirty();
-    listeners.forEach(Listener::tileEntityContentsChanged);
-  }
-
   public interface Listener {
-    void tileEntityContentsChanged();
-  }
+  }*/
 
   @Override
   public CompoundNBT getUpdateTag()
@@ -108,10 +83,7 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
   @Override
   public SUpdateTileEntityPacket getUpdatePacket()
   {
-    CompoundNBT nbt = new CompoundNBT();
-    this.write(nbt);
-
-    return new SUpdateTileEntityPacket(getPos(), 1, nbt);
+    return new SUpdateTileEntityPacket(getPos(), 1, getUpdateTag());
   }
 
   @Override

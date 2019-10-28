@@ -21,6 +21,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   private static final ResourceLocation SCROLLBAR_BACKGROUND_AND_TAB = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
 
   public static final ResourceLocation SECONDARY_GUI_TEXTURE = new ResourceLocation(CraftingStation.MODID, "textures/gui/secondary.png");
+
   /**
    * Amount scrolled in inventory (0 = top, 1 = bottom)
    */
@@ -50,6 +51,12 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     if (!ModList.get().isLoaded("craftingtweaks")) {
       this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new CClearPacket())));
     }
+  }
+
+  @Override
+  protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
+    return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) &&
+            (!container.hasSideContainers || !isPointInRegion(-126, -16, 126, 32 + ySize, mouseX, mouseY));
   }
 
   public void changeContainer(int container){

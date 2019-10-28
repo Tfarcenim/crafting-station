@@ -1,6 +1,5 @@
 package com.tfar.craftingstation;
 
-import com.tfar.craftingstation.util.Helpers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
@@ -40,8 +39,7 @@ import java.util.stream.IntStream;
 
 public class CraftingStationBlock extends Block implements IWaterLoggable {
 
-  protected static final VoxelShape[] shapes;
-  protected static final VoxelShape shape;
+  public static final VoxelShape shape;
 
   public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
   public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
@@ -55,13 +53,13 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   static {
-    shapes = new VoxelShape[5];
+    VoxelShape[] shapes = new VoxelShape[5];
 
-    shapes[0] = Helpers.createVoxelShape(0, 12, 0, 16, 16, 16);
-    shapes[1] = Helpers.createVoxelShape(0, 0, 0, 4, 12, 4);
-    shapes[2] = Helpers.createVoxelShape(12, 0, 0, 16, 12, 4);
-    shapes[3] = Helpers.createVoxelShape(0, 0, 12, 4, 12, 16);
-    shapes[4] = Helpers.createVoxelShape(12, 0, 12, 16, 12, 16);
+    shapes[0] = Block.makeCuboidShape(0, 12, 0, 16, 16, 16);
+    shapes[1] = Block.makeCuboidShape(0, 0, 0, 4, 12, 4);
+    shapes[2] = Block.makeCuboidShape(12, 0, 0, 16, 12, 4);
+    shapes[3] = Block.makeCuboidShape(0, 0, 12, 4, 12, 16);
+    shapes[4] = Block.makeCuboidShape(12, 0, 12, 16, 12, 16);
 
     shape = VoxelShapes.or(shapes[0], shapes[1], shapes[2], shapes[3], shapes[4]);
   }

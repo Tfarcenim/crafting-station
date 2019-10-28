@@ -25,7 +25,7 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
       double shiftY;
       double shiftZ;
 
-      double blockshift = 0.6;
+      final double sixteenth = .0625;
 
       Direction facing = tileEntity.getBlockState().get(CraftingStationBlock.FACING);
 
@@ -37,40 +37,45 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           ItemStack item = tileEntity.input.getStackInSlot(j + 3 * i);
           if (item.isEmpty())continue;
           boolean isBlock = (item.getItem() instanceof BlockItem);
-          double blockScale = isBlock ? .5 : .31;
+          double blockScale = isBlock ? .5 : .25;
+          double offset = isBlock ? sixteenth : 0;
+          shiftY = 1 + offset;
           switch (facing) {
             case NORTH: {
-              shiftX = (isBlock ? 0.311 : .306) + .189 * j;//.05
-              shiftY = isBlock ? 1.0625 : 1.005;//.062
-              shiftZ = (isBlock ? 0.217 : .277) + .189 * i;//.06
+              shiftX = .311 + .189 * j;
+              shiftZ = .34 + offset + .189 * i;
               break;
             }
             case EAST: {
-              shiftX = (isBlock ? 0.311 : .306) - .189 * i + .378;//.05
-              shiftY = isBlock ? 1.0625 : 1.005;//.062
-              shiftZ = (isBlock ? 0.217 : .277) + .189 * j;//.06
+              shiftX = .28 - offset - .189 * i + .378;
+              shiftZ = 0.31 + .189 * j;
               break;
             }
             case SOUTH: {
-              shiftX = (isBlock ? 0.311 : .306) - .189 * j + 0.378;//.05
-              shiftY = isBlock ? 1.0625 : 1.005;//.062
-              shiftZ = (isBlock ? 0.217 : .277) - .189 * i + 0.378;//.06
+              shiftX = 0.689 - .189 * j;
+              shiftZ = .277 - offset - .189 * i + 0.378;
               break;
             }
             case WEST: {
-              shiftX = (isBlock ? 0.311 : .306) + .189 * i;//.05
-              shiftY = isBlock ? 1.0625 : 1.005;//.062
-              shiftZ = (isBlock ? 0.217 : .277) - .189 * j + .378;//.06
+              shiftX = .342 + offset + .189 * i;
+              shiftZ =  0.689 - .189 * j;
               break;
             }
-            default:throw new RuntimeException();
+            default:throw new RuntimeException(facing.toString());
           }
           GlStateManager.pushMatrix();
           GlStateManager.enableBlend();
           GlStateManager.translated(x + shiftX, y + shiftY, z + shiftZ);
           //if(!isBlock)
           GlStateManager.rotated(90, 1, 0, 0);
-
+          switch (facing){
+            case WEST:GlStateManager.rotated(90, 0, 0, 1);break;
+            case SOUTH:GlStateManager.rotated(180, 0, 1, 0);break;
+            case EAST:GlStateManager.rotated(270, 0, 0, 1);break;
+            case NORTH:
+              GlStateManager.rotated(180, 0, 0, 1);
+            default:
+          }
           GlStateManager.scaled(blockScale, blockScale, blockScale);
 
           this.itemRenderer.renderItem(item, ItemCameraTransforms.TransformType.GROUND);

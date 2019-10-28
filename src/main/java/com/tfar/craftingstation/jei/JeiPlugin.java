@@ -44,8 +44,9 @@ public class JeiPlugin implements IModPlugin, IGuiContainerHandler<CraftingStati
   public List<Rectangle2d> getGuiExtraAreas(CraftingStationScreen containerScreen) {
     List<Rectangle2d> areas = new ArrayList<>();
     if (containerScreen.getContainer().hasSideContainers){
-      areas.add(new Rectangle2d(0,0,140,220));
-    }
+      int x = (containerScreen.width - 140) / 2 - 140;
+      int y = (containerScreen.height - 180) / 2 - 16;
+      areas.add(new Rectangle2d(x, y, 140, 196));    }
     return areas;
   }
 }

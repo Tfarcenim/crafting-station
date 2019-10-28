@@ -8,36 +8,38 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.hooks.BasicEventHooks;
 
 
 /**
- *  SlotCraftingSucks from FastWorkbench adapted for the Crafting Station container (no change in functionality)
- *  See: https://github.com/Shadows-of-Fire/FastWorkbench/blob/master/src/main/java/shadows/fastbench/gui/SlotCraftingSucks.java
- *
- *  Basically it ju
+ * SlotCraftingSucks from FastWorkbench adapted for the Crafting Station container (no change in functionality)
+ * See: https://github.com/Shadows-of-Fire/FastWorkbench/blob/master/src/main/java/shadows/fastbench/gui/SlotCraftingSucks.java
+ * <p>
+ * Basically it makes crafting less laggy
  */
 public class SlotFastCraft extends CraftingResultSlot {
 
-  private final CraftingStationContainer containerCraftingStation;
-  private final CraftingInventoryPersistant craftMatrix;
+  private final CraftingStationContainer container;
+  protected CraftingInventoryPersistant craftingInventoryPersistant;
 
-  public SlotFastCraft(CraftingStationContainer containerCraftingStation, PlayerEntity player, CraftingInventoryPersistant craftingInventory, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition) {
-    super(player, craftingInventory, inventoryIn, slotIndex, xPosition, yPosition);
-    this.containerCraftingStation = containerCraftingStation;
-    this.craftMatrix = craftingInventory;
+  public SlotFastCraft(CraftingStationContainer container, CraftingInventoryPersistant craftingInventoryPersistant, IInventory resultInventory, int slotIndex, int xPosition, int yPosition, PlayerEntity player) {
+    super(player,craftingInventoryPersistant,resultInventory, slotIndex, xPosition, yPosition);
+    this.container = container;
+    this.craftingInventoryPersistant = craftingInventoryPersistant;
   }
 
   @Override
   public ItemStack decrStackSize(int amount) {
-    if (this.getHasStack())
-    {
-      this.amountCrafted += Math.min(amount, this.getStack().getCount());
+    if (this.getHasStack()) {
+      this.amountCrafted += Math.min(amount, getStack().getCount());
     }
-
-    return super.decrStackSize(amount);
+    return getStack();
   }
 
+  /**
+   * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
+   */
   @Override
   protected void onCrafting(ItemStack stack) {
     if (this.amountCrafted > 0) {
@@ -49,50 +51,49 @@ public class SlotFastCraft extends CraftingResultSlot {
   }
 
   @Override
-  public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
-    this.onCrafting(stack);
+  public ItemStack onTake(PlayerEntity thePlayer, ItemStack craftingResult) {
+    this.onCrafting(craftingResult);
     net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
     /* CHANGE BEGINS HERE */
-    NonNullList<ItemStack> nonnulllist = containerCraftingStation.getRemainingItems();
+    NonNullList<ItemStack> nonnulllist = container.getRemainingItems();
     /* END OF CHANGE */
     net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 
-    // note: craftMatrix and this.craftMatrix are the same object!
-    craftMatrix.setDoNotCallUpdates(true);
+    // note: craftMatrixPersistent and this.field_75239_a are the same object!
+    craftingInventoryPersistant.setDoNotCallUpdates(true);
 
     for (int i = 0; i < nonnulllist.size(); ++i)
     {
-      ItemStack itemstack = this.craftMatrix.getStackInSlot(i);
-      ItemStack itemstack1 = nonnulllist.get(i);
+      ItemStack stackInSlot = this.field_75239_a.getStackInSlot(i);
+      ItemStack stack1 = nonnulllist.get(i);
 
-      if (!itemstack.isEmpty())
+      if (!stackInSlot.isEmpty())
       {
-        this.craftMatrix.decrStackSize(i, 1);
-        itemstack = this.craftMatrix.getStackInSlot(i);
+        this.field_75239_a.decrStackSize(i, 1);
+        stackInSlot = this.field_75239_a.getStackInSlot(i);
       }
 
-      if (!itemstack1.isEmpty())
+      if (!stack1.isEmpty())
       {
-        if (itemstack.isEmpty())
+        if (stackInSlot.isEmpty())
         {
-          this.craftMatrix.setInventorySlotContents(i, itemstack1);
+          this.field_75239_a.setInventorySlotContents(i, stack1);
         }
-        else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
+        else if (ItemStack.areItemsEqual(stackInSlot, stack1) && ItemStack.areItemStackTagsEqual(stackInSlot, stack1))
         {
-          itemstack1.grow(itemstack.getCount());
-          this.craftMatrix.setInventorySlotContents(i, itemstack1);
+          stack1.grow(stackInSlot.getCount());
+          this.field_75239_a.setInventorySlotContents(i, stack1);
         }
-        else if (!this.player.inventory.addItemStackToInventory(itemstack1))
+        else if (!this.player.inventory.addItemStackToInventory(stack1))
         {
-          this.player.dropItem(itemstack1, false);
+          this.player.dropItem(stack1, false);
         }
       }
     }
 
-    craftMatrix.setDoNotCallUpdates(false);
-    containerCraftingStation.onCraftMatrixChanged(craftMatrix);
+    craftingInventoryPersistant.setDoNotCallUpdates(false);
+    container.onCraftMatrixChanged(craftingInventoryPersistant);
 
-    return stack;
+    return craftingResult;
   }
-
 }

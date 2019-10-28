@@ -1,5 +1,8 @@
 package com.tfar.craftingstation;
 
+import com.tfar.craftingstation.network.PacketHandler;
+import com.tfar.craftingstation.network.SLastRecipePacket;
+import com.tfar.craftingstation.slot.SlotFastCraft;
 import com.tfar.craftingstation.slot.WrapperSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -8,7 +11,6 @@ import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -23,6 +25,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -32,14 +36,17 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class CraftingStationContainer extends Container implements CraftingStationBlockEntity.Listener {
-  public final CraftingInventory craftMatrix;
+import static net.minecraftforge.fml.network.NetworkDirection.PLAY_TO_CLIENT;
+
+public class CraftingStationContainer extends Container {
+  public final CraftingInventoryPersistant craftMatrix;
   public final CraftResultInventory craftResult = new CraftResultInventory();
   public final World world;
   private final BlockPos pos;
   private final PlayerEntity player;
-  private final CraftingStationBlockEntity tileEntity;
+  public final CraftingStationBlockEntity tileEntity;
   public IRecipe<CraftingInventory> lastRecipe;
   protected IRecipe<CraftingInventory> lastLastRecipe;
   public final List<Pair<Integer,Integer>> containerStarts = new ArrayList<>();
@@ -59,7 +66,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
     this.pos = pos;
     this.player = player;
     this.tileEntity = (CraftingStationBlockEntity) world.getTileEntity(pos);
-    assert tileEntity != null;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
     this.hasSideContainers = false;
 
@@ -77,9 +83,9 @@ public class CraftingStationContainer extends Container implements CraftingStati
     //    if(blacklisted(te.getClass())) {
       //    continue;
     //    }
-//        if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
- //         continue;
-  //      }
+        if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
+          continue;
+        }
 
         // try internal access first
         if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).isPresent()){
@@ -107,9 +113,21 @@ public class CraftingStationContainer extends Container implements CraftingStati
       addSideContainerSlots(tileEntities, accessDir, -125, 17);
     }
     addPlayerSlots(playerInventory);
-    func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
+    //func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
 
-    tileEntity.addListener(this);
+//    tileEntity.addListener(this);
+  }
+
+  private void addOwnSlots() {
+    // crafting result
+    this.addSlot(new SlotFastCraft(this, this.craftMatrix, craftResult,0, 124, 35,player));
+
+    // crafting grid
+    for (int y = 0; y < 3; y++) {
+      for (int x = 0; x < 3; x++) {
+        addSlot(new Slot(craftMatrix, x + 3 * y, 30 + 18 * x, 17 + 18 * y));
+      }
+    }
   }
 
   private void addSideContainerSlots(List<TileEntity> tes,Direction dir ,int xPos, int yPos){
@@ -141,20 +159,8 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   @Override
   public void onContainerClosed(PlayerEntity player) {
-    tileEntity.removeListener(this);
+   // tileEntity.removeListener(this);
     super.onContainerClosed(player);
-  }
-
-  private void addOwnSlots() {
-    // crafting result
-    addSlot(new CraftingResultSlot(player, craftMatrix, craftResult, 0, 124, 35));
-
-    // crafting grid
-    for (int y = 0; y < 3; y++) {
-      for (int x = 0; x < 3; x++) {
-        addSlot(new Slot(craftMatrix, x + 3 * y, 30 + 18 * x, 17 + 18 * y));
-      }
-    }
   }
 
   private void addPlayerSlots(PlayerInventory playerInventory) {
@@ -171,14 +177,19 @@ public class CraftingStationContainer extends Container implements CraftingStati
     }
   }
 
+  // update crafting
+  //clientside only
   @Override
-  public void tileEntityContentsChanged() {
-    onCraftMatrixChanged(craftMatrix);
+  public void setAll(List<ItemStack> p_190896_1_) {
+    craftMatrix.setDoNotCallUpdates(true);
+    super.setAll(p_190896_1_);
+    craftMatrix.setDoNotCallUpdates(false);
+    craftMatrix.onCraftMatrixChanged();
   }
 
   @Override
   public void onCraftMatrixChanged(IInventory inventory) {
-    func_217066_a(this.windowId, world, player, craftMatrix, craftResult);
+    this.slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
   }
 
   @Override
@@ -250,6 +261,76 @@ public class CraftingStationContainer extends Container implements CraftingStati
       return ItemStack.EMPTY;
     }
     return notifySlotAfterTransfer(playerIn, stack, ret, slot);
+  }
+
+  protected void slotChangedCraftingGrid(World world, PlayerEntity player, CraftingInventory inv, CraftResultInventory result) {
+    ItemStack itemstack = ItemStack.EMPTY;
+
+    // if the recipe is no longer valid, update it
+    if(lastRecipe == null || !lastRecipe.matches(inv, world)) {
+      lastRecipe = findRecipe(inv, world);
+    }
+
+    // if we have a recipe, fetch its result
+    if(lastRecipe != null) {
+      itemstack = lastRecipe.getCraftingResult(inv);
+    }
+    // set the slot on both sides, client is for display/so the client knows about the recipe
+    result.setInventorySlotContents(0, itemstack);
+
+    // update recipe on server
+    if(!world.isRemote) {
+      ServerPlayerEntity entityplayermp = (ServerPlayerEntity) player;
+
+      // we need to sync to all players currently in the inventory
+      List<ServerPlayerEntity> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.getServerWorld());
+
+      // sync result to all serverside inventories to prevent duplications/recipes being blocked
+      // need to do this every time as otherwise taking items of the result causes desync
+      syncResultToAllOpenWindows(itemstack, relevantPlayers);
+
+      // if the recipe changed, update clients last recipe
+      // this also updates the client side display when the recipe is added
+      if(lastLastRecipe != lastRecipe) {
+        syncRecipeToAllOpenWindows(lastRecipe, relevantPlayers);
+        lastLastRecipe = lastRecipe;
+      }
+    }
+  }
+
+  private void syncResultToAllOpenWindows(final ItemStack stack, List<ServerPlayerEntity> players) {
+    players.forEach(otherPlayer -> {
+      otherPlayer.openContainer.putStackInSlot(0, stack);
+      //otherPlayer.connection.sendPacket(new SPacketSetSlot(otherPlayer.openContainer.windowId, SLOT_RESULT, stack));
+    });
+  }
+
+  private void syncRecipeToAllOpenWindows(final IRecipe lastRecipe, List<ServerPlayerEntity> players) {
+    players.forEach(otherPlayer -> {
+      // safe cast since hasSameContainerOpen does class checks
+      ((CraftingStationContainer)otherPlayer.openContainer).lastRecipe = lastRecipe;
+      PacketHandler.INSTANCE.sendTo(new SLastRecipePacket(lastRecipe), otherPlayer.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+    });
+  }
+
+  private List<ServerPlayerEntity> getAllPlayersWithThisContainerOpen(CraftingStationContainer container, ServerWorld server) {
+    return server.getPlayers().stream()
+            .filter(player -> hasSameContainerOpen(container, player))
+            .collect(Collectors.toList());
+  }
+
+  private <T extends TileEntity> boolean hasSameContainerOpen(CraftingStationContainer container, PlayerEntity playerToCheck) {
+    return playerToCheck instanceof ServerPlayerEntity &&
+            playerToCheck.openContainer.getClass().isAssignableFrom(container.getClass()) &&
+            this.sameGui((CraftingStationContainer) playerToCheck.openContainer);
+  }
+
+  public boolean sameGui(CraftingStationContainer otherContainer) {
+    return this.tileEntity == otherContainer.tileEntity;
+  }
+
+  public static IRecipe<CraftingInventory> findRecipe(CraftingInventory inv, World world) {
+    return world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, inv, world).orElse(null);
   }
 
   @Nonnull
@@ -403,22 +484,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
     return slot.inventory != craftResult && super.canMergeSlot(stack, slot);
   }
 
-  protected static void func_217066_a(int p_217066_0_, World p_217066_1_, PlayerEntity player, CraftingInventory p_217066_3_, CraftResultInventory p_217066_4_) {
-    if (!p_217066_1_.isRemote) {
-      ServerPlayerEntity lvt_5_1_ = (ServerPlayerEntity)player;
-      ItemStack lvt_6_1_ = ItemStack.EMPTY;
-      Optional<ICraftingRecipe> lvt_7_1_ = p_217066_1_.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, p_217066_3_, p_217066_1_);
-      if (lvt_7_1_.isPresent()) {
-        ICraftingRecipe lvt_8_1_ = lvt_7_1_.get();
-        if (p_217066_4_.canUseRecipe(p_217066_1_, lvt_5_1_, lvt_8_1_)) {
-          lvt_6_1_ = lvt_8_1_.getCraftingResult(p_217066_3_);
-        }
-      }
-
-      p_217066_4_.setInventorySlotContents(0, lvt_6_1_);
-      lvt_5_1_.connection.sendPacket(new SSetSlotPacket(p_217066_0_, 0, lvt_6_1_));
-    }
-  }
   public void updateSlotPositions(int offset) {
     Pair<Integer,Integer> range = containerStarts.get(currentContainer);
     int start = range.getLeft();
@@ -443,13 +508,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
        int index = (i - start) / 6;
        slot.yPos = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
      }
-  }
-
-  public NonNullList<ItemStack> getRemainingItems() {
-    if(lastRecipe != null && lastRecipe.matches(craftMatrix, world)) {
-      return lastRecipe.getRemainingItems(craftMatrix);
-    }
-    return craftMatrix.stackList;
   }
 
   public void updateLastRecipeFromServer(IRecipe<CraftingInventory> recipe) {
@@ -483,5 +541,12 @@ public class CraftingStationContainer extends Container implements CraftingStati
     int left = containerStarts.get(containerStarts.size() - 1).getRight();
     int right = handler.getSlots() + left;
     containerStarts.add(Pair.of(left,right));
+  }
+
+  public NonNullList<ItemStack> getRemainingItems() {
+    if(lastRecipe != null && lastRecipe.matches(craftMatrix, world)) {
+      return lastRecipe.getRemainingItems(craftMatrix);
+    }
+    return craftMatrix.getStackList();
   }
 }

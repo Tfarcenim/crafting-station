@@ -42,8 +42,7 @@ public class CraftingStation {
     PacketHandler.registerMessages(MODID);
   }
 
-  private void enqueueIMC(final InterModEnqueueEvent event)
-  {
+  private void enqueueIMC(final InterModEnqueueEvent event) {
     InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
       CompoundNBT tagCompound = new CompoundNBT();
       tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
