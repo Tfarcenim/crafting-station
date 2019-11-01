@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "craftingstation:block/top",
+    "down": "block/oak_planks",
+    "up": "craftingstation:block/top",
+    "north": "craftingstation:block/slab_side",
+    "east": "craftingstation:block/slab_side",
+    "south": "craftingstation:block/slab_side",
+    "west": "craftingstation:block/slab_side"
+  }
+}

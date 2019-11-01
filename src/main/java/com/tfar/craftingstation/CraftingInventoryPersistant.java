@@ -8,7 +8,9 @@ import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
 public class CraftingInventoryPersistant extends CraftingInventory {
@@ -23,28 +25,34 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   }
 
   /**
-   * Returns the size of this inventory.  Must be equivalent to {@link #getHeight()} * {@link #getWidth()}.
-   */
-  @Override
-  public int getSizeInventory()
-  {
-    return inv.getSlots();
-  }
-
-  /**
    * Returns the stack in this slot.  This stack should be a modifiable reference, not a copy of a stack in your inventory.
    */
+  @Nonnull
   @Override
-  public ItemStack getStackInSlot(int slot)
-  {
+  public ItemStack getStackInSlot(int slot) {
+    validate(slot);
     return inv.getStackInSlot(slot);
+  }
+
+  public void validate(int slot){
+    if (isValid(slot))return;
+    IndexOutOfBoundsException e = new IndexOutOfBoundsException("Someone attempted to poll an outofbounds stack at slot " +
+            slot+" report to them, NOT Crafting Station");
+    e.printStackTrace();
+    throw e;
+  }
+
+  public boolean isValid(int slot){
+    return slot >= 0 && slot < getSizeInventory();
   }
 
   /**
    * Attempts to remove n items from the specified slot.  Returns the split stack that was removed.  Modifies the inventory.
    */
+  @Nonnull
   @Override
   public ItemStack decrStackSize(int slot, int count) {
+    validate(slot);
     ItemStack stack = inv.extractItem(slot,count,false);
     if (!stack.isEmpty())
       onCraftMatrixChanged();
@@ -55,7 +63,8 @@ public class CraftingInventoryPersistant extends CraftingInventory {
    * Sets the contents of this slot to the provided stack.
    */
   @Override
-  public void setInventorySlotContents(int slot, ItemStack stack) {
+  public void setInventorySlotContents(int slot,@Nonnull ItemStack stack) {
+    validate(slot);
     inv.setStackInSlot(slot, stack);
     onCraftMatrixChanged();
   }
@@ -63,8 +72,10 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   /**
    * Removes the stack contained in this slot from the underlying handler, and returns it.
    */
+  @Nonnull
   @Override
   public ItemStack removeStackFromSlot(int index) {
+    validate(index);
     ItemStack s = getStackInSlot(index);
     if(s.isEmpty()) return ItemStack.EMPTY;
     onCraftMatrixChanged();
@@ -77,18 +88,14 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   }
 
   @Override
-  public boolean isEmpty()
-  {
-    for(int i = 0; i < inv.getSlots(); i++)
-    {
-      if(!inv.getStackInSlot(i).isEmpty()) return false;
-    }
-    return true;
+  public boolean isEmpty() {
+    return IntStream.range(0, inv.getSlots()).allMatch(i -> inv.getStackInSlot(i).isEmpty());
   }
 
-  //dont
   @Override
-  public void clear(){}
+  public void clear(){
+    //dont
+  }
 
   /**
    * If set to true no eventhandler.onCraftMatrixChanged calls will be made.

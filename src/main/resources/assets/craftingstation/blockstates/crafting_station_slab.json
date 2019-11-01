@@ -1,0 +1,7 @@
+{
+  "variants": {
+      "type=bottom": { "model": "craftingstation:block/crafting_station_slab" },
+      "type=top": { "model": "craftingstation:block/crafting_station_slab_top" },
+      "type=double": { "model": "craftingstation:block/crafting_station_slab_double" }
+    }
+}

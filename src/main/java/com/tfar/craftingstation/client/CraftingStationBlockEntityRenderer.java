@@ -1,14 +1,20 @@
 package com.tfar.craftingstation.client;
 
+import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationBlock;
 import com.tfar.craftingstation.CraftingStationBlockEntity;
+import com.tfar.craftingstation.CraftingStationSlabBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.properties.SlabType;
 import net.minecraft.util.Direction;
 
 public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<CraftingStationBlockEntity> {
@@ -18,8 +24,8 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
   private double[] north = new double[]{0.311, 1.0625,0.217};//.05 + +
 
   @Override
-  public void render(CraftingStationBlockEntity tileEntity, double x, double y, double z, float partialTicks, int destroyStage) {
-    if (this.rendererDispatcher.renderInfo != null && tileEntity.getDistanceSq(this.rendererDispatcher.renderInfo.getProjectedView().x, this.rendererDispatcher.renderInfo.getProjectedView().y, this.rendererDispatcher.renderInfo.getProjectedView().z) < 128d) {
+  public void render(CraftingStationBlockEntity blockEntity, double x, double y, double z, float partialTicks, int destroyStage) {
+    if (this.rendererDispatcher.renderInfo != null && blockEntity.getDistanceSq(this.rendererDispatcher.renderInfo.getProjectedView().x, this.rendererDispatcher.renderInfo.getProjectedView().y, this.rendererDispatcher.renderInfo.getProjectedView().z) < 128d) {
 
       double shiftX;
       double shiftY;
@@ -27,19 +33,23 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
 
       final double sixteenth = .0625;
 
-      Direction facing = tileEntity.getBlockState().get(CraftingStationBlock.FACING);
+      BlockState storedState = blockEntity.getBlockState();
+
+      Direction facing = storedState.get(CraftingStationBlock.FACING);
+
+      double height = storedState.getBlock() == CraftingStation.Objects.crafting_station_slab ? storedState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? .5 : 1 : 1;
 
       if (this.itemRenderer == null) {
         this.itemRenderer = new ItemRenderer(Minecraft.getInstance().textureManager, Minecraft.getInstance().getModelManager(), Minecraft.getInstance().getItemColors());
       }
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3;j++) {
-          ItemStack item = tileEntity.input.getStackInSlot(j + 3 * i);
+          ItemStack item = blockEntity.input.getStackInSlot(j + 3 * i);
           if (item.isEmpty())continue;
           boolean isBlock = (item.getItem() instanceof BlockItem);
           double blockScale = isBlock ? .5 : .25;
           double offset = isBlock ? sixteenth : 0;
-          shiftY = 1 + offset;
+          shiftY = height + offset;
           switch (facing) {
             case NORTH: {
               shiftX = .311 + .189 * j;
@@ -61,7 +71,7 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
               shiftZ =  0.689 - .189 * j;
               break;
             }
-            default:throw new RuntimeException(facing.toString());
+            default:throw new IllegalStateException(facing.toString());
           }
           GlStateManager.pushMatrix();
           GlStateManager.enableBlend();
@@ -77,7 +87,8 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
             default:
           }
           GlStateManager.scaled(blockScale, blockScale, blockScale);
-
+          int light = blockEntity.getWorld().getCombinedLight(blockEntity.getPos().up(), 0);
+          GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, light % 65536, light / 65536);
           this.itemRenderer.renderItem(item, ItemCameraTransforms.TransformType.GROUND);
           GlStateManager.popMatrix();
         }

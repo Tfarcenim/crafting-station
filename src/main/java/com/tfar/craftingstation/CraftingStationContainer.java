@@ -14,11 +14,10 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
@@ -35,10 +34,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static net.minecraftforge.fml.network.NetworkDirection.PLAY_TO_CLIENT;
 
 public class CraftingStationContainer extends Container {
   public final CraftingInventoryPersistant craftMatrix;
@@ -80,9 +76,8 @@ public class CraftingStationContainer extends Container {
       TileEntity te = world.getTileEntity(neighbor);
       if(te != null && !(te instanceof CraftingStationBlockEntity)) {
         // if blacklisted, skip checks entirely
-    //    if(blacklisted(te.getClass())) {
-      //    continue;
-    //    }
+        if(isBlacklisted(te.getType()))
+          continue;
         if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
           continue;
         }
@@ -116,6 +111,10 @@ public class CraftingStationContainer extends Container {
     //func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
 
 //    tileEntity.addListener(this);
+  }
+
+  protected boolean isBlacklisted(TileEntityType<?> blockEntityType){
+    return Configs.ServerConfig.blockentitytypes.contains(blockEntityType);
   }
 
   private void addOwnSlots() {
