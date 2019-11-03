@@ -26,6 +26,7 @@ public class JeiPlugin implements IModPlugin, IGuiContainerHandler<CraftingStati
   @Override
   public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
     registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station),VanillaRecipeCategoryUid.CRAFTING);
+    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station_slab),VanillaRecipeCategoryUid.CRAFTING);
   }
 
   @Nonnull

@@ -7,7 +7,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class CClearPacket {
+public class C2SClearPacket {
 
   public void handle(Supplier<NetworkEvent.Context> ctx) {
     PlayerEntity player = ctx.get().getSender();

@@ -3,10 +3,9 @@ package com.tfar.craftingstation.client;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
-import com.tfar.craftingstation.network.CClearPacket;
+import com.tfar.craftingstation.network.C2SClearPacket;
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -49,7 +48,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
-      this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new CClearPacket())));
+      this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket())));
     }
   }
 

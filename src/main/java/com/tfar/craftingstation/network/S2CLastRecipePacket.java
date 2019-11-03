@@ -12,25 +12,25 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
-public class SLastRecipePacket {
+public class S2CLastRecipePacket {
 
   public static final ResourceLocation NULL = new ResourceLocation("null", "null");
 
   ResourceLocation rec;
 
-  public SLastRecipePacket() {
+  public S2CLastRecipePacket() {
   }
 
-  public SLastRecipePacket(IRecipe<CraftingInventory> toSend) {
+  public S2CLastRecipePacket(IRecipe<CraftingInventory> toSend) {
     rec = toSend == null ? NULL : toSend.getId();
   }
 
-  public SLastRecipePacket(ResourceLocation toSend) {
+  public S2CLastRecipePacket(ResourceLocation toSend) {
     rec = toSend;
   }
 
 
-  public SLastRecipePacket(PacketBuffer buf) {
+  public S2CLastRecipePacket(PacketBuffer buf) {
     rec = new ResourceLocation(buf.readString());
   }
 

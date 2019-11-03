@@ -8,6 +8,7 @@ import com.tfar.craftingstation.CraftingStationBlockEntity;
 import com.tfar.craftingstation.CraftingStationSlabBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StainedGlassPaneBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
@@ -33,6 +34,8 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
 
       final double sixteenth = .0625;
 
+      final double shift = .189;
+
       BlockState storedState = blockEntity.getBlockState();
 
       Direction facing = storedState.get(CraftingStationBlock.FACING);
@@ -47,28 +50,30 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           ItemStack item = blockEntity.input.getStackInSlot(j + 3 * i);
           if (item.isEmpty())continue;
           boolean isBlock = (item.getItem() instanceof BlockItem);
-          double blockScale = isBlock ? .5 : .25;
+          double blockScale = isBlock ? .25 : .125;
           double offset = isBlock ? sixteenth : 0;
+          double offset2 = isBlock ? .125 : 0;
+          final double offset3 = .3109;
           shiftY = height + offset;
           switch (facing) {
             case NORTH: {
-              shiftX = .311 + .189 * j;
-              shiftZ = .34 + offset + .189 * i;
+              shiftX = offset3 + shift * j;
+              shiftZ = offset3 - offset2 / 2 + offset + shift * i;
               break;
             }
             case EAST: {
-              shiftX = .28 - offset - .189 * i + .378;
-              shiftZ = 0.31 + .189 * j;
+              shiftX = offset2 / 2 - offset - shift * i + 0.689;
+              shiftZ = offset3 + shift * j;
               break;
             }
             case SOUTH: {
-              shiftX = 0.689 - .189 * j;
-              shiftZ = .277 - offset - .189 * i + 0.378;
+              shiftX = 0.689 - shift * j;
+              shiftZ = offset2 / 2 - offset - shift * i + 0.689;
               break;
             }
             case WEST: {
-              shiftX = .342 + offset + .189 * i;
-              shiftZ =  0.689 - .189 * j;
+              shiftX =  - offset2/2 + offset3 + offset + shift * i;
+              shiftZ =  0.689 - shift * j;
               break;
             }
             default:throw new IllegalStateException(facing.toString());
@@ -77,19 +82,27 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           GlStateManager.enableBlend();
           GlStateManager.translated(x + shiftX, y + shiftY, z + shiftZ);
           //if(!isBlock)
-          GlStateManager.rotated(90, 1, 0, 0);
+      //  GlStateManager.rotated(90, 1, 0, 0);
           switch (facing){
-            case WEST:GlStateManager.rotated(90, 0, 0, 1);break;
-            case SOUTH:GlStateManager.rotated(180, 0, 1, 0);break;
-            case EAST:GlStateManager.rotated(270, 0, 0, 1);break;
+            case WEST:GlStateManager.rotated(90, 1, 0, 0);
+              GlStateManager.rotated(90, 0, 1, 0);
+              GlStateManager.rotated(90, 0, 1, 0);
+            break;
+            case SOUTH:GlStateManager.rotated(90, 1,0, 0);
+            break;
+            case EAST:GlStateManager.rotated(90, 0, 0, 1);
+              GlStateManager.rotated(90, 0, 1, 0);
+              GlStateManager.rotated(270, 0, 0, 1);
+              break;
             case NORTH:
+              GlStateManager.rotated(90, 1, 0, 0);
               GlStateManager.rotated(180, 0, 0, 1);
-            default:
+            default://no
           }
           GlStateManager.scaled(blockScale, blockScale, blockScale);
           int light = blockEntity.getWorld().getCombinedLight(blockEntity.getPos().up(), 0);
           GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, light % 65536, light / 65536);
-          this.itemRenderer.renderItem(item, ItemCameraTransforms.TransformType.GROUND);
+          ClientStuffs.mc.getItemRenderer().renderItem(item, ItemCameraTransforms.TransformType.FIXED);
           GlStateManager.popMatrix();
         }
       }

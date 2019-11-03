@@ -12,14 +12,14 @@ public class PacketHandler {
 
   public static void registerMessages(String channelName) {
     INSTANCE = NetworkRegistry.newSimpleChannel(new ResourceLocation(CraftingStation.MODID, channelName), () -> "1.0", s -> true, s -> true);
-    INSTANCE.registerMessage(0, SLastRecipePacket.class,
-            SLastRecipePacket::encode,
-            SLastRecipePacket::new,
-            SLastRecipePacket::handle);
+    INSTANCE.registerMessage(0, S2CLastRecipePacket.class,
+            S2CLastRecipePacket::encode,
+            S2CLastRecipePacket::new,
+            S2CLastRecipePacket::handle);
 
-    INSTANCE.registerMessage(4, CClearPacket.class,
+    INSTANCE.registerMessage(4, C2SClearPacket.class,
             (cMessagePickBlock, buffer) -> {},
-            buffer -> new CClearPacket(),
-            CClearPacket::handle);
+            buffer -> new C2SClearPacket(),
+            C2SClearPacket::handle);
   }
 }

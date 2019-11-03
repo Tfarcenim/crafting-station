@@ -1,7 +1,7 @@
 package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.network.PacketHandler;
-import com.tfar.craftingstation.network.SLastRecipePacket;
+import com.tfar.craftingstation.network.S2CLastRecipePacket;
 import com.tfar.craftingstation.slot.SlotFastCraft;
 import com.tfar.craftingstation.slot.WrapperSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -308,7 +308,7 @@ public class CraftingStationContainer extends Container {
     players.forEach(otherPlayer -> {
       // safe cast since hasSameContainerOpen does class checks
       ((CraftingStationContainer)otherPlayer.openContainer).lastRecipe = lastRecipe;
-      PacketHandler.INSTANCE.sendTo(new SLastRecipePacket(lastRecipe), otherPlayer.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+      PacketHandler.INSTANCE.sendTo(new S2CLastRecipePacket(lastRecipe), otherPlayer.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
     });
   }
 
