@@ -5,6 +5,8 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
+import java.util.stream.IntStream;
+
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
 public class CraftingInventoryPersistant extends InventoryCrafting {
 
@@ -15,23 +17,17 @@ public class CraftingInventoryPersistant extends InventoryCrafting {
   CraftingInventoryPersistant(Container eventHandler, ItemStackHandler itemHandler) {
     super(eventHandler, 3, 3);
 
-    assert itemHandler.getSlots() == 9;
-
     this.eventHandler = eventHandler;
     this.itemHandler = itemHandler;
   }
 
   @Override
   public boolean isEmpty() {
-    for (int i = 0; i < itemHandler.getSlots(); i++) {
-      if (!itemHandler.getStackInSlot(i).isEmpty())
-        return false;
-    }
-    return true;
+    return IntStream.range(0, itemHandler.getSlots()).allMatch(i -> itemHandler.getStackInSlot(i).isEmpty());
   }
 
   public ItemStack getStackInSlot(int index) {
-    return index < itemHandler.getSlots() ? itemHandler.getStackInSlot(index) : ItemStack.EMPTY;
+    return itemHandler.getStackInSlot(index);
   }
 
   @Override

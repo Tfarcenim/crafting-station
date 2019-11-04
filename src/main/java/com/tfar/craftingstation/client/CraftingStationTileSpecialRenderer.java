@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 
-public class CraftingStationTileSpecialRenderer extends TileEntitySpecialRenderer<CraftingStationTile> { private ItemRenderer itemRenderer;
+public class CraftingStationTileSpecialRenderer extends TileEntitySpecialRenderer<CraftingStationTile> {
 
   @Override
   public void render(CraftingStationTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -20,9 +20,6 @@ public class CraftingStationTileSpecialRenderer extends TileEntitySpecialRendere
       double shiftY;
       double shiftZ;
 
-      if (this.itemRenderer == null) {
-        this.itemRenderer = new ItemRenderer(Minecraft.getMinecraft());
-      }
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3;j++) {
           ItemStack item = te.input.getStackInSlot(j + 3 * i);
@@ -40,7 +37,7 @@ public class CraftingStationTileSpecialRenderer extends TileEntitySpecialRendere
 
           GlStateManager.scale(blockScale, blockScale, blockScale);
 
-          this.itemRenderer.renderItem(Minecraft.getMinecraft().player,item, ItemCameraTransforms.TransformType.GROUND);
+          Minecraft.getMinecraft().getItemRenderer().renderItem(Minecraft.getMinecraft().player,item, ItemCameraTransforms.TransformType.GROUND);
           GlStateManager.popMatrix();
         }
       }

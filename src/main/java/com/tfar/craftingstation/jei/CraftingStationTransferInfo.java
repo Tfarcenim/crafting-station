@@ -61,13 +61,7 @@ public class CraftingStationTransferInfo implements IRecipeTransferInfo<Crafting
   @Nonnull
   @Override
   public List<Slot> getInventorySlots(@Nonnull CraftingStationContainer container) {
-    List<Slot> slots = new ArrayList<>();
-    container.inventorySlots.size();
-    for (int i = 11; i < container.inventorySlots.size(); i++) {
-      Slot slot = container.getSlot(i);
-      slots.add(slot);
-    }
-    return slots;
+    return IntStream.range(10, container.inventorySlots.size()).mapToObj(container::getSlot).collect(Collectors.toList());
   }
 }
 

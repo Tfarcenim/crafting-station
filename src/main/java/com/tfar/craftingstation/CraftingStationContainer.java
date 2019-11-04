@@ -34,7 +34,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
   public final InventoryCraftResult craftResult = new InventoryCraftResult();
   private static final int SLOT_RESULT = 0;
   public final World world;
-  private final BlockPos pos;
   private final EntityPlayer player;
   private final CraftingStationTile tileEntity;
   public IRecipe lastRecipe;
@@ -48,7 +47,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   public CraftingStationContainer(InventoryPlayer InventoryPlayer, World world, BlockPos pos, EntityPlayer player) {
     this.world = world;
-    this.pos = pos;
     this.player = player;
     this.tileEntity = (CraftingStationTile) world.getTileEntity(pos);
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
@@ -65,9 +63,9 @@ public class CraftingStationContainer extends Container implements CraftingStati
       TileEntity te = world.getTileEntity(neighbor);
       if(te != null && !(te instanceof CraftingStationTile)) {
         // if blacklisted, skip checks entirely
-    //    if(blacklisted(te.getClass())) {
-      //    continue;
-    //    }
+        if(isBlacklisted(te) || te instanceof IInventory && !((IInventory)te).isUsableByPlayer(player)) {
+          continue;
+        }
 //        if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
  //         continue;
   //      }
@@ -97,6 +95,10 @@ public class CraftingStationContainer extends Container implements CraftingStati
     slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
 
     tileEntity.addListener(this);
+  }
+
+  protected boolean isBlacklisted(TileEntity te){
+    return Configs.tileentityblacklistresourcelocations.contains(TileEntity.getKey(te.getClass()));
   }
 
   private void addSideContainerSlots(TileEntity te, EnumFacing dir, int xPos, int yPos){
