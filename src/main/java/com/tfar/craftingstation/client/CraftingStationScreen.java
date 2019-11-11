@@ -2,11 +2,10 @@ package com.tfar.craftingstation.client;
 
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiContainerCreative;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -36,7 +35,6 @@ public class CraftingStationScreen extends GuiContainer {
   private static final ResourceLocation SCROLLBAR = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
   private static final ResourceLocation SCROLLBAR_BACKGROUND_AND_TAB = new ResourceLocation("textures/gui/container/creative_inventory/tab_items.png");
 
-
   public static final ResourceLocation SECONDARY_GUI_TEXTURE = new ResourceLocation(CraftingStation.MODID, "textures/gui/secondary.png");
 
   public CraftingStationScreen(CraftingStationContainer inv) {
@@ -44,6 +42,11 @@ public class CraftingStationScreen extends GuiContainer {
     realRows = inv.getRows();
     topRow = 0;
     currentScroll = 0;
+    CraftingStationContainer craftingStationContainer = (CraftingStationContainer) inventorySlots;
+    if(craftingStationContainer.chestPosition != null && craftingStationContainer.world.getTileEntity(craftingStationContainer.chestPosition)instanceof TileEntityChest) {
+      // Fix: chests don't update their single/double chest status clientside once accessed
+      ((TileEntityChest) craftingStationContainer.world.getTileEntity(craftingStationContainer.chestPosition)).doubleChestHandler = null;
+    }
   }
 
   @Override

@@ -40,7 +40,7 @@ public class CraftingInventoryPersistant extends InventoryCrafting {
     ItemStack removed = itemHandler.extractItem(index, count, false);
 
     if (!removed.isEmpty()) {
-      eventHandler.onCraftMatrixChanged(this);
+      onCraftMatrixChanged();
     }
 
     return removed;
@@ -49,6 +49,10 @@ public class CraftingInventoryPersistant extends InventoryCrafting {
   @Override
   public void setInventorySlotContents(int index, ItemStack stack) {
     itemHandler.setStackInSlot(index, stack);
+    onCraftMatrixChanged();
+  }
+
+  public void onCraftMatrixChanged(){
     if (!doNotCallUpdates)eventHandler.onCraftMatrixChanged(this);
   }
 

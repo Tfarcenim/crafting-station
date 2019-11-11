@@ -13,6 +13,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
@@ -36,6 +37,7 @@ public class CraftingStationContainer extends Container implements CraftingStati
   public final World world;
   private final EntityPlayer player;
   private final CraftingStationTile tileEntity;
+  public BlockPos chestPosition;
   public IRecipe lastRecipe;
   protected IRecipe lastLastRecipe;
   public boolean hasSideContainer;
@@ -72,7 +74,8 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
         // try internal access first
         if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,null)) {
-          inventoryTE = te;
+          if (te instanceof TileEntityChest)this.chestPosition = neighbor;
+            inventoryTE = te;
         }
         // try sided access else
         else if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {
@@ -113,6 +116,16 @@ public class CraftingStationContainer extends Container implements CraftingStati
       WrapperSlot wrapper = new WrapperSlot(new SlotItemHandler(handler,index,18 * x +xPos,18 * y + yPos + offset));
       addSlotToContainer(wrapper);
     }
+  }
+
+  //update crafting
+  //clientonly
+  @Override
+  public void setAll(List<ItemStack> p_190896_1_) {
+    craftMatrix.setDoNotCallUpdates(true);
+    super.setAll(p_190896_1_);
+    craftMatrix.setDoNotCallUpdates(false);
+    craftMatrix.onCraftMatrixChanged();
   }
 
   @Override
