@@ -9,8 +9,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CraftingStationTile extends TileEntity {
 
@@ -27,9 +25,9 @@ public class CraftingStationTile extends TileEntity {
   public NBTTagCompound writeToNBT(NBTTagCompound tag) {
     NBTTagCompound compound = this.input.serializeNBT();
     tag.setTag("inv", compound);
-   // if (this.customName != null) {
-   //   tag.putString("CustomName", ITextComponent.Serializer.toJson(this.customName));
-  //  }
+    // if (this.customName != null) {
+    //   tag.putString("CustomName", ITextComponent.Serializer.toJson(this.customName));
+    //  }
     return super.writeToNBT(tag);
   }
 
@@ -37,9 +35,9 @@ public class CraftingStationTile extends TileEntity {
   public void readFromNBT(NBTTagCompound tag) {
     NBTTagCompound invTag = tag.getCompoundTag("inv");
     input.deserializeNBT(invTag);
-  //  if (tag.contains("CustomName", 8)) {
-  //    this.customName = ITextComponent.Serializer.fromJson(tag.getString("CustomName"));
- //   }
+    //  if (tag.contains("CustomName", 8)) {
+    //    this.customName = ITextComponent.Serializer.fromJson(tag.getString("CustomName"));
+    //   }
     super.readFromNBT(tag);
   }
 
@@ -49,63 +47,18 @@ public class CraftingStationTile extends TileEntity {
     return new TextComponentTranslation("title.crafting_station");
   }
 
-  private List<Listener> listeners = new ArrayList<>();
-
-  protected ItemStackHandler newItemHandler() {
-    return new ItemStackHandler(9) {
-      @Override
-      protected void onContentsChanged(int slot) {
-        super.onContentsChanged(slot);
-
-        contentsChanged();
-      }
-
-      @Override
-      protected void onLoad() {
-        super.onLoad();
-
-        contentsChanged();
-      }
-    };
-  }
-
-  public void addListener(Listener listener) {
-    listeners.add(listener);
-  }
-
-  public void removeListener(Listener listener) {
-    listeners.remove(listener);
-  }
-
-  public void contentsChanged() {
-    if (world == null)
-      return; // not loaded yet
-    markDirty();
-    listeners.forEach(Listener::tileEntityContentsChanged);
-  }
-
   @Override
-  public NBTTagCompound getUpdateTag()
-  {
+  public NBTTagCompound getUpdateTag() {
     return this.writeToNBT(new NBTTagCompound());    // okay to send entire inventory on chunk load
   }
 
   @Override
-  public SPacketUpdateTileEntity getUpdatePacket()
-  {
-    NBTTagCompound nbt = new NBTTagCompound();
-    this.writeToNBT(nbt);
-
-    return new SPacketUpdateTileEntity(getPos(), 1, nbt);
+  public SPacketUpdateTileEntity getUpdatePacket() {
+    return new SPacketUpdateTileEntity(getPos(), 1, this.writeToNBT(new NBTTagCompound()));
   }
 
   @Override
-  public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet)
-  {
+  public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet) {
     this.readFromNBT(packet.getNbtCompound());
-  }
-
-  public interface Listener {
-    void tileEntityContentsChanged();
   }
 }

@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CraftingStationContainer extends Container implements CraftingStationTile.Listener {
+public class CraftingStationContainer extends Container {
   public final CraftingInventoryPersistant craftMatrix;
   public final InventoryCraftResult craftResult = new InventoryCraftResult();
   private static final int SLOT_RESULT = 0;
@@ -97,7 +97,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
     addPlayerSlots(InventoryPlayer);
     slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
 
-    tileEntity.addListener(this);
   }
 
   protected boolean isBlacklisted(TileEntity te){
@@ -130,7 +129,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   @Override
   public void onContainerClosed(EntityPlayer player) {
-    tileEntity.removeListener(this);
     super.onContainerClosed(player);
   }
 
@@ -172,11 +170,6 @@ public class CraftingStationContainer extends Container implements CraftingStati
 
   public int getSubContainerSize(){
     return this.subContainerSize;
-  }
-
-  @Override
-  public void tileEntityContentsChanged() {
-    onCraftMatrixChanged(craftMatrix);
   }
 
   @Override
