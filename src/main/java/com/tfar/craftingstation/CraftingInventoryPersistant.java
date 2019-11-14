@@ -36,10 +36,8 @@ public class CraftingInventoryPersistant extends CraftingInventory {
 
   public void validate(int slot){
     if (isValid(slot))return;
-    IndexOutOfBoundsException e = new IndexOutOfBoundsException("Someone attempted to poll an outofbounds stack at slot " +
+    throw new IndexOutOfBoundsException("Someone attempted to poll an outofbounds stack at slot " +
             slot+" report to them, NOT Crafting Station");
-    e.printStackTrace();
-    throw e;
   }
 
   public boolean isValid(int slot){

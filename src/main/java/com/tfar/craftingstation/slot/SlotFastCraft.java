@@ -24,7 +24,7 @@ public class SlotFastCraft extends CraftingResultSlot {
   protected CraftingInventoryPersistant craftingInventoryPersistant;
 
   public SlotFastCraft(CraftingStationContainer container, CraftingInventoryPersistant craftingInventoryPersistant, IInventory resultInventory, int slotIndex, int xPosition, int yPosition, PlayerEntity player) {
-    super(player,craftingInventoryPersistant,resultInventory, slotIndex, xPosition, yPosition);
+    super(player, craftingInventoryPersistant, resultInventory, slotIndex, xPosition, yPosition);
     this.container = container;
     this.craftingInventoryPersistant = craftingInventoryPersistant;
   }
@@ -62,30 +62,22 @@ public class SlotFastCraft extends CraftingResultSlot {
     // note: craftMatrixPersistent and this.field_75239_a are the same object!
     craftingInventoryPersistant.setDoNotCallUpdates(true);
 
-    for (int i = 0; i < nonnulllist.size(); ++i)
-    {
+    for (int i = 0; i < nonnulllist.size(); ++i) {
       ItemStack stackInSlot = this.field_75239_a.getStackInSlot(i);
       ItemStack stack1 = nonnulllist.get(i);
 
-      if (!stackInSlot.isEmpty())
-      {
+      if (!stackInSlot.isEmpty()) {
         this.field_75239_a.decrStackSize(i, 1);
         stackInSlot = this.field_75239_a.getStackInSlot(i);
       }
 
-      if (!stack1.isEmpty())
-      {
-        if (stackInSlot.isEmpty())
-        {
+      if (!stack1.isEmpty()) {
+        if (stackInSlot.isEmpty()) {
           this.field_75239_a.setInventorySlotContents(i, stack1);
-        }
-        else if (ItemStack.areItemsEqual(stackInSlot, stack1) && ItemStack.areItemStackTagsEqual(stackInSlot, stack1))
-        {
+        } else if (ItemStack.areItemsEqual(stackInSlot, stack1) && ItemStack.areItemStackTagsEqual(stackInSlot, stack1)) {
           stack1.grow(stackInSlot.getCount());
           this.field_75239_a.setInventorySlotContents(i, stack1);
-        }
-        else if (!this.player.inventory.addItemStackToInventory(stack1))
-        {
+        } else if (!this.player.inventory.addItemStackToInventory(stack1)) {
           this.player.dropItem(stack1, false);
         }
       }

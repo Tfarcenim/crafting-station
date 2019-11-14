@@ -41,14 +41,12 @@ public class CraftingStationSlabBlock extends SlabBlock {
 
   }
 
-  static final Random RANDOM = new Random();
-
   @Override
   public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
     if (!world.isRemote) {
-      TileEntity tileEntity = world.getTileEntity(pos);
-      if (tileEntity instanceof INamedContainerProvider) {
-        NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tileEntity, tileEntity.getPos());
+      INamedContainerProvider iNamedContainerProvider = getContainer(state,world,pos);
+      if (iNamedContainerProvider != null) {
+        NetworkHooks.openGui((ServerPlayerEntity) player, iNamedContainerProvider, pos);
       } else {
         throw new IllegalStateException("Our named container provider is missing!");
       }

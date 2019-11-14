@@ -4,6 +4,7 @@ import com.tfar.craftingstation.network.PacketHandler;
 import com.tfar.craftingstation.network.S2CLastRecipePacket;
 import com.tfar.craftingstation.slot.SlotFastCraft;
 import com.tfar.craftingstation.slot.WrapperSlot;
+import mezz.jei.api.recipe.IRecipeManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -16,13 +17,17 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -33,6 +38,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -138,7 +144,7 @@ public class CraftingStationContainer extends Container {
       te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent((h) -> {
         int size = h.getSlots();
         this.subContainerSize += size;
-        int offsetx = (needsScroll()) ? 0 : 8;
+        int offsetx = needsScroll() ? 0 : 8;
         for (int y = 0; y < (int) Math.ceil((double)size / 6); y++)
           for (int x = 0; x < 6; x++) {
             int index = 6 * y + x;
@@ -267,7 +273,7 @@ public class CraftingStationContainer extends Container {
 
     // if the recipe is no longer valid, update it
     if(lastRecipe == null || !lastRecipe.matches(inv, world)) {
-      lastRecipe = findRecipe(inv, world);
+      lastRecipe = findRecipe(inv, world,player);
     }
 
     // if we have a recipe, fetch its result
@@ -328,8 +334,17 @@ public class CraftingStationContainer extends Container {
     return this.tileEntity == otherContainer.tileEntity;
   }
 
-  public static IRecipe<CraftingInventory> findRecipe(CraftingInventory inv, World world) {
-    return world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, inv, world).orElse(null);
+  public static IRecipe<CraftingInventory> findRecipe(CraftingInventory inv, World world, PlayerEntity player){
+    return world.getRecipeManager().getRecipes(IRecipeType.CRAFTING).values().stream().flatMap(recipe -> {
+      try {
+        return Util.streamOptional(IRecipeType.CRAFTING.matches(recipe, world, inv));
+      } catch (Exception e){
+        CraftingStation.LOGGER.error("Bad recipe found: "+ recipe.getId().toString());
+        CraftingStation.LOGGER.error(e.getMessage());
+        player.sendMessage(new TranslationTextComponent("text.crafting_station.error",recipe.getId().toString()).applyTextStyle(TextFormatting.DARK_RED));
+        return null;
+      }
+    }).findFirst().orElse(null);
   }
 
   @Nonnull
@@ -504,8 +519,12 @@ public class CraftingStationContainer extends Container {
      }
      for (int i = start; i < finish;i++){
        Slot slot = inventorySlots.get(i);
-       int index = (i - start) / 6;
-       slot.yPos = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
+       int row = (i - start) / 6;
+       int column = (i - start) % 6;
+       slot.yPos = (row >= 9 || row < 0) ? -10000 : 17 + 18 * row;
+       final int offsetx = needsScroll() ? 0 : 8;
+       slot.xPos =  18 * column - 125 + offsetx;
+
      }
   }
 

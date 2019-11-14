@@ -28,12 +28,10 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
 
   private boolean isScrolling = false;
 
-  private final int realRows;
   private int topRow;
 
   public CraftingStationScreen(CraftingStationContainer p_i51094_1_, PlayerInventory p_i51094_2_, ITextComponent p_i51094_3_) {
     super(p_i51094_1_, p_i51094_2_, p_i51094_3_);
-    realRows = p_i51094_1_.getRows();
     topRow = 0;
   }
 
@@ -97,7 +95,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       int totalSlots = this.container.getSlotCount();
       int slotsToDraw = 54;
       if (totalSlots < slotsToDraw) slotsToDraw = totalSlots;
-      else if (hasScrollbar() && topRow == this.realRows - 9 && totalSlots % 6 != 0)
+      else if (hasScrollbar() && topRow == this.container.getRows() - 9 && totalSlots % 6 != 0)
         slotsToDraw = 54 - 6 + totalSlots % 6;
 
       int offset = hasScrollbar() ? -126 : -118;
@@ -154,7 +152,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   private boolean hasScrollbar() {
-    return realRows > 9;
+    return container.getRows() > 9;
   }
 
   @Override
@@ -168,15 +166,15 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   private void scrollTo(double scroll) {
-    setTopRow((int) Math.round((realRows - 9) * scroll), true);
+    setTopRow((int) Math.round((container.getRows() - 9) * scroll), true);
   }
 
   private void setTopRow(int offset, boolean smooth) {
     topRow = offset;
     if (topRow < 0) topRow = 0;
-    else if (topRow > realRows - 9) topRow = realRows - 9;
+    else if (topRow > container.getRows() - 9) topRow = container.getRows() - 9;
     container.updateSlotPositions(topRow);
-    if (!smooth) this.currentScroll = (double) topRow / (this.realRows - 9);
+    if (!smooth) this.currentScroll = (double) topRow / (this.container.getRows() - 9);
   }
 }
 
