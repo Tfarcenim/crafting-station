@@ -4,7 +4,6 @@ import com.tfar.craftingstation.network.PacketHandler;
 import com.tfar.craftingstation.network.S2CLastRecipePacket;
 import com.tfar.craftingstation.slot.SlotFastCraft;
 import com.tfar.craftingstation.slot.WrapperSlot;
-import mezz.jei.api.recipe.IRecipeManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -17,7 +16,6 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
@@ -38,7 +36,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,7 +55,7 @@ public class CraftingStationContainer extends Container {
 
   public int subContainerSize = 0;
   public boolean hasSideContainers;
-  public int currentContainer = 0;
+  public int currentContainer;
 
 
   public CraftingStationContainer(int id, PlayerInventory playerInventory, World world, BlockPos pos, PlayerEntity player) {
@@ -68,6 +65,7 @@ public class CraftingStationContainer extends Container {
     this.pos = pos;
     this.player = player;
     this.tileEntity = (CraftingStationBlockEntity) world.getTileEntity(pos);
+    currentContainer = tileEntity.currentContainer;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
     this.hasSideContainers = false;
 
@@ -164,7 +162,7 @@ public class CraftingStationContainer extends Container {
 
   @Override
   public void onContainerClosed(PlayerEntity player) {
-   // tileEntity.removeListener(this);
+    tileEntity.currentContainer = currentContainer;
     super.onContainerClosed(player);
   }
 
@@ -567,4 +565,5 @@ public class CraftingStationContainer extends Container {
     }
     return craftMatrix.getStackList();
   }
+
 }

@@ -23,6 +23,8 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
   public CraftingStationItemHandler input;
   public ItemStackHandler output;
 
+  public int currentContainer = 0;
+
   public CraftingStationBlockEntity() {
     super(CraftingStation.Objects.crafting_station_tile);
     this.input = new CraftingStationItemHandler(9);
