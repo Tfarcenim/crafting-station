@@ -76,7 +76,7 @@ public class CraftingStationSlabBlock extends SlabBlock {
     if (state.getBlock() != newState.getBlock()) {
       TileEntity tileentity = worldIn.getTileEntity(pos);
       if (tileentity instanceof CraftingStationBlockEntity) {
-        dropItems((CraftingStationBlockEntity) tileentity, worldIn, pos);
+        dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
         worldIn.updateComparatorOutputLevel(pos, this);
       }
       super.onReplaced(state, worldIn, pos, newState, isMoving);

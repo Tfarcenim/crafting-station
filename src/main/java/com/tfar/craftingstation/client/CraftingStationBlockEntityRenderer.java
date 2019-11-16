@@ -20,10 +20,6 @@ import net.minecraft.util.Direction;
 
 public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<CraftingStationBlockEntity> {
 
-  private ItemRenderer itemRenderer;
-
-  private double[] north = new double[]{0.311, 1.0625,0.217};//.05 + +
-
   @Override
   public void render(CraftingStationBlockEntity blockEntity, double x, double y, double z, float partialTicks, int destroyStage) {
     if (this.rendererDispatcher.renderInfo != null && blockEntity.getDistanceSq(this.rendererDispatcher.renderInfo.getProjectedView().x, this.rendererDispatcher.renderInfo.getProjectedView().y, this.rendererDispatcher.renderInfo.getProjectedView().z) < 128d) {
@@ -42,9 +38,6 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
 
       double height = storedState.getBlock() == CraftingStation.Objects.crafting_station_slab ? storedState.get(SlabBlock.TYPE) == SlabType.BOTTOM ? .5 : 1 : 1;
 
-      if (this.itemRenderer == null) {
-        this.itemRenderer = new ItemRenderer(Minecraft.getInstance().textureManager, Minecraft.getInstance().getModelManager(), Minecraft.getInstance().getItemColors());
-      }
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3;j++) {
           ItemStack item = blockEntity.input.getStackInSlot(j + 3 * i);
@@ -55,24 +48,26 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           double offset2 = isBlock ? .125 : 0;
           final double offset3 = .3109;
           shiftY = height + offset;
+          double x1 = offset2 / 2 - offset - shift * i + 0.689;
+          double z1 = offset3 - offset2 / 2 + offset + shift * i;
           switch (facing) {
             case NORTH: {
               shiftX = offset3 + shift * j;
-              shiftZ = offset3 - offset2 / 2 + offset + shift * i;
+              shiftZ = z1;
               break;
             }
             case EAST: {
-              shiftX = offset2 / 2 - offset - shift * i + 0.689;
+              shiftX = x1;
               shiftZ = offset3 + shift * j;
               break;
             }
             case SOUTH: {
               shiftX = 0.689 - shift * j;
-              shiftZ = offset2 / 2 - offset - shift * i + 0.689;
+              shiftZ = x1;
               break;
             }
             case WEST: {
-              shiftX =  - offset2/2 + offset3 + offset + shift * i;
+              shiftX = z1;
               shiftZ =  0.689 - shift * j;
               break;
             }
@@ -82,21 +77,14 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           GlStateManager.enableBlend();
           GlStateManager.translated(x + shiftX, y + shiftY, z + shiftZ);
           //if(!isBlock)
-      //  GlStateManager.rotated(90, 1, 0, 0);
+        GlStateManager.rotated(90, 1, 0, 0);
           switch (facing){
-            case WEST:GlStateManager.rotated(90, 1, 0, 0);
-              GlStateManager.rotated(90, 0, 1, 0);
-              GlStateManager.rotated(90, 0, 1, 0);
+            case WEST: GlStateManager.rotated(90, 0, 0, 1);
             break;
-            case SOUTH:GlStateManager.rotated(90, 1,0, 0);
-            break;
-            case EAST:GlStateManager.rotated(90, 0, 0, 1);
-              GlStateManager.rotated(90, 0, 1, 0);
-              GlStateManager.rotated(270, 0, 0, 1);
+            case SOUTH: break;
+            case EAST: GlStateManager.rotated(270, 0, 0, 1);
               break;
-            case NORTH:
-              GlStateManager.rotated(90, 1, 0, 0);
-              GlStateManager.rotated(180, 0, 0, 1);
+            case NORTH: GlStateManager.rotated(180, 0, 0, 1);
             default://no
           }
           GlStateManager.scaled(blockScale, blockScale, blockScale);

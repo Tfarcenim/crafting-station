@@ -1,6 +1,5 @@
 package com.tfar.craftingstation.util;
 
-import com.tfar.craftingstation.CraftingStationBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.ItemStackHandler;

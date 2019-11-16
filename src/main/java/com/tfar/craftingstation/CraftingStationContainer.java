@@ -58,12 +58,12 @@ public class CraftingStationContainer extends Container {
   public int currentContainer;
 
 
-  public CraftingStationContainer(int id, PlayerInventory playerInventory, World world, BlockPos pos, PlayerEntity player) {
+  public CraftingStationContainer(int id, PlayerInventory inv, World world, BlockPos pos) {
     super(CraftingStation.Objects.crafting_station_container,id);
 
     this.world = world;
     this.pos = pos;
-    this.player = player;
+    this.player = inv.player;
     this.tileEntity = (CraftingStationBlockEntity) world.getTileEntity(pos);
     currentContainer = tileEntity.currentContainer;
     this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
@@ -111,7 +111,7 @@ public class CraftingStationContainer extends Container {
     if(!tileEntities.isEmpty()) {
       addSideContainerSlots(tileEntities, accessDir, -125, 17);
     }
-    addPlayerSlots(playerInventory);
+    addPlayerSlots(inv);
     //func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
 
 //    tileEntity.addListener(this);

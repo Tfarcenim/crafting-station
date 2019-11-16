@@ -4,12 +4,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.IWaterLoggable;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.IFluidState;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
@@ -31,10 +30,11 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Random;
 import java.util.stream.IntStream;
 
 public class CraftingStationBlock extends Block implements IWaterLoggable {
@@ -44,8 +44,6 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
   public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
 
-
-  public static final Random RANDOM = new Random();
 
   public CraftingStationBlock(Properties p_i48440_1_) {
     super(p_i48440_1_);
@@ -99,31 +97,15 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
     if (state.getBlock() != newState.getBlock()) {
       TileEntity tileentity = worldIn.getTileEntity(pos);
       if (tileentity instanceof CraftingStationBlockEntity) {
-        dropItems((CraftingStationBlockEntity) tileentity, worldIn, pos);
+        dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
         worldIn.updateComparatorOutputLevel(pos, this);
       }
       super.onReplaced(state, worldIn, pos, newState, isMoving);
     }
   }
 
-  public static void dropItems(CraftingStationBlockEntity table, World world, BlockPos pos) {
-    IntStream.range(0, table.input.getSlots()).mapToObj(i -> table.input.getStackInSlot(i)).filter(stack -> !stack.isEmpty()).forEach(stack -> spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack));
-  }
-
-  public static void spawnItemStack(World worldIn, double x, double y, double z, ItemStack stack) {
-    double d0 = EntityType.ITEM.getWidth();
-    double d1 = 1 - d0;
-    double d2 = d0 / 2;
-    double d3 = Math.floor(x) + RANDOM.nextDouble() * d1 + d2;
-    double d4 = Math.floor(y) + RANDOM.nextDouble() * d1;
-    double d5 = Math.floor(z) + RANDOM.nextDouble() * d1 + d2;
-
-    while (!stack.isEmpty()) {
-      ItemEntity itementity = new ItemEntity(worldIn, d3, d4, d5, stack.split(RANDOM.nextInt(21) + 10));
-      float f = 0.05F;
-      itementity.setMotion(RANDOM.nextGaussian() * f, RANDOM.nextGaussian() * f + 0.2, RANDOM.nextGaussian() * f);
-      worldIn.addEntity(itementity);
-    }
+  public static void dropItems(IItemHandler inv, World world, BlockPos pos) {
+    IntStream.range(0, inv.getSlots()).mapToObj(inv::getStackInSlot).filter(s -> !s.isEmpty()).forEach(stack -> InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack));
   }
 
   @Override

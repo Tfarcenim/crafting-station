@@ -2,6 +2,7 @@ package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
@@ -12,6 +13,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -40,10 +42,11 @@ public class CraftingStation {
 
   public CraftingStation() {
     // Register the setup method for modloading
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+    IEventBus iEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    iEventBus.addListener(this::setup);
+    iEventBus.addListener(this::enqueueIMC);
+    iEventBus.addListener(this::onConfigChanged);
     ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onConfigChanged);
   }
 
   private void setup(final FMLCommonSetupEvent event) {
@@ -70,7 +73,7 @@ public class CraftingStation {
     @SubscribeEvent
     public static void block(final RegistryEvent.Register<Block> event) {
       // register a new block here
-      Block.Properties wood = Block.Properties.create(Material.WOOD).hardnessAndResistance(2,2);
+      Block.Properties wood = Block.Properties.create(Material.WOOD).hardnessAndResistance(2,2).sound(SoundType.WOOD);
       register(new CraftingStationBlock(wood),"crafting_station",event.getRegistry());
       register(new CraftingStationSlabBlock(wood),"crafting_station_slab",event.getRegistry());
 
@@ -87,7 +90,7 @@ public class CraftingStation {
     @SubscribeEvent
     public static void container(final RegistryEvent.Register<ContainerType<?>> event){
       register(IForgeContainerType.create((windowId, inv, data) ->
-              new CraftingStationContainer(windowId, inv, inv.player.world, data.readBlockPos(), inv.player)),"crafting_station_container",event.getRegistry());
+              new CraftingStationContainer(windowId, inv, inv.player.world, data.readBlockPos())),"crafting_station_container",event.getRegistry());
 
     }
 

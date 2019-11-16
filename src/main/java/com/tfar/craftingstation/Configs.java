@@ -30,12 +30,13 @@ public class Configs {
     ClientConfig(ForgeConfigSpec.Builder builder) {
       builder.push("client");
       showItemsInTable = builder
-              .comment("Always show armor bar even if empty?")
-              .translation("text.overloadedarmorbar.config.alwaysshowarmorbar")
-              .define("Always show bar", false);
+              .comment("Display Items in Table?")
+              .translation("text.craftingstation.config.displayitemsintable")
+              .define("display items in table", true);
       builder.pop();
     }
   }
+
   public static class ServerConfig {
     static ForgeConfigSpec.ConfigValue<List<? extends String>> blockEntityTypeStrings;
     public static final Set<TileEntityType<?>> blockentitytypes = new HashSet<>();
