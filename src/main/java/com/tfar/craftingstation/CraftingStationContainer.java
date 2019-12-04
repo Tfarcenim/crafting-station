@@ -43,7 +43,6 @@ public class CraftingStationContainer extends Container {
   public final CraftingInventoryPersistant craftMatrix;
   public final CraftResultInventory craftResult = new CraftResultInventory();
   public final World world;
-  private final BlockPos pos;
   private final PlayerEntity player;
   public final CraftingStationBlockEntity tileEntity;
   public IRecipe<CraftingInventory> lastRecipe;
@@ -62,7 +61,6 @@ public class CraftingStationContainer extends Container {
     super(CraftingStation.Objects.crafting_station_container,id);
 
     this.world = world;
-    this.pos = pos;
     this.player = inv.player;
     this.tileEntity = (CraftingStationBlockEntity) world.getTileEntity(pos);
     currentContainer = tileEntity.currentContainer;
@@ -112,9 +110,7 @@ public class CraftingStationContainer extends Container {
       addSideContainerSlots(tileEntities, accessDir, -125, 17);
     }
     addPlayerSlots(inv);
-    //func_217066_a(this.windowId,world, player, craftMatrix, craftResult);
-
-//    tileEntity.addListener(this);
+    onCraftMatrixChanged(craftMatrix);
   }
 
   protected boolean isBlacklisted(TileEntityType<?> blockEntityType){
@@ -322,7 +318,7 @@ public class CraftingStationContainer extends Container {
             .collect(Collectors.toList());
   }
 
-  private <T extends TileEntity> boolean hasSameContainerOpen(CraftingStationContainer container, PlayerEntity playerToCheck) {
+  private boolean hasSameContainerOpen(CraftingStationContainer container, PlayerEntity playerToCheck) {
     return playerToCheck instanceof ServerPlayerEntity &&
             playerToCheck.openContainer.getClass().isAssignableFrom(container.getClass()) &&
             this.sameGui((CraftingStationContainer) playerToCheck.openContainer);
@@ -560,10 +556,6 @@ public class CraftingStationContainer extends Container {
   }
 
   public NonNullList<ItemStack> getRemainingItems() {
-    if(lastRecipe != null && lastRecipe.matches(craftMatrix, world)) {
-      return lastRecipe.getRemainingItems(craftMatrix);
-    }
-    return craftMatrix.getStackList();
+    return lastRecipe != null && lastRecipe.matches(craftMatrix, world) ? lastRecipe.getRemainingItems(craftMatrix) : craftMatrix.getStackList();
   }
-
 }
