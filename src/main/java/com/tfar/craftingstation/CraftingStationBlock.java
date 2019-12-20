@@ -17,10 +17,7 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
@@ -31,7 +28,6 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,7 +59,7 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   @Override
-  public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
+  public ActionResultType func_225533_a_(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
     if (!world.isRemote) {
       TileEntity tileEntity = world.getTileEntity(pos);
       if (tileEntity instanceof INamedContainerProvider) {
@@ -72,7 +68,7 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
         throw new IllegalStateException("Our named container provider is missing!");
       }
     }
-    return true;
+    return ActionResultType.SUCCESS;
   }
 
   @Override

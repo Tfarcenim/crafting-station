@@ -130,12 +130,11 @@ public class CraftingStationContainer extends Container {
   }
 
   private void addSideContainerSlots(List<TileEntity> tes,Direction dir ,int xPos, int yPos){
-    hasSideContainers = true;
     for (int i = 0; i < tes.size(); i++) {
       TileEntity te = tes.get(i);
       containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider)te).getDisplayName() : new StringTextComponent("placeholder"));//inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
       final int number = i;
-      te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent((h) -> {
+      te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
         int size = h.getSlots();
         this.subContainerSize += size;
         int offsetx = needsScroll() ? 0 : 8;
@@ -150,6 +149,7 @@ public class CraftingStationContainer extends Container {
           }
       });
     }
+    hasSideContainers = true;
   }
 
   public void hideSlot(Slot slot){

@@ -1,9 +1,9 @@
 package com.tfar.craftingstation.client;
 
 import com.tfar.craftingstation.CraftingStation;
-import com.tfar.craftingstation.CraftingStationBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -18,6 +18,6 @@ public class ClientStuffs {
   @SubscribeEvent
   public static void doClientStuff(final FMLClientSetupEvent event) {
     ScreenManager.registerFactory(CraftingStation.Objects.crafting_station_container, CraftingStationScreen::new);
-    ClientRegistry.bindTileEntitySpecialRenderer(CraftingStationBlockEntity.class, new CraftingStationBlockEntityRenderer());
+    ClientRegistry.bindTileEntityRenderer(CraftingStation.Objects.crafting_station_tile, new CraftingStationBlockEntityRenderer(TileEntityRendererDispatcher.instance));
   }
 }

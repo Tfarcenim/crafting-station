@@ -1,6 +1,6 @@
 package com.tfar.craftingstation.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
 import com.tfar.craftingstation.network.C2SClearPacket;
@@ -68,7 +68,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
-    this.font.drawString(this.title.getFormattedText(), 28.0F, 6.0F, 4210752);
+    this.font.drawString(this.title.getFormattedText(), 28, 6, 4210752);
     this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8.0F, (float) (this.ySize - 96 + 2), 4210752);
     if (container.hasSideContainers){
       this.font.drawString(container.containerNames.get(container.currentContainer).getFormattedText(),-120,6,4210752);
@@ -77,7 +77,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
 
   @Override
   protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     minecraft.getTextureManager().bindTexture(CRAFTING_TABLE_GUI_TEXTURES);
     blit(guiLeft, guiTop, 0, 0, xSize, ySize);
     int i = this.guiLeft;

@@ -13,10 +13,7 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
@@ -42,7 +39,7 @@ public class CraftingStationSlabBlock extends SlabBlock {
   }
 
   @Override
-  public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
+  public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
     if (!world.isRemote) {
       INamedContainerProvider iNamedContainerProvider = getContainer(state,world,pos);
       if (iNamedContainerProvider != null) {
@@ -51,7 +48,7 @@ public class CraftingStationSlabBlock extends SlabBlock {
         throw new IllegalStateException("Our named container provider is missing!");
       }
     }
-    return true;
+    return ActionResultType.SUCCESS;
   }
 
   @Override
