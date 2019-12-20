@@ -54,8 +54,8 @@ public class TabButton extends Button{
         final int itemX = x + 3;
         final int itemY = y + 3;
 
+        GlStateManager.pushMatrix();
         mc.getItemRenderer().renderItemAndEffectIntoGUI(stack, itemX, itemY);
-
         mc.getItemRenderer().renderItemOverlays(mc.fontRenderer, stack, itemX, itemY);
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableRescaleNormal();
