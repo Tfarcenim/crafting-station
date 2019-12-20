@@ -1,6 +1,6 @@
 package com.tfar.craftingstation.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
 
@@ -17,18 +17,16 @@ public class ClearButton extends Button {
     if (visible) {
       Minecraft minecraft = Minecraft.getInstance();
       minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
-
-
-      GlStateManager.color3f(1, 0, 0);
-
+      
+      RenderSystem.color3f(1, 0, 0);
 
       isHovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
 
       int i = getYImage(isHovered);
 
-      GlStateManager.enableBlend();
-      GlStateManager.blendFuncSeparate(770, 771, 1, 0);
-      GlStateManager.blendFunc(770, 771);
+      RenderSystem.enableBlend();
+      RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+      RenderSystem.blendFunc(770, 771);
 
       int halfwidth1 = this.width / 2;
       int halfwidth2 = this.width - halfwidth1;
