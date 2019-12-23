@@ -68,8 +68,6 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
       TileEntity tileEntity = world.getTileEntity(pos);
       if (tileEntity instanceof INamedContainerProvider) {
         NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tileEntity, tileEntity.getPos());
-      } else {
-        throw new IllegalStateException("Our named container provider is missing!");
       }
     }
     return true;
