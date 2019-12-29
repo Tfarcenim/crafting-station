@@ -44,8 +44,6 @@ public class CraftingStationSlabBlock extends SlabBlock {
       INamedContainerProvider iNamedContainerProvider = getContainer(state,world,pos);
       if (iNamedContainerProvider != null) {
         NetworkHooks.openGui((ServerPlayerEntity) player, iNamedContainerProvider, pos);
-      } else {
-        throw new IllegalStateException("Our named container provider is missing!");
       }
     }
     return ActionResultType.SUCCESS;

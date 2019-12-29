@@ -33,3 +33,9 @@ description='''
 Simple standalone crafting station
 
 '''
+[[dependencies.craftingstation]]
+    modId="forge"
+    mandatory=true
+    versionRange="[30.0.17,)"
+    ordering="NONE"
+    side="BOTH"
