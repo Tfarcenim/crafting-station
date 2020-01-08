@@ -93,7 +93,7 @@ dependencies {
     // at runtime, use the full JEI jar
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 
-    //compile fg.deobf("curse.maven:better-crates:2820783")
+    compile fg.deobf("curse.maven:storage-drawers:2788023")
 
     //compile fg.deobf("curse.maven:corail-tombstone:2815790")
 

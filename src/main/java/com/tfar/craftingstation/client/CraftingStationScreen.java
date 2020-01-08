@@ -3,6 +3,7 @@ package com.tfar.craftingstation.client;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
+import com.tfar.craftingstation.network.C2SChangeContainerPacket;
 import com.tfar.craftingstation.network.C2SClearPacket;
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -57,7 +58,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   public void changeContainer(int container){
-    this.container.changeContainer(container);
+    PacketHandler.INSTANCE.sendToServer(new C2SChangeContainerPacket(container));
   }
 
   @Override

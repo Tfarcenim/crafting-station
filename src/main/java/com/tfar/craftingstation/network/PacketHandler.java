@@ -17,9 +17,19 @@ public class PacketHandler {
             S2CLastRecipePacket::new,
             S2CLastRecipePacket::handle);
 
-    INSTANCE.registerMessage(4, C2SClearPacket.class,
+    INSTANCE.registerMessage(1, C2SClearPacket.class,
             (cMessagePickBlock, buffer) -> {},
             buffer -> new C2SClearPacket(),
             C2SClearPacket::handle);
+
+    INSTANCE.registerMessage(2, C2SChangeContainerPacket.class,
+            C2SChangeContainerPacket::encode,
+            C2SChangeContainerPacket::new,
+            C2SChangeContainerPacket::handle);
+
+    INSTANCE.registerMessage(3, S2CChangeContainerPacket.class,
+            S2CChangeContainerPacket::encode,
+            S2CChangeContainerPacket::new,
+            S2CChangeContainerPacket::handle);
   }
 }
