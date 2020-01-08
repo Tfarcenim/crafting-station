@@ -132,13 +132,13 @@ public class CraftingStationContainer extends Container {
   private void addSideContainerSlots(List<TileEntity> tes,Direction dir ,int xPos, int yPos){
     for (int i = 0; i < tes.size(); i++) {
       TileEntity te = tes.get(i);
-      containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider)te).getDisplayName() : new StringTextComponent("placeholder"));//inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
+      containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider)te).getDisplayName() : new TranslationTextComponent(te.getBlockState().getBlock().getTranslationKey()));
       final int number = i;
       te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
         int size = h.getSlots();
         this.subContainerSize += size;
         int offsetx = needsScroll() ? 0 : 8;
-        for (int y = 0; y < (int) Math.ceil((double)size / 6); y++)
+        for (int y = 0; y < (int) Math.ceil(size / 6d); y++)
           for (int x = 0; x < 6; x++) {
             int index = 6 * y + x;
             if (index >= size) continue;
