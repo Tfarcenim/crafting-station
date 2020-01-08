@@ -12,16 +12,18 @@ import net.minecraft.util.ResourceLocation;
 
 import static com.tfar.craftingstation.client.ClientStuffs.mc;
 
-public class TabButton extends Button{
+public class TabButton extends Button {
 
   public final int index;
   public final ItemStack stack;
+
   public TabButton(int x, int y, int widthIn, int heightIn, Button.IPressable callback, int index, ItemStack stack) {
-    super(x, y, widthIn, heightIn,"", callback);
+    super(x, y, widthIn, heightIn, "", callback);
     this.index = index;
     this.stack = stack;
   }
-  public static final ResourceLocation TAB = new ResourceLocation(CraftingStation.MODID,"textures/gui/tabs.png");
+
+  public static final ResourceLocation TAB = new ResourceLocation(CraftingStation.MODID, "textures/gui/tabs.png");
 
 
   @Override
@@ -38,10 +40,10 @@ public class TabButton extends Button{
       GlStateManager.enableBlend();
       GlStateManager.blendFuncSeparate(770, 771, 1, 0);
       GlStateManager.blendFunc(770, 771);
-      if (((CraftingStationContainer)mc.player.openContainer).currentContainer == index)
-      blit(x, y, 0, height, width, height,width,height * 2);
+      if (((CraftingStationContainer) mc.player.openContainer).currentContainer == index)
+        blit(x, y, 0, height, width, height, width, height * 2);
 
-      else      blit(x, y, 0, 0, width, height,width,height * 2);
+      else blit(x, y, 0, 0, width, height, width, height * 2);
       if (!stack.isEmpty()) {
         // String s1 = s.getUnformattedComponentText();
         //String slot = String.valueOf(Utils.getSelectedSlot(bag));
@@ -62,7 +64,6 @@ public class TabButton extends Button{
         GlStateManager.popMatrix();
       }
     }
-
-    }
   }
+}
 
