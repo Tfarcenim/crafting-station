@@ -23,7 +23,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -134,9 +133,11 @@ public class CraftingStationContainer extends Container {
     hasSideContainers = true;
     for (int i = 0; i < tes.size(); i++) {
       TileEntity te = tes.get(i);
-      containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider)te).getDisplayName() : new StringTextComponent("placeholder"));//inventoryTE instanceof INamedContainerProvider ? ((INamedContainerProvider) inventoryTE).getDisplayName() : playerInventory.getName();
+      containerNames.add(te instanceof INamedContainerProvider ?
+              ((INamedContainerProvider)te).getDisplayName() :
+              new TranslationTextComponent(te.getBlockState().getBlock().getTranslationKey()));
       final int number = i;
-      te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent((h) -> {
+      te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir).ifPresent(h -> {
         int size = h.getSlots();
         this.subContainerSize += size;
         int offsetx = needsScroll() ? 0 : 8;
