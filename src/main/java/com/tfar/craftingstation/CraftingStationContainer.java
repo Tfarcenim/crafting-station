@@ -110,7 +110,7 @@ public class CraftingStationContainer extends Container {
     }
     addPlayerSlots(inv);
     onCraftMatrixChanged(craftMatrix);
-    changeContainer(currentContainer);
+    if (hasSideContainers)changeContainer(currentContainer);
   }
 
   protected boolean isBlacklisted(TileEntityType<?> blockEntityType){
