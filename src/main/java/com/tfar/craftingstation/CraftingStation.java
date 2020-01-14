@@ -2,6 +2,7 @@ package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.inventory.container.ContainerType;
@@ -73,7 +74,7 @@ public class CraftingStation {
     @SubscribeEvent
     public static void block(final RegistryEvent.Register<Block> event) {
       // register a new block here
-      Block.Properties wood = Block.Properties.create(Material.WOOD).hardnessAndResistance(2,2).sound(SoundType.WOOD);
+      Block.Properties wood = Block.Properties.from(Blocks.CRAFTING_TABLE);
       register(new CraftingStationBlock(wood),"crafting_station",event.getRegistry());
       register(new CraftingStationSlabBlock(wood),"crafting_station_slab",event.getRegistry());
 

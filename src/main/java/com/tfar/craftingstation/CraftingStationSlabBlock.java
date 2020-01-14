@@ -39,7 +39,7 @@ public class CraftingStationSlabBlock extends SlabBlock {
   }
 
   @Override
-  public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+  public ActionResultType onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
     if (!world.isRemote) {
       INamedContainerProvider iNamedContainerProvider = getContainer(state,world,pos);
       if (iNamedContainerProvider != null) {

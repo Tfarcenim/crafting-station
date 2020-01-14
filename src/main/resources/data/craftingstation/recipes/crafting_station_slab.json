@@ -7,6 +7,7 @@
     }
   ],
   "result": {
-    "item": "craftingstation:crafting_station_slab"
+    "item": "craftingstation:crafting_station_slab",
+    "count": 2
   }
 }

@@ -59,7 +59,7 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   @Override
-  public ActionResultType func_225533_a_(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+  public ActionResultType onUse(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
     if (!world.isRemote) {
       TileEntity tileEntity = world.getTileEntity(pos);
       if (tileEntity instanceof INamedContainerProvider) {

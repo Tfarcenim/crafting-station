@@ -53,7 +53,7 @@ public class Configs {
   public static void onConfigChanged(ModConfig.ModConfigEvent e){
     if (e.getConfig().getModId().equals(CraftingStation.MODID)){
       ServerConfig.blockentitytypes.clear();
-      ServerConfig.blockEntityTypeStrings.get().forEach((blockEntityType) -> ServerConfig.blockentitytypes.add(ForgeRegistries.TILE_ENTITIES.getValue(new ResourceLocation(blockEntityType))));
+      ServerConfig.blockEntityTypeStrings.get().forEach(blockEntityType -> ServerConfig.blockentitytypes.add(ForgeRegistries.TILE_ENTITIES.getValue(new ResourceLocation(blockEntityType))));
     }
   }
 }

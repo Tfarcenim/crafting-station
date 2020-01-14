@@ -12,4 +12,8 @@ public class CraftingStationItemHandler extends ItemStackHandler {
   public NonNullList<ItemStack> getContents(){
     return stacks;
   }
+
+  public boolean isEmpty(){
+    return getContents().stream().allMatch(ItemStack::isEmpty);
+  }
 }
