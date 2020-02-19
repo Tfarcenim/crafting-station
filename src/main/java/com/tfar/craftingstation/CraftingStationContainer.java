@@ -30,6 +30,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -84,7 +85,8 @@ public class CraftingStationContainer extends Container {
         }
 
         // try internal access first
-        if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).isPresent()){
+        if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)
+                .filter(IItemHandlerModifiable.class::isInstance).isPresent()){
           tileEntities.add(te);
           blocks.add(new ItemStack(world.getBlockState(neighbor).getBlock()));
         }
