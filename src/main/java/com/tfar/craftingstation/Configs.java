@@ -1,27 +1,15 @@
 package com.tfar.craftingstation;
 
-import com.google.common.collect.Lists;
+import net.minecraft.tags.Tag;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import tfar.extratags.api.tagtypes.BlockEntityTypeTags;
 
 public class Configs {
 
-  public static final ServerConfig SERVER;
-  public static final ForgeConfigSpec SERVER_SPEC;
-
-  static {
-    final Pair<ServerConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ServerConfig::new);
-    SERVER_SPEC = specPair.getRight();
-    SERVER = specPair.getLeft();
-  }
+	public static final Tag<TileEntityType<?>>  blacklisted
+					= BlockEntityTypeTags.makeWrapperTag(new ResourceLocation(CraftingStation.MODID,"blacklisted"));
 
   public static class ClientConfig {
 
@@ -34,26 +22,6 @@ public class Configs {
               .translation("text.craftingstation.config.displayitemsintable")
               .define("display items in table", true);
       builder.pop();
-    }
-  }
-
-  public static class ServerConfig {
-    static ForgeConfigSpec.ConfigValue<List<? extends String>> blockEntityTypeStrings;
-    public static final Set<TileEntityType<?>> blockentitytypes = new HashSet<>();
-
-    ServerConfig(ForgeConfigSpec.Builder builder) {
-
-      builder.push("server");
-      blockEntityTypeStrings = builder
-              .comment("Blacklisted Block Entities")
-              .translation("text.craftingstation.config.blacklistedblockentities")
-              .defineList("blacklisted block entities", Lists.newArrayList(), String.class::isInstance);
-    }
-  }
-  public static void onConfigChanged(ModConfig.ModConfigEvent e){
-    if (e.getConfig().getModId().equals(CraftingStation.MODID)){
-      ServerConfig.blockentitytypes.clear();
-      ServerConfig.blockEntityTypeStrings.get().forEach(blockEntityType -> ServerConfig.blockentitytypes.add(ForgeRegistries.TILE_ENTITIES.getValue(new ResourceLocation(blockEntityType))));
     }
   }
 }

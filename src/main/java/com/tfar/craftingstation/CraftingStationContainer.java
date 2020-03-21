@@ -79,7 +79,7 @@ public class CraftingStationContainer extends Container {
       TileEntity te = world.getTileEntity(neighbor);
       if(te != null && !(te instanceof CraftingStationBlockEntity)) {
         // if blacklisted, skip checks entirely
-        if(isBlacklisted(te.getType()))
+        if(Configs.blacklisted.contains(te.getType()))
           continue;
         if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
           continue;
@@ -113,10 +113,6 @@ public class CraftingStationContainer extends Container {
     addPlayerSlots(inv);
     onCraftMatrixChanged(craftMatrix);
     if (hasSideContainers)changeContainer(currentContainer);
-  }
-
-  protected boolean isBlacklisted(TileEntityType<?> blockEntityType){
-    return Configs.ServerConfig.blockentitytypes.contains(blockEntityType);
   }
 
   private void addOwnSlots() {

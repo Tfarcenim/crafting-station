@@ -46,8 +46,7 @@ public class CraftingStation {
     IEventBus iEventBus = FMLJavaModLoadingContext.get().getModEventBus();
     iEventBus.addListener(this::setup);
     iEventBus.addListener(this::enqueueIMC);
-    iEventBus.addListener(this::onConfigChanged);
-    ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
+    //ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
   }
 
   private void setup(final FMLCommonSetupEvent event) {
@@ -61,10 +60,6 @@ public class CraftingStation {
       tagCompound.putString("AlignToGrid", "left");
       return tagCompound;
     });
-  }
-
-  private void onConfigChanged(ModConfig.ModConfigEvent e){
-    Configs.onConfigChanged(e);
   }
 
   // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
