@@ -18,7 +18,7 @@ public class PacketHandler {
             S2CLastRecipePacket::handle);
 
     INSTANCE.registerMessage(4, C2SClearPacket.class,
-            (cMessagePickBlock, buffer) -> {},
+            (c2SClearPacket, buffer) -> {},
             buffer -> new C2SClearPacket(),
             C2SClearPacket::handle);
   }
