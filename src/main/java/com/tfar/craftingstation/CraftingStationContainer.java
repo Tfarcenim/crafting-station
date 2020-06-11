@@ -47,7 +47,7 @@ public class CraftingStationContainer extends Container {
   public int subContainerSize = 0;
 
 
-  public CraftingStationContainer(InventoryPlayer InventoryPlayer, World world, BlockPos pos, EntityPlayer player) {
+  public CraftingStationContainer(InventoryPlayer inv, World world, BlockPos pos, EntityPlayer player) {
     this.world = world;
     this.player = player;
     this.tileEntity = (CraftingStationTile) world.getTileEntity(pos);
@@ -68,13 +68,11 @@ public class CraftingStationContainer extends Container {
         if(isBlacklisted(te) || te instanceof IInventory && !((IInventory)te).isUsableByPlayer(player)) {
           continue;
         }
-//        if(te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
- //         continue;
-  //      }
 
         // try internal access first
         if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,null)) {
-          if (te instanceof TileEntityChest)this.chestPosition = neighbor;
+          if(te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null) instanceof IItemHandlerModifiable)
+            if (te instanceof TileEntityChest)this.chestPosition = neighbor;
             inventoryTE = te;
         }
         // try sided access else
@@ -91,10 +89,10 @@ public class CraftingStationContainer extends Container {
     if(inventoryTE != null) {
       this.hasSideContainer = true;
       addSideContainerSlots(inventoryTE, accessDir, -125, 18);
-      containerName = inventoryTE instanceof IInteractionObject ? ((IInteractionObject) inventoryTE).getDisplayName() : InventoryPlayer.getDisplayName();
+      containerName = inventoryTE instanceof IInteractionObject ? ((IInteractionObject) inventoryTE).getDisplayName() : inv.getDisplayName();
     //  scrollTo(0);
     }
-    addPlayerSlots(InventoryPlayer);
+    addPlayerSlots(inv);
     slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
 
   }
@@ -127,11 +125,6 @@ public class CraftingStationContainer extends Container {
     craftMatrix.onCraftMatrixChanged();
   }
 
-  @Override
-  public void onContainerClosed(EntityPlayer player) {
-    super.onContainerClosed(player);
-  }
-
   private void addOwnSlots() {
     // crafting result
     this.addSlotToContainer(new SlotFastCraft(this, player, this.craftMatrix, this.craftResult, SLOT_RESULT, 124, 35));
@@ -139,7 +132,7 @@ public class CraftingStationContainer extends Container {
     // crafting grid
     for (int y = 0; y < 3; y++) {
       for (int x = 0; x < 3; x++) {
-        addSlotToContainer(new Slot(craftMatrix, x + 3 * y, 30 + 18 * x, 17 + 18 * y));
+        addSlotToContainer(new Slot(craftMatrix, x + 3 * y, 130 + 18 * x, 17 + 18 * y));
       }
     }
   }
