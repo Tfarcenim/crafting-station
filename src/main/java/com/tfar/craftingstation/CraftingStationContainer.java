@@ -43,19 +43,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CraftingStationContainer extends Container {
-    private static final Method doubleSlabsGetTileEntity;
+    private static final Method GET_TILE_ENTITY_METHOD;
 
     static {
         Method doubleSlabsGetTileEntity1 = null;
         if (ModList.get().isLoaded("doubleslabs")) {
             try {
-                Class<?> doubleSlabsFlags = Class.forName("cjminecraft.doubleslabs.Flags");
+                Class<?> doubleSlabsFlags = Class.forName("cjminecraft.doubleslabs.api.Flags");
                 doubleSlabsGetTileEntity1 = doubleSlabsFlags.getDeclaredMethod("getTileEntityAtPos", BlockPos.class, IBlockReader.class);
             } catch (ClassNotFoundException | NoSuchMethodException e) {
+                e.printStackTrace();
                 doubleSlabsGetTileEntity1 = null;
             }
         }
-        doubleSlabsGetTileEntity = doubleSlabsGetTileEntity1;
+        GET_TILE_ENTITY_METHOD = doubleSlabsGetTileEntity1;
     }
 
     public final CraftingInventoryPersistant craftMatrix;
@@ -76,7 +77,7 @@ public class CraftingStationContainer extends Container {
 
     private static TileEntity getTileEntityAtPos(BlockPos pos, World world) {
         try {
-            return doubleSlabsGetTileEntity != null ? (TileEntity) doubleSlabsGetTileEntity.invoke(null, pos, world) : world.getTileEntity(pos);
+            return GET_TILE_ENTITY_METHOD != null ? (TileEntity) GET_TILE_ENTITY_METHOD.invoke(null, pos, world) : world.getTileEntity(pos);
         } catch (IllegalAccessException | InvocationTargetException ignored) {
             return world.getTileEntity(pos);
         }
