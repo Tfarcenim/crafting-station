@@ -1,0 +1,7 @@
+{
+  "block.craftingstation.crafting_station": "Верстак инженера",
+  "block.craftingstation.crafting_station_slab": "Верстак-плита инженера",
+  "title.crafting_station": "Верстак инженера",
+  "text.crafting_station.error": "Неправильный рецепт %s найден, подробности смотрите в журнале"
+
+}
