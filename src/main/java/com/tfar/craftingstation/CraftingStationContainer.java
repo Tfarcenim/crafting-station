@@ -105,7 +105,7 @@ public class CraftingStationContainer extends Container {
             TileEntity te = world.getTileEntity(neighbor);
             if (te != null && !(te instanceof CraftingStationBlockEntity)) {
                 // if blacklisted, skip checks entirely
-                if (Configs.blacklisted.contains(te.getType()))
+                if (CraftingStation.blacklisted.contains(te.getType()))
                     continue;
                 if (te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
                     continue;
@@ -148,7 +148,7 @@ public class CraftingStationContainer extends Container {
             } catch (Exception e) {
                 CraftingStation.LOGGER.error("Bad recipe found: " + recipe.getId().toString());
                 CraftingStation.LOGGER.error(e.getMessage());
-                player.sendMessage(new TranslationTextComponent("text.crafting_station.error", recipe.getId().toString()).applyTextStyle(TextFormatting.DARK_RED));
+                player.sendMessage(new TranslationTextComponent("text.crafting_station.error", recipe.getId().toString()).mergeStyle(TextFormatting.DARK_RED),Util.DUMMY_UUID);
                 return null;
             }
         }).findFirst().orElse(null);

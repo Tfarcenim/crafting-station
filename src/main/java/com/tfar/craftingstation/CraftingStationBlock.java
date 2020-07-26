@@ -6,12 +6,11 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -59,7 +58,7 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   @Override
-  public ActionResultType onUse(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+  public ActionResultType onBlockActivated(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
     if (!world.isRemote) {
       TileEntity tileEntity = world.getTileEntity(pos);
       if (tileEntity instanceof INamedContainerProvider) {
@@ -124,7 +123,7 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   @Nonnull
-  public IFluidState getFluidState(BlockState p_204507_1_) {
+  public FluidState getFluidState(BlockState p_204507_1_) {
     return p_204507_1_.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(p_204507_1_);
   }
 

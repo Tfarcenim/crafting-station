@@ -1,5 +1,6 @@
 package com.tfar.craftingstation.client;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
@@ -61,25 +62,23 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   @Override
-  public void render(int mouseX, int mouseY, float partialTicks) {
-    renderBackground();
-    super.render(mouseX, mouseY, partialTicks);
-    renderHoveredToolTip(mouseX, mouseY);
+  public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
+    renderBackground(stack);
+    super.render(stack,mouseX, mouseY, partialTicks);
+    func_230459_a_(stack,mouseX, mouseY);
   }
 
-  protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
-    this.font.drawString(this.title.getFormattedText(), 28, 6, 4210752);
-    this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8.0F, (float) (this.ySize - 96 + 2), 4210752);
+  protected void drawGuiContainerForegroundLayer(MatrixStack stack,int p_146979_1_, int p_146979_2_) {
     if (container.hasSideContainers){
-      this.font.drawString(container.containerNames.get(container.currentContainer).getFormattedText(),-120,6,4210752);
+      this.font.drawString(stack,container.containerNames.get(container.currentContainer).getString(),-120,6,4210752);
     }
   }
 
   @Override
-  protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+  protected void drawGuiContainerBackgroundLayer(MatrixStack stack,float partialTicks, int mouseX, int mouseY) {
     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     minecraft.getTextureManager().bindTexture(CRAFTING_TABLE_GUI_TEXTURES);
-    blit(guiLeft, guiTop, 0, 0, xSize, ySize);
+    blit(stack,guiLeft, guiTop, 0, 0, xSize, ySize);
     int i = this.guiLeft;
 
     int i1 = i - 16;
@@ -89,7 +88,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     if (this.container.hasSideContainers) {
       //draw background
       this.minecraft.getTextureManager().bindTexture(SECONDARY_GUI_TEXTURE);
-      this.blit(i - 130, j, 0, 0, this.xSize, this.ySize + 18);
+      this.blit(stack,i - 130, j, 0, 0, this.xSize, this.ySize + 18);
 
       this.minecraft.getTextureManager().bindTexture(SCROLLBAR_BACKGROUND_AND_TAB);
       int totalSlots = this.container.getSlotCount();
@@ -103,18 +102,18 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       for (int i3 = 0; i3 < slotsToDraw; i3++) {
         int j1 = i3 % 6;
         int k1 = i3 / 6;
-        blit(i + j1 * 18 + offset, 18 * k1 + j + 16, 8, 17, 18, 18);
+        blit(stack,i + j1 * 18 + offset, 18 * k1 + j + 16, 8, 17, 18, 18);
       }
 
       if (this.hasScrollbar()) {
-        blit(i - 17, j + 16, 174, 17, 14, 100);
-        blit(i - 17, j + 67, 174, 18, 14, 111);
+        blit(stack,i - 17, j + 16, 174, 17, 14, 100);
+        blit(stack,i - 17, j + 67, 174, 18, 14, 111);
         this.minecraft.getTextureManager().bindTexture(SCROLLBAR_AND_TAB);
         int k = (int) (j + 17 + 145 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)
-          blit(i - 16, k, 244, 0, 12, 15);
-        else blit(i - 16, k, 244 - 12, 0, 12, 15);
+          blit(stack,i - 16, k, 244, 0, 12, 15);
+        else blit(stack,i - 16, k, 244 - 12, 0, 12, 15);
       }
 
     }

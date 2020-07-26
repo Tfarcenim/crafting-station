@@ -8,7 +8,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -16,6 +15,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.SlabType;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<CraftingStationBlockEntity> {
 
@@ -25,14 +25,13 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
 
   @Override
   public void render(CraftingStationBlockEntity blockEntity, float var2, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int light, int var6) {
-    if (this.dispatcher.renderInfo != null && blockEntity.getDistanceSq(this.dispatcher.renderInfo.getProjectedView().x,
-            this.dispatcher.renderInfo.getProjectedView().y, this.dispatcher.renderInfo.getProjectedView().z) < 128d) {
+    if (this.renderDispatcher.renderInfo != null) {
 
       if (blockEntity.input.isEmpty())return;
 
       BlockState state = blockEntity.getBlockState();
 
-      double height = state.has(SlabBlock.TYPE) ? state.get(SlabBlock.TYPE) == SlabType.BOTTOM ?.5:1:1;
+      double height = state.hasProperty(SlabBlock.TYPE) ? state.get(SlabBlock.TYPE) == SlabType.BOTTOM ?.5:1:1;
 
       final double spacing = .189;
       final double offset = .31;
@@ -47,13 +46,13 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           matrixStack.push();
           //translate x,y,z
           matrixStack.translate(spacing * i +offset, 0, spacing * j +offset);
-          matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(0));
+          matrixStack.rotate(Vector3f.YP.rotation(0));
           //scale x,y,z
           matrixStack.scale(0.25F, 0.25F, 0.25F);
 
-          int lightAbove = WorldRenderer.getLightmapCoordinates(blockEntity.getWorld(), blockEntity.getPos().up());
+          int lightAbove = WorldRenderer.getCombinedLight(blockEntity.getWorld(), blockEntity.getPos().up());
           Minecraft.getInstance().getItemRenderer().renderItem(item, ItemCameraTransforms.TransformType.FIXED,
-                  lightAbove, OverlayTexture.DEFAULT_UV, matrixStack, iRenderTypeBuffer);
+                  lightAbove, OverlayTexture.NO_OVERLAY, matrixStack, iRenderTypeBuffer);
           //popmatrix
           matrixStack.pop();
         }

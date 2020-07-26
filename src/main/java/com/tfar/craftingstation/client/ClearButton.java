@@ -1,19 +1,21 @@
 package com.tfar.craftingstation.client;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.StringTextComponent;
 
 public class ClearButton extends Button {
 
 
   public ClearButton(int x, int y, int widthIn, int heightIn, IPressable callback) {
-    super(x, y, widthIn, heightIn,"", callback);
+    super(x, y, widthIn, heightIn,new StringTextComponent(""), callback);
   }
 
 
   @Override
-  public void render(int mouseX, int mouseY, float partialTicks) {
+  public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
     if (visible) {
       Minecraft minecraft = Minecraft.getInstance();
       minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
@@ -32,14 +34,14 @@ public class ClearButton extends Button {
       int halfwidth2 = this.width - halfwidth1;
       int halfheight1 = this.height / 2;
       int halfheight2 = this.height - halfheight1;
-      blit(x, y, 0,
+      blit(stack,x, y, 0,
               46 + i * 20, halfwidth1, halfheight1);
-      blit(x + halfwidth1, y, 200 - halfwidth2,
+      blit(stack,x + halfwidth1, y, 200 - halfwidth2,
               46 + i * 20, halfwidth2, halfheight1);
 
-      blit(x, y + halfheight1,
+      blit(stack,x, y + halfheight1,
               0, 46 + i * 20 + 20 - halfheight2, halfwidth1, halfheight2);
-      blit(x + halfwidth1, y + halfheight1,
+      blit(stack,x + halfwidth1, y + halfheight1,
               200 - halfwidth2, 46 + i * 20 + 20 - halfheight2, halfwidth2, halfheight2);
     }
   }

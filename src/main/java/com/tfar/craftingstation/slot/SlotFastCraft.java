@@ -44,7 +44,7 @@ public class SlotFastCraft extends CraftingResultSlot {
   protected void onCrafting(ItemStack stack) {
     if (this.amountCrafted > 0) {
       stack.onCrafting(this.player.world, this.player, this.amountCrafted);
-      BasicEventHooks.firePlayerCraftingEvent(this.player, stack, field_75239_a);
+      BasicEventHooks.firePlayerCraftingEvent(this.player, stack, craftMatrix);
     }
 
     this.amountCrafted = 0;
@@ -63,20 +63,20 @@ public class SlotFastCraft extends CraftingResultSlot {
     craftingInventoryPersistant.setDoNotCallUpdates(true);
 
     for (int i = 0; i < nonnulllist.size(); ++i) {
-      ItemStack stackInSlot = this.field_75239_a.getStackInSlot(i);
+      ItemStack stackInSlot = this.craftMatrix.getStackInSlot(i);
       ItemStack stack1 = nonnulllist.get(i);
 
       if (!stackInSlot.isEmpty()) {
-        this.field_75239_a.decrStackSize(i, 1);
-        stackInSlot = this.field_75239_a.getStackInSlot(i);
+        this.craftMatrix.decrStackSize(i, 1);
+        stackInSlot = this.craftMatrix.getStackInSlot(i);
       }
 
       if (!stack1.isEmpty()) {
         if (stackInSlot.isEmpty()) {
-          this.field_75239_a.setInventorySlotContents(i, stack1);
+          this.craftMatrix.setInventorySlotContents(i, stack1);
         } else if (ItemStack.areItemsEqual(stackInSlot, stack1) && ItemStack.areItemStackTagsEqual(stackInSlot, stack1)) {
           stack1.grow(stackInSlot.getCount());
-          this.field_75239_a.setInventorySlotContents(i, stack1);
+          this.craftMatrix.setInventorySlotContents(i, stack1);
         } else if (!this.player.inventory.addItemStackToInventory(stack1)) {
           this.player.dropItem(stack1, false);
         }

@@ -1,6 +1,8 @@
 package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.util.CraftingStationItemHandler;
+import net.minecraft.block.BlockState;
+import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -38,13 +40,13 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
   }
 
   @Override
-  public void read(CompoundNBT tag) {
+  public void read(BlockState state,CompoundNBT tag) {
     CompoundNBT invTag = tag.getCompound("inv");
     input.deserializeNBT(invTag);
     //  if (tag.contains("CustomName", 8)) {
     //    this.customName = ITextComponent.Serializer.fromJson(tag.getString("CustomName"));
     //   }
-    super.read(tag);
+    super.read(state,tag);
   }
 
   @Nonnull
@@ -72,7 +74,7 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
 
   @Override
   public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
-    this.read(packet.getNbtCompound());
+    this.read(null,packet.getNbtCompound());
   }
 }
 

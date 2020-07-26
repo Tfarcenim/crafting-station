@@ -10,6 +10,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.extensions.IForgeContainerType;
@@ -28,6 +29,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tfar.extratags.api.ExtraTagRegistry;
 
 import static com.tfar.craftingstation.CraftingStation.Objects.crafting_station;
 import static com.tfar.craftingstation.CraftingStation.Objects.crafting_station_slab;
@@ -38,8 +40,10 @@ public class CraftingStation {
   // Directly reference a log4j logger.
 
   public static final String MODID = "craftingstation";
+	public static final ITag<TileEntityType<?>> blacklisted
+					= ExtraTagRegistry.blockEntityType(new ResourceLocation(MODID,"blacklisted").toString());
 
-  public static final Logger LOGGER = LogManager.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger();
 
   public CraftingStation() {
     // Register the setup method for modloading

@@ -106,7 +106,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
 
   public void onCraftMatrixChanged() {
     if(!doNotCallUpdates) {
-      this.field_70465_c.onCraftMatrixChanged(this);
+      this.eventHandler.onCraftMatrixChanged(this);
     }
   }
 }
