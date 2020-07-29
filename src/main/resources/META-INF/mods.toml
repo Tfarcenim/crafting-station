@@ -9,6 +9,7 @@ modLoader="javafml" #mandatory
 loaderVersion="[25,)" #mandatory (24 is current forge version)
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/Tfarcenim/crafting-station/issues" #optional
+license="no"
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
@@ -36,13 +37,13 @@ Simple standalone crafting station
 [[dependencies.craftingstation]]
                    modId="forge"
                    mandatory=true
-                   versionRange="[30.0.17,)"
+                   versionRange="[32.0.75,)"
                    ordering="NONE"
                    side="BOTH"
 
 [[dependencies.craftingstation]]
                    modId="extratags"
                    mandatory=true
-                   versionRange="[1.0,)"
+                   versionRange="[2.0,)"
                    ordering="NONE"
-                   side="SERVER"
+                   side="BOTH"
