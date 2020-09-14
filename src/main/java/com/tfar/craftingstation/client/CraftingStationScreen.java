@@ -69,8 +69,9 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   protected void drawGuiContainerForegroundLayer(MatrixStack stack,int p_146979_1_, int p_146979_2_) {
+    super.drawGuiContainerForegroundLayer(stack, p_146979_1_, p_146979_2_);
     if (container.hasSideContainers){
-      this.font.drawString(stack,container.containerNames.get(container.currentContainer).getString(),-120,6,4210752);
+      this.font.drawString(stack,container.containerNames.get(container.currentContainer).getString(),-120,6, 0x404040);
     }
   }
 

@@ -3,8 +3,6 @@ package com.tfar.craftingstation;
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -18,9 +16,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -29,7 +25,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tfar.extratags.api.ExtraTagRegistry;
+import tfar.extratags.api.ExtraTagHelper;
 
 import static com.tfar.craftingstation.CraftingStation.Objects.crafting_station;
 import static com.tfar.craftingstation.CraftingStation.Objects.crafting_station_slab;
@@ -41,7 +37,7 @@ public class CraftingStation {
 
   public static final String MODID = "craftingstation";
 	public static final ITag<TileEntityType<?>> blacklisted
-					= ExtraTagRegistry.blockEntityType(new ResourceLocation(MODID,"blacklisted").toString());
+					= ExtraTagHelper.createBlockEntityTagWrapper(new ResourceLocation(MODID,"blacklisted"));
 
 	public static final Logger LOGGER = LogManager.getLogger();
 

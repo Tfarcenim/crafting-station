@@ -1,11 +1,6 @@
 package com.tfar.craftingstation;
 
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.Tag;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
-import tfar.extratags.api.ExtraTagRegistry;
 
 public class Configs {
 

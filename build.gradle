@@ -84,11 +84,11 @@ dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}" //21
 
     // compile against the JEI API but do not include it at runtime
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+    compileOnly fg.deobf("mezz.jei:jei-1.16.2:${jei_version}:api")
     // at runtime, use the full JEI jar
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.16.2:${jei_version}")
 
-    compile fg.deobf("curse.maven:extra-tags:3015680")
+    compile fg.deobf("curse.maven:extra-tags:3057168")
 
     //compile fileTree(dir: 'libs', include: '*.jar')
 
