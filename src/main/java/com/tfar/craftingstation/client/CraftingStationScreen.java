@@ -65,7 +65,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
     renderBackground(stack);
     super.render(stack,mouseX, mouseY, partialTicks);
-    func_230459_a_(stack,mouseX, mouseY);
+    renderHoveredTooltip(stack,mouseX, mouseY);
   }
 
   protected void drawGuiContainerForegroundLayer(MatrixStack stack,int p_146979_1_, int p_146979_2_) {

@@ -37,13 +37,6 @@ Simple standalone crafting station
 [[dependencies.craftingstation]]
                    modId="forge"
                    mandatory=true
-                   versionRange="[32.0.75,)"
-                   ordering="NONE"
-                   side="BOTH"
-
-[[dependencies.craftingstation]]
-                   modId="extratags"
-                   mandatory=true
-                   versionRange="[2.0,)"
+                   versionRange="[34.1.22,)"
                    ordering="NONE"
                    side="BOTH"

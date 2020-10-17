@@ -11,6 +11,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.ForgeTagHandler;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -20,12 +22,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tfar.extratags.api.ExtraTagHelper;
 
 import static com.tfar.craftingstation.CraftingStation.Objects.crafting_station;
 import static com.tfar.craftingstation.CraftingStation.Objects.crafting_station_slab;
@@ -37,7 +39,7 @@ public class CraftingStation {
 
   public static final String MODID = "craftingstation";
 	public static final ITag<TileEntityType<?>> blacklisted
-					= ExtraTagHelper.createBlockEntityTagWrapper(new ResourceLocation(MODID,"blacklisted"));
+					= ForgeTagHandler.makeWrapperTag(ForgeRegistries.TILE_ENTITIES,new ResourceLocation(MODID,"blacklisted"));
 
 	public static final Logger LOGGER = LogManager.getLogger();
 
