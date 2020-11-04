@@ -136,7 +136,7 @@ public class CraftingStationContainer extends Container {
         // crafting grid
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
-                addSlotToContainer(new Slot(craftMatrix, x + 3 * y, 130 + 18 * x, 17 + 18 * y));
+                addSlotToContainer(new Slot(craftMatrix, x + 3 * y, 30 + 18 * x, 17 + 18 * y));
             }
         }
     }
