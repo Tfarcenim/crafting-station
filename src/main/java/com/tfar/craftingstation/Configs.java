@@ -4,12 +4,12 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 public class Configs {
 
-	public static class ClientConfig {
+	public static class Client {
 
-    public static ForgeConfigSpec.BooleanValue showItemsInTable;
+      public static ForgeConfigSpec.BooleanValue showItemsInTable;
 
-    ClientConfig(ForgeConfigSpec.Builder builder) {
-      builder.push("client");
+    Client(ForgeConfigSpec.Builder builder) {
+      builder.push("general");
       showItemsInTable = builder
               .comment("Display Items in Table?")
               .translation("text.craftingstation.config.displayitemsintable")
@@ -17,4 +17,20 @@ public class Configs {
       builder.pop();
     }
   }
+
+  public static class Server {
+
+      public static ForgeConfigSpec.BooleanValue sideInventories;
+
+
+      Server(ForgeConfigSpec.Builder builder) {
+          builder.push("general");
+          sideInventories = builder
+                  .comment("Are side inventories displayed in the crafting grid?")
+                  .translation("text.craftingstation.config.enable_side_inventories")
+                  .define("display side inventories in crafting grid", true);
+          builder.pop();
+      }
+  }
+
 }

@@ -7,10 +7,12 @@ import com.tfar.craftingstation.CraftingStationContainer;
 import com.tfar.craftingstation.network.C2SClearPacket;
 import com.tfar.craftingstation.network.PacketHandler;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.ModList;
 
 public class CraftingStationScreen extends ContainerScreen<CraftingStationContainer> {
@@ -47,14 +49,22 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
-      this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket())));
+
+      Button.ITooltip tooltip =  (button, matrices, i, i1) -> {
+        this.renderTooltip(matrices,
+                this.minecraft.fontRenderer.trimStringToWidth(new TranslationTextComponent("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
+
+      };
+
+      this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()),tooltip));
     }
   }
 
   @Override
   protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
-    return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) &&
+    boolean b = super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) &&
             (!container.hasSideContainers || !isPointInRegion(-126, -16, 126, 32 + ySize, mouseX, mouseY));
+    return b;
   }
 
   public void changeContainer(int container){

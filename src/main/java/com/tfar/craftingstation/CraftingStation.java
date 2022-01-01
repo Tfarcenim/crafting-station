@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeTagHandler;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.extensions.IForgeContainerType;
@@ -18,7 +19,9 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -26,6 +29,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,11 +49,25 @@ public class CraftingStation {
 
   public CraftingStation() {
     // Register the setup method for modloading
+    ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_SPEC);
     IEventBus iEventBus = FMLJavaModLoadingContext.get().getModEventBus();
     iEventBus.addListener(this::setup);
     iEventBus.addListener(this::enqueueIMC);
     //ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
   }
+
+  public static final Configs.Server SERVER;
+  public static final ForgeConfigSpec SERVER_SPEC;
+
+  static {
+    //final Pair<ClientConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+    //CLIENT_SPEC = specPair.getRight();
+    //CLIENT = specPair.getLeft();
+    final Pair<Configs.Server, ForgeConfigSpec> specPair2 = new ForgeConfigSpec.Builder().configure(Configs.Server::new);
+    SERVER_SPEC = specPair2.getRight();
+    SERVER = specPair2.getLeft();
+  }
+
 
   private void setup(final FMLCommonSetupEvent event) {
     PacketHandler.registerMessages(MODID);
