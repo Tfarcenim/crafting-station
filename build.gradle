@@ -1,15 +1,12 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
-plugins {
-    id "com.wynprice.cursemaven" version "2.1.5"
-}
+
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
@@ -75,12 +72,12 @@ repositories{
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
-    maven {
+  //  maven {
         // location of a maven mirror for JEI files, as a fallback
-        name = "ModMaven"
-        url = 'https://modmaven.dev/'
-    }
-    maven { url "https://maven.tterrag.com/" }
+   //     name = "ModMaven"
+   //     url = 'https://modmaven.dev/'
+  //  }
+   // maven { url "https://maven.tterrag.com/" }
 }
 
 dependencies {
@@ -98,7 +95,7 @@ dependencies {
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
     // compile "some.group:artifact:version"
-    compile fg.deobf("curse.maven:dank-storage-335673:3586635")
+   // compile fg.deobf("curse.maven:dank-storage-335673:3586635")
 
 
     // Real examples
