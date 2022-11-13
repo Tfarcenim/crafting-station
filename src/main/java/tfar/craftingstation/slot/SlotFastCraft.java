@@ -1,8 +1,8 @@
 
-package com.tfar.craftingstation.slot;
+package tfar.craftingstation.slot;
 
-import com.tfar.craftingstation.CraftingInventoryPersistant;
-import com.tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingInventoryPersistant;
+import tfar.craftingstation.CraftingStationContainer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;

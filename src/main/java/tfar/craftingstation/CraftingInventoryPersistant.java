@@ -1,15 +1,12 @@
-package com.tfar.craftingstation;
+package tfar.craftingstation;
 
-import com.tfar.craftingstation.util.CraftingStationItemHandler;
+import tfar.craftingstation.util.CraftingStationItemHandler;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.NonNullList;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.stream.IntStream;
 
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */

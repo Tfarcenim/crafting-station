@@ -1,4 +1,4 @@
-package com.tfar.craftingstation;
+package tfar.craftingstation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

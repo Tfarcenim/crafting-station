@@ -1,4 +1,4 @@
-package com.tfar.craftingstation;
+package tfar.craftingstation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,15 +19,12 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static com.tfar.craftingstation.CraftingStationBlock.FACING;
-import static com.tfar.craftingstation.CraftingStationBlock.dropItems;
-
 public class CraftingStationSlabBlock extends SlabBlock implements EntityBlock {
 
 
   public CraftingStationSlabBlock(Properties properties) {
     super(properties);
-    this.stateDefinition.any().setValue(FACING, Direction.NORTH);
+    this.stateDefinition.any().setValue(CraftingStationBlock.FACING, Direction.NORTH);
 
   }
 
@@ -59,7 +56,7 @@ public class CraftingStationSlabBlock extends SlabBlock implements EntityBlock {
     if (state.getBlock() != newState.getBlock()) {
       BlockEntity tileentity = worldIn.getBlockEntity(pos);
       if (tileentity instanceof CraftingStationBlockEntity) {
-        dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
+        CraftingStationBlock.dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
         worldIn.updateNeighbourForOutputSignal(pos, this);
       }
       super.onRemove(state, worldIn, pos, newState, isMoving);
@@ -68,21 +65,21 @@ public class CraftingStationSlabBlock extends SlabBlock implements EntityBlock {
 
   @Nonnull
   public BlockState rotate(BlockState p_185499_1_, Rotation p_185499_2_) {
-    return p_185499_1_.setValue(FACING, p_185499_2_.rotate(p_185499_1_.getValue(FACING)));
+    return p_185499_1_.setValue(CraftingStationBlock.FACING, p_185499_2_.rotate(p_185499_1_.getValue(CraftingStationBlock.FACING)));
   }
 
   @Nonnull
   public BlockState mirror(BlockState p_185471_1_, Mirror p_185471_2_) {
-    return p_185471_1_.rotate(p_185471_2_.getRotation(p_185471_1_.getValue(FACING)));
+    return p_185471_1_.rotate(p_185471_2_.getRotation(p_185471_1_.getValue(CraftingStationBlock.FACING)));
   }
 
   protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_206840_1_) {
     super.createBlockStateDefinition(p_206840_1_);
-    p_206840_1_.add(FACING);
+    p_206840_1_.add(CraftingStationBlock.FACING);
   }
 
   @Nullable
   public BlockState getStateForPlacement(BlockPlaceContext p_196258_1_) {
-    return super.getStateForPlacement(p_196258_1_).setValue(FACING, p_196258_1_.getHorizontalDirection());
+    return super.getStateForPlacement(p_196258_1_).setValue(CraftingStationBlock.FACING, p_196258_1_.getHorizontalDirection());
   }
 }

@@ -1,7 +1,8 @@
-package com.tfar.craftingstation.jei;
+package tfar.craftingstation.jei;
 
-import com.tfar.craftingstation.CraftingStation;
-import com.tfar.craftingstation.client.CraftingStationScreen;
+import tfar.craftingstation.CraftingStation;
+import tfar.craftingstation.init.ModBlocks;
+import tfar.craftingstation.client.CraftingStationScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
@@ -25,8 +26,8 @@ public class JeiPlugin implements IModPlugin, IGuiContainerHandler<CraftingStati
 
   @Override
   public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station), RecipeTypes.CRAFTING);
-    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station_slab),RecipeTypes.CRAFTING);
+    registration.addRecipeCatalyst(new ItemStack(ModBlocks.crafting_station), RecipeTypes.CRAFTING);
+    registration.addRecipeCatalyst(new ItemStack(ModBlocks.crafting_station_slab),RecipeTypes.CRAFTING);
   }
 
   @Nonnull

@@ -1,11 +1,10 @@
-package com.tfar.craftingstation;
+package tfar.craftingstation;
 
-import com.tfar.craftingstation.network.PacketHandler;
-import com.tfar.craftingstation.network.S2CLastRecipePacket;
-import com.tfar.craftingstation.slot.BigSlot;
-import com.tfar.craftingstation.slot.SlotFastCraft;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import tfar.craftingstation.init.ModMenuTypes;
+import tfar.craftingstation.network.PacketHandler;
+import tfar.craftingstation.network.S2CLastRecipePacket;
+import tfar.craftingstation.slot.BigSlot;
+import tfar.craftingstation.slot.SlotFastCraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -86,7 +85,7 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
 
     public CraftingStationContainer(int id, Inventory inv, BlockPos pos) {
-        super(CraftingStation.Objects.crafting_station_container, id);
+        super(ModMenuTypes.crafting_station, id);
 
         this.player = inv.player;
         this.world = player.level;

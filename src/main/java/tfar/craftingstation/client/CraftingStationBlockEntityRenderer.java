@@ -1,7 +1,7 @@
-package com.tfar.craftingstation.client;
+package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.tfar.craftingstation.CraftingStationBlockEntity;
+import tfar.craftingstation.CraftingStationBlockEntity;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import com.mojang.math.Vector3f;

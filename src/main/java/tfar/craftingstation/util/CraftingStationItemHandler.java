@@ -1,4 +1,4 @@
-package com.tfar.craftingstation.util;
+package tfar.craftingstation.util;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.NonNullList;

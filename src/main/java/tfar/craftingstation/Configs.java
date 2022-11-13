@@ -1,4 +1,4 @@
-package com.tfar.craftingstation;
+package tfar.craftingstation;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

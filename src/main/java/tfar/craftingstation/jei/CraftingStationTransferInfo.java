@@ -1,6 +1,6 @@
-package com.tfar.craftingstation.jei;
+package tfar.craftingstation.jei;
 
-import com.tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingStationContainer;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import net.minecraft.resources.ResourceLocation;

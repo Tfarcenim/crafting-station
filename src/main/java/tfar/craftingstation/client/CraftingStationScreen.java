@@ -1,11 +1,11 @@
-package com.tfar.craftingstation.client;
+package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.tfar.craftingstation.CraftingStation;
-import com.tfar.craftingstation.CraftingStationContainer;
-import com.tfar.craftingstation.network.C2SClearPacket;
-import com.tfar.craftingstation.network.PacketHandler;
+import tfar.craftingstation.CraftingStation;
+import tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.network.C2SClearPacket;
+import tfar.craftingstation.network.PacketHandler;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.world.entity.player.Inventory;

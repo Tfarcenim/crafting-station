@@ -1,18 +1,15 @@
-package com.tfar.craftingstation.client;
+package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.tfar.craftingstation.CraftingStation;
-import com.tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingStation;
+import tfar.craftingstation.CraftingStationContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.TextComponent;
-
-import static com.tfar.craftingstation.client.ClientStuffs.mc;
 
 public class TabButton extends Button{
 
@@ -37,7 +34,7 @@ public class TabButton extends Button{
       RenderSystem.enableBlend();
       RenderSystem.blendFuncSeparate(770, 771, 1, 0);
       RenderSystem.blendFunc(770, 771);
-      if (((CraftingStationContainer)mc.player.containerMenu).currentContainer == index)
+      if (((CraftingStationContainer) ClientStuffs.mc.player.containerMenu).currentContainer == index)
       blit(matrices,x, y, 0, height, width, height,width,height * 2);
 
       else      blit(matrices,x, y, 0, 0, width, height,width,height * 2);
@@ -58,7 +55,7 @@ public class TabButton extends Button{
 
 
   private static void renderHotbarItem(PoseStack matrices, int x, int y, float partialTicks, Player player, ItemStack stack) {
-    mc.getItemRenderer().renderGuiItemDecorations(mc.font, stack, x, y);
+    ClientStuffs.mc.getItemRenderer().renderGuiItemDecorations(ClientStuffs.mc.font, stack, x, y);
   }
 }
 

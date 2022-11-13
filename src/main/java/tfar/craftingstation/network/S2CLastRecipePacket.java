@@ -1,6 +1,6 @@
-package com.tfar.craftingstation.network;
+package tfar.craftingstation.network;
 
-import com.tfar.craftingstation.client.CraftingStationScreen;
+import tfar.craftingstation.client.CraftingStationScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;

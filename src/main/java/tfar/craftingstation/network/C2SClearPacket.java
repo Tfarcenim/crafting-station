@@ -1,6 +1,6 @@
-package com.tfar.craftingstation.network;
+package tfar.craftingstation.network;
 
-import com.tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingStationContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.network.NetworkEvent;

@@ -1,6 +1,7 @@
-package com.tfar.craftingstation;
+package tfar.craftingstation;
 
-import com.tfar.craftingstation.util.CraftingStationItemHandler;
+import tfar.craftingstation.init.ModBlockEntityTypes;
+import tfar.craftingstation.util.CraftingStationItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -23,7 +24,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
   public int currentContainer = 0;
 
   public CraftingStationBlockEntity(BlockPos pPos, BlockState pState) {
-    super(CraftingStation.Objects.crafting_station_tile,pPos,pState);
+    super(ModBlockEntityTypes.crafting_station,pPos,pState);
     this.input = new CraftingStationItemHandler(9);
   }
 

@@ -1,4 +1,4 @@
-package com.tfar.craftingstation.client;
+package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
