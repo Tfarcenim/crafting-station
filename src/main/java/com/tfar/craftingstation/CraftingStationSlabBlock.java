@@ -1,43 +1,28 @@
 package com.tfar.craftingstation;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.util.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.IWorld;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Random;
-import java.util.stream.IntStream;
 
 import static com.tfar.craftingstation.CraftingStationBlock.FACING;
 import static com.tfar.craftingstation.CraftingStationBlock.dropItems;
 
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
-
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-
-public class CraftingStationSlabBlock extends SlabBlock {
+public class CraftingStationSlabBlock extends SlabBlock implements EntityBlock {
 
 
   public CraftingStationSlabBlock(Properties properties) {
@@ -63,15 +48,10 @@ public class CraftingStationSlabBlock extends SlabBlock {
     return te instanceof CraftingStationBlockEntity ? (MenuProvider) te : null;
   }
 
+  @org.jetbrains.annotations.Nullable
   @Override
-  public boolean hasTileEntity(BlockState state) {
-    return true;
-  }
-
-  @Nullable
-  @Override
-  public BlockEntity createTileEntity(BlockState state, BlockGetter world) {
-    return new CraftingStationBlockEntity();
+  public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+    return new CraftingStationBlockEntity(pPos,pState);
   }
 
   @Override

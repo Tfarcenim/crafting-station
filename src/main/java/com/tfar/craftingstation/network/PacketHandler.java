@@ -2,8 +2,8 @@ package com.tfar.craftingstation.network;
 
 import com.tfar.craftingstation.CraftingStation;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 
 public class PacketHandler {

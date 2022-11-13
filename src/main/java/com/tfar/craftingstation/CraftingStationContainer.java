@@ -4,35 +4,36 @@ import com.tfar.craftingstation.network.PacketHandler;
 import com.tfar.craftingstation.network.S2CLastRecipePacket;
 import com.tfar.craftingstation.slot.BigSlot;
 import com.tfar.craftingstation.slot.SlotFastCraft;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.inventory.ResultContainer;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.Container;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
-import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -84,11 +85,11 @@ public class CraftingStationContainer extends AbstractContainerMenu {
     }
 
 
-    public CraftingStationContainer(int id, Inventory inv, Level world, BlockPos pos) {
+    public CraftingStationContainer(int id, Inventory inv, BlockPos pos) {
         super(CraftingStation.Objects.crafting_station_container, id);
 
-        this.world = world;
         this.player = inv.player;
+        this.world = player.level;
         this.tileEntity = (CraftingStationBlockEntity) getTileEntityAtPos(pos, world);
         currentContainer = tileEntity.currentContainer;
         this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
@@ -120,9 +121,9 @@ public class CraftingStationContainer extends AbstractContainerMenu {
             BlockEntity te = world.getBlockEntity(neighbor);
             if (te != null && !(te instanceof CraftingStationBlockEntity)) {
                 // if blacklisted, skip checks entirely
-                if (CraftingStation.blacklisted.contains(te.getType()))
+                if (ForgeRegistries.BLOCK_ENTITIES.tags().getTag(CraftingStation.blacklisted).contains(te.getType()))
                     continue;
-                if (te instanceof Container && !((Container) te).stillValid(player)) {
+                if (te instanceof Container container && !container.stillValid(player)) {
                     continue;
                 }
 
@@ -154,17 +155,12 @@ public class CraftingStationContainer extends AbstractContainerMenu {
     }
 
     public static Recipe<CraftingContainer> findRecipe(CraftingContainer inv, Level world, Player player) {
-        return world.getRecipeManager().byType(RecipeType.CRAFTING).values().stream().flatMap(recipe -> {
-            try {
-                return Util.toStream(RecipeType.CRAFTING.tryMatch(recipe, world, inv));
-            } catch (Exception e) {
-                CraftingStation.LOGGER.error("Bad recipe found: " + recipe.getId().toString());
-                CraftingStation.LOGGER.error(e.getMessage());
-                player.sendMessage(new TranslatableComponent("text.crafting_station.error", recipe.getId().toString()).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
-                return null;
-            }
-        }).findFirst().orElse(null);
+        return world.getRecipeManager().getRecipeFor(RecipeType.CRAFTING,inv,world).stream().findFirst().orElse(null);
     }
+
+    //                CraftingStation.LOGGER.error("Bad recipe found: " + recipe.getId().toString());
+    //                CraftingStation.LOGGER.error(e.getMessage());
+    //                player.sendMessage(new TranslatableComponent("text.crafting_station.error", recipe.getId().toString()).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
 
     private void addOwnSlots() {
         // crafting result
@@ -227,13 +223,13 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
     // update crafting
     //clientside only
-    @Override
-    public void setAll(List<ItemStack> p_190896_1_) {
-        craftMatrix.setDoNotCallUpdates(true);
-        super.setAll(p_190896_1_);
-        craftMatrix.setDoNotCallUpdates(false);
-        craftMatrix.onCraftMatrixChanged();
-    }
+    //@Override
+    //public void setAll(List<ItemStack> p_190896_1_) {
+    //    craftMatrix.setDoNotCallUpdates(true);
+    //    super.setAll(p_190896_1_);
+     //   craftMatrix.setDoNotCallUpdates(false);
+     //   craftMatrix.onCraftMatrixChanged();
+   // }
 
     @Override
     public void slotsChanged(Container inventory) {
@@ -393,7 +389,7 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
     private void syncResultToAllOpenWindows(final ItemStack stack, List<ServerPlayer> players) {
         players.forEach(otherPlayer -> {
-            otherPlayer.containerMenu.setItem(0, stack);
+            otherPlayer.containerMenu.setItem(0,this.getStateId(), stack);
             //otherPlayer.connection.sendPacket(new SPacketSetSlot(otherPlayer.openContainer.windowId, SLOT_RESULT, stack));
         });
     }

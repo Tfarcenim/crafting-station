@@ -3,13 +3,11 @@ package com.tfar.craftingstation.slot;
 
 import com.tfar.craftingstation.CraftingInventoryPersistant;
 import com.tfar.craftingstation.CraftingStationContainer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.NonNullList;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.hooks.BasicEventHooks;
 
 
 /**
@@ -44,14 +42,14 @@ public class SlotFastCraft extends ResultSlot {
   protected void checkTakeAchievements(ItemStack stack) {
     if (this.removeCount > 0) {
       stack.onCraftedBy(this.player.level, this.player, this.removeCount);
-      BasicEventHooks.firePlayerCraftingEvent(this.player, stack, craftSlots);
+      net.minecraftforge.event.ForgeEventFactory.firePlayerCraftingEvent(this.player, stack, craftSlots);
     }
 
     this.removeCount = 0;
   }
 
   @Override
-  public ItemStack onTake(Player thePlayer, ItemStack craftingResult) {
+  public void onTake(Player thePlayer, ItemStack craftingResult) {
     this.checkTakeAchievements(craftingResult);
     net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
     /* CHANGE BEGINS HERE */
@@ -77,7 +75,7 @@ public class SlotFastCraft extends ResultSlot {
         } else if (ItemStack.isSame(stackInSlot, stack1) && ItemStack.tagMatches(stackInSlot, stack1)) {
           stack1.grow(stackInSlot.getCount());
           this.craftSlots.setItem(i, stack1);
-        } else if (!this.player.inventory.add(stack1)) {
+        } else if (!this.player.getInventory().add(stack1)) {
           this.player.drop(stack1, false);
         }
       }
@@ -86,6 +84,6 @@ public class SlotFastCraft extends ResultSlot {
     craftingInventoryPersistant.setDoNotCallUpdates(false);
     container.slotsChanged(craftingInventoryPersistant);
 
-    return craftingResult;
+    //return craftingResult;
   }
 }

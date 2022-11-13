@@ -1,16 +1,14 @@
 package com.tfar.craftingstation.network;
 
-import java.util.function.Supplier;
-
 import com.tfar.craftingstation.client.CraftingStationScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
 
 public class S2CLastRecipePacket {
 
@@ -39,7 +37,7 @@ public class S2CLastRecipePacket {
   }
 
   @SuppressWarnings("unchecked")
-  public void handle(Supplier<Context> ctx) {
+  public void handle(Supplier<NetworkEvent.Context> ctx) {
     ctx.get().enqueueWork(() -> {
       if (Minecraft.getInstance().screen instanceof CraftingStationScreen) {
         Recipe<?> r = Minecraft.getInstance().level.getRecipeManager().byKey(rec).orElse(null);

@@ -19,12 +19,11 @@ public class ClearButton extends Button {
 
   @Override
   public void renderButton(PoseStack stack,int mouseX, int mouseY, float partialTicks) {
-    Minecraft minecraft = Minecraft.getInstance();
-    minecraft.getTextureManager().bind(WIDGETS_LOCATION);
+    RenderSystem.setShaderTexture(0,WIDGETS_LOCATION);
 
-    RenderSystem.color3f(1, 0, 0);
+    RenderSystem.setShaderColor(1, 0, 0,1);
 
-    int i = getYImage(isHovered());
+    int i = getYImage(isHoveredOrFocused());
 
     RenderSystem.enableBlend();
     RenderSystem.blendFuncSeparate(770, 771, 1, 0);
@@ -44,7 +43,7 @@ public class ClearButton extends Button {
     blit(stack,x + halfwidth1, y + halfheight1,
             200 - halfwidth2, 46 + i * 20 + 20 - halfheight2, halfwidth2, halfheight2);
 
-    if (this.isHovered()) {
+    if (this.isHoveredOrFocused()) {
       this.renderToolTip(stack,mouseX,mouseY);
     }
   }

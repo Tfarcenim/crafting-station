@@ -30,7 +30,7 @@ public class TabButton extends Button{
   public void render(PoseStack matrices,int mouseX, int mouseY, float partialTicks) {
     if (visible) {
       Minecraft minecraft = Minecraft.getInstance();
-      minecraft.getTextureManager().bind(TAB);
+      RenderSystem.setShaderTexture(0,TAB);
 
 
       isHovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
@@ -50,49 +50,15 @@ public class TabButton extends Button{
         int c = color != null ? color : 0xFFFFFF;
         final int itemX = x + 3;
         final int itemY = y + 3;
-        renderHotbarItem(itemX,itemY,minecraft.getFrameTime(),minecraft.player,stack);
+        renderHotbarItem(matrices,itemX,itemY,partialTicks,minecraft.player,stack);
 
       }
     }
   }
 
 
-  private static void renderHotbarItem(int x, int y, float partialTicks, Player player, ItemStack stack) {
-    float f = (float) stack.getPopTime() - partialTicks;
-    if (f > 0.0F) {
-      RenderSystem.pushMatrix();
-      float f1 = 1.0F + f / 5.0F;
-      RenderSystem.translatef((float) (x + 8), (float) (y + 12), 0.0F);
-      RenderSystem.scalef(1.0F / f1, (f1 + 1.0F) / 2.0F, 1.0F);
-      RenderSystem.translatef((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
-    }
-
-    mc.getItemRenderer().renderAndDecorateItem(player, stack, x, y);
-    if (f > 0.0F) {
-      RenderSystem.popMatrix();
-    }
+  private static void renderHotbarItem(PoseStack matrices, int x, int y, float partialTicks, Player player, ItemStack stack) {
     mc.getItemRenderer().renderGuiItemDecorations(mc.font, stack, x, y);
   }
-
-
-  /**
-   * Draws an ItemStack.
-   *
-   * The z index is increased by 32 (and not decreased afterwards), and the item is then rendered at z=200.
-   */
-  private void drawItemStack(ItemStack stack, int x, int y) {
-
-    ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-    RenderSystem.translatef(0.0F, 0.0F, 32.0F);
-    this.setBlitOffset(200);
-    itemRenderer.blitOffset = 200.0F;
-    net.minecraft.client.gui.Font font = stack.getItem().getFontRenderer(stack);
-    //if (font == null) font = this.font;
-    itemRenderer.renderAndDecorateItem(stack, x, y);
-    //itemRenderer.renderItemOverlayIntoGUI(font, stack, x, y - (this.draggedStack.isEmpty() ? 0 : 8), altText);
-    this.setBlitOffset(0);
-    itemRenderer.blitOffset = 0.0F;
-  }
-
 }
 

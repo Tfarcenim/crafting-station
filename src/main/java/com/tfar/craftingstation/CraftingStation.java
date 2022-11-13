@@ -1,20 +1,21 @@
 package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.network.PacketHandler;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.tags.Tag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeTagHandler;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -25,7 +26,6 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
@@ -42,8 +42,8 @@ public class CraftingStation {
   // Directly reference a log4j logger.
 
   public static final String MODID = "craftingstation";
-	public static final Tag<BlockEntityType<?>> blacklisted
-					= ForgeTagHandler.makeWrapperTag(ForgeRegistries.TILE_ENTITIES,new ResourceLocation(MODID,"blacklisted"));
+	public static final TagKey<BlockEntityType<?>> blacklisted
+					= TagKey.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY,new ResourceLocation(MODID,"blacklisted"));
 
 	public static final Logger LOGGER = LogManager.getLogger();
 
@@ -105,14 +105,14 @@ public class CraftingStation {
 
     @SubscribeEvent
     public static void container(final RegistryEvent.Register<MenuType<?>> event){
-      register(IForgeContainerType.create((windowId, inv, data) ->
-              new CraftingStationContainer(windowId, inv, inv.player.level, data.readBlockPos())),"crafting_station_container",event.getRegistry());
+      register(IForgeMenuType.create((windowId, inv, data) ->
+              new CraftingStationContainer(windowId, inv, data.readBlockPos())),"crafting_station_container",event.getRegistry());
 
     }
 
     @SubscribeEvent
     public static void tile(final RegistryEvent.Register<BlockEntityType<?>> event){
-      register(BlockEntityType.Builder.of(CraftingStationBlockEntity::new,crafting_station,crafting_station_slab).build(null),"crafting_station_tile",event.getRegistry());
+      register(BlockEntityType.Builder.of(CraftingStationBlockEntity::new,crafting_station,crafting_station_slab).build(null),"crafting_station",event.getRegistry());
     }
 
     private static <T extends IForgeRegistryEntry<T>> void register(T obj, String name, IForgeRegistry<T> registry) {

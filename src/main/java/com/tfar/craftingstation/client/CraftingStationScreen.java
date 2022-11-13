@@ -43,7 +43,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
     super.init();
     if (this.menu.hasSideContainers) {
       for (int i = 0; i < menu.containerStarts.size(); i++) {
-        addButton(new TabButton(leftPos - 120 + 20 * i, topPos - 22, 22, 22, button -> {
+        addRenderableWidget(new TabButton(leftPos - 120 + 20 * i, topPos - 22, 22, 22, button -> {
           changeContainer(((TabButton)button).index);
         },i,menu.blocks.get(i)));
       }
@@ -56,7 +56,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 
       };
 
-      this.addButton(new ClearButton(leftPos + 85, topPos + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()),tooltip));
+      this.addRenderableWidget(new ClearButton(leftPos + 85, topPos + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()),tooltip));
     }
   }
 
@@ -87,8 +87,8 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 
   @Override
   protected void renderBg(PoseStack stack,float partialTicks, int mouseX, int mouseY) {
-    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-    minecraft.getTextureManager().bind(CRAFTING_TABLE_GUI_TEXTURES);
+    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    bind(CRAFTING_TABLE_GUI_TEXTURES);
     blit(stack,leftPos, topPos, 0, 0, imageWidth, imageHeight);
     int i = this.leftPos;
 
@@ -98,10 +98,10 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
     int j = (this.height - this.imageHeight) / 2;
     if (this.menu.hasSideContainers) {
       //draw background
-      this.minecraft.getTextureManager().bind(SECONDARY_GUI_TEXTURE);
+      bind(SECONDARY_GUI_TEXTURE);
       this.blit(stack,i - 130, j, 0, 0, this.imageWidth, this.imageHeight + 18);
 
-      this.minecraft.getTextureManager().bind(SCROLLBAR_BACKGROUND_AND_TAB);
+      bind(SCROLLBAR_BACKGROUND_AND_TAB);
       int totalSlots = this.menu.getSlotCount();
       int slotsToDraw = 54;
       if (totalSlots < slotsToDraw) slotsToDraw = totalSlots;
@@ -119,15 +119,18 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
       if (this.hasScrollbar()) {
         blit(stack,i - 17, j + 16, 174, 17, 14, 100);
         blit(stack,i - 17, j + 67, 174, 18, 14, 111);
-        this.minecraft.getTextureManager().bind(SCROLLBAR_AND_TAB);
+        bind(SCROLLBAR_AND_TAB);
         int k = (int) (j + 17 + 145 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)
           blit(stack,i - 16, k, 244, 0, 12, 15);
         else blit(stack,i - 16, k, 244 - 12, 0, 12, 15);
       }
-
     }
+  }
+
+  private static void bind(ResourceLocation tex) {
+    RenderSystem.setShaderTexture(0,tex);
   }
 
   @Override

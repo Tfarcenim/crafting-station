@@ -3,14 +3,14 @@ package com.tfar.craftingstation.jei;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.client.CraftingStationScreen;
 import mezz.jei.api.IModPlugin;
-import mezz.jei.api.constants.VanillaRecipeCategoryUid;
+import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -25,8 +25,8 @@ public class JeiPlugin implements IModPlugin, IGuiContainerHandler<CraftingStati
 
   @Override
   public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station),VanillaRecipeCategoryUid.CRAFTING);
-    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station_slab),VanillaRecipeCategoryUid.CRAFTING);
+    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station), RecipeTypes.CRAFTING);
+    registration.addRecipeCatalyst(new ItemStack(CraftingStation.Objects.crafting_station_slab),RecipeTypes.CRAFTING);
   }
 
   @Nonnull
