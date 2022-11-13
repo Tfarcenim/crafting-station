@@ -16,7 +16,7 @@ public class BigSlot extends SlotItemHandler {
   }
 
   @Override
-  public int getItemStackLimit(@Nonnull ItemStack stack) {
+  public int getMaxStackSize(@Nonnull ItemStack stack) {
     return getItemHandler().getSlotLimit(index);
   }
 

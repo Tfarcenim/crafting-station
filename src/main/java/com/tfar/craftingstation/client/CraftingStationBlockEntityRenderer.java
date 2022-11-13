@@ -23,13 +23,13 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
 
   @Override
   public void render(CraftingStationBlockEntity blockEntity, float var2, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int light, int var6) {
-    if (this.renderDispatcher.renderInfo != null) {
+    if (this.renderer.camera != null) {
 
       if (blockEntity.input.isEmpty())return;
 
       BlockState state = blockEntity.getBlockState();
 
-      double height = state.hasProperty(SlabBlock.TYPE) ? state.get(SlabBlock.TYPE) == SlabType.BOTTOM ?.5:1:1;
+      double height = state.hasProperty(SlabBlock.TYPE) ? state.getValue(SlabBlock.TYPE) == SlabType.BOTTOM ?.5:1:1;
 
       final double spacing = .189;
       final double offset = .31;
@@ -41,18 +41,18 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           if (item.isEmpty()) continue;
 
           //pushmatrix
-          matrixStack.push();
+          matrixStack.pushPose();
           //translate x,y,z
           matrixStack.translate(spacing * i +offset, 0, spacing * j +offset);
-          matrixStack.rotate(Vector3f.YP.rotation(0));
+          matrixStack.mulPose(Vector3f.YP.rotation(0));
           //scale x,y,z
           matrixStack.scale(0.25F, 0.25F, 0.25F);
 
-          int lightAbove = WorldRenderer.getCombinedLight(blockEntity.getWorld(), blockEntity.getPos().up());
-          Minecraft.getInstance().getItemRenderer().renderItem(item, ItemCameraTransforms.TransformType.FIXED,
+          int lightAbove = WorldRenderer.getLightColor(blockEntity.getLevel(), blockEntity.getBlockPos().above());
+          Minecraft.getInstance().getItemRenderer().renderStatic(item, ItemCameraTransforms.TransformType.FIXED,
                   lightAbove, OverlayTexture.NO_OVERLAY, matrixStack, iRenderTypeBuffer);
           //popmatrix
-          matrixStack.pop();
+          matrixStack.popPose();
         }
       }
     }

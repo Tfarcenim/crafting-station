@@ -15,11 +15,11 @@ public class C2SClearPacket {
     if (player == null) return;
 
     ctx.get().enqueueWork(() -> {
-      Container container = player.openContainer;
+      Container container = player.containerMenu;
       if (container instanceof CraftingStationContainer) {
         CraftingStationContainer craftingStationContainer = (CraftingStationContainer)container;
         for (int i = 1; i < 10;i++)
-        craftingStationContainer.transferStackInSlot(player,i);
+        craftingStationContainer.quickMoveStack(player,i);
       }
     });
     ctx.get().setPacketHandled(true);

@@ -41,71 +41,71 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   @Override
   protected void init() {
     super.init();
-    if (this.container.hasSideContainers) {
-      for (int i = 0; i < container.containerStarts.size(); i++) {
-        addButton(new TabButton(guiLeft - 120 + 20 * i, guiTop - 22, 22, 22, button -> {
+    if (this.menu.hasSideContainers) {
+      for (int i = 0; i < menu.containerStarts.size(); i++) {
+        addButton(new TabButton(leftPos - 120 + 20 * i, topPos - 22, 22, 22, button -> {
           changeContainer(((TabButton)button).index);
-        },i,container.blocks.get(i)));
+        },i,menu.blocks.get(i)));
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
 
       Button.ITooltip tooltip =  (button, matrices, i, i1) -> {
         this.renderTooltip(matrices,
-                this.minecraft.fontRenderer.trimStringToWidth(new TranslationTextComponent("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
+                this.minecraft.font.split(new TranslationTextComponent("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
 
       };
 
-      this.addButton(new ClearButton(guiLeft + 85, guiTop + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()),tooltip));
+      this.addButton(new ClearButton(leftPos + 85, topPos + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()),tooltip));
     }
   }
 
   @Override
   protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
     boolean b = super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) &&
-            (!container.hasSideContainers || !isPointInRegion(-126, -16, 126, 32 + ySize, mouseX, mouseY));
+            (!menu.hasSideContainers || !isHovering(-126, -16, 126, 32 + imageHeight, mouseX, mouseY));
     return b;
   }
 
   public void changeContainer(int container){
-    this.container.changeContainer(container);
+    this.menu.changeContainer(container);
   }
 
   @Override
   public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
     renderBackground(stack);
     super.render(stack,mouseX, mouseY, partialTicks);
-    renderHoveredTooltip(stack,mouseX, mouseY);
+    renderTooltip(stack,mouseX, mouseY);
   }
 
-  protected void drawGuiContainerForegroundLayer(MatrixStack stack,int p_146979_1_, int p_146979_2_) {
-    super.drawGuiContainerForegroundLayer(stack, p_146979_1_, p_146979_2_);
-    if (container.hasSideContainers){
-      this.font.drawString(stack,container.containerNames.get(container.currentContainer).getString(),-120,6, 0x404040);
+  protected void renderLabels(MatrixStack stack,int p_146979_1_, int p_146979_2_) {
+    super.renderLabels(stack, p_146979_1_, p_146979_2_);
+    if (menu.hasSideContainers){
+      this.font.draw(stack,menu.containerNames.get(menu.currentContainer).getString(),-120,6, 0x404040);
     }
   }
 
   @Override
-  protected void drawGuiContainerBackgroundLayer(MatrixStack stack,float partialTicks, int mouseX, int mouseY) {
+  protected void renderBg(MatrixStack stack,float partialTicks, int mouseX, int mouseY) {
     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-    minecraft.getTextureManager().bindTexture(CRAFTING_TABLE_GUI_TEXTURES);
-    blit(stack,guiLeft, guiTop, 0, 0, xSize, ySize);
-    int i = this.guiLeft;
+    minecraft.getTextureManager().bind(CRAFTING_TABLE_GUI_TEXTURES);
+    blit(stack,leftPos, topPos, 0, 0, imageWidth, imageHeight);
+    int i = this.leftPos;
 
     int i1 = i - 16;
     int i2 = i1 + 14;
 
-    int j = (this.height - this.ySize) / 2;
-    if (this.container.hasSideContainers) {
+    int j = (this.height - this.imageHeight) / 2;
+    if (this.menu.hasSideContainers) {
       //draw background
-      this.minecraft.getTextureManager().bindTexture(SECONDARY_GUI_TEXTURE);
-      this.blit(stack,i - 130, j, 0, 0, this.xSize, this.ySize + 18);
+      this.minecraft.getTextureManager().bind(SECONDARY_GUI_TEXTURE);
+      this.blit(stack,i - 130, j, 0, 0, this.imageWidth, this.imageHeight + 18);
 
-      this.minecraft.getTextureManager().bindTexture(SCROLLBAR_BACKGROUND_AND_TAB);
-      int totalSlots = this.container.getSlotCount();
+      this.minecraft.getTextureManager().bind(SCROLLBAR_BACKGROUND_AND_TAB);
+      int totalSlots = this.menu.getSlotCount();
       int slotsToDraw = 54;
       if (totalSlots < slotsToDraw) slotsToDraw = totalSlots;
-      else if (hasScrollbar() && topRow == this.container.getRows() - 9 && totalSlots % 6 != 0)
+      else if (hasScrollbar() && topRow == this.menu.getRows() - 9 && totalSlots % 6 != 0)
         slotsToDraw = 54 - 6 + totalSlots % 6;
 
       int offset = hasScrollbar() ? -126 : -118;
@@ -119,7 +119,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
       if (this.hasScrollbar()) {
         blit(stack,i - 17, j + 16, 174, 17, 14, 100);
         blit(stack,i - 17, j + 67, 174, 18, 14, 111);
-        this.minecraft.getTextureManager().bindTexture(SCROLLBAR_AND_TAB);
+        this.minecraft.getTextureManager().bind(SCROLLBAR_AND_TAB);
         int k = (int) (j + 17 + 145 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)
@@ -139,10 +139,10 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   @Override
   public boolean mouseDragged(double mouseX, double mouseY, int p_mouseDragged_5_, double p_mouseDragged_6_, double p_mouseDragged_8_) {
     if (this.isScrolling){
-      int j = this.guiTop;
+      int j = this.topPos;
       int j1 = j + 24;
       int j2 = j1 + 145;
-      int k = this.guiLeft;
+      int k = this.leftPos;
       int k1 = k - 16;
       int k2 = k1 + 14;
 
@@ -162,13 +162,13 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   private boolean hasScrollbar() {
-    return container.getRows() > 9;
+    return menu.getRows() > 9;
   }
 
   @Override
   public boolean mouseScrolled(double mouseX, double mouseY, double scrollDelta) {
 
-    if (this.hasScrollbar() && mouseX < guiLeft && mouseX > guiLeft - 20) {
+    if (this.hasScrollbar() && mouseX < leftPos && mouseX > leftPos - 20) {
       setTopRow((int) (topRow - scrollDelta), false);
       return true;
     }
@@ -176,15 +176,15 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   private void scrollTo(double scroll) {
-    setTopRow((int) Math.round((container.getRows() - 9) * scroll), true);
+    setTopRow((int) Math.round((menu.getRows() - 9) * scroll), true);
   }
 
   private void setTopRow(int offset, boolean smooth) {
     topRow = offset;
     if (topRow < 0) topRow = 0;
-    else if (topRow > container.getRows() - 9) topRow = container.getRows() - 9;
-    container.updateSlotPositions(topRow);
-    if (!smooth) this.currentScroll = (double) topRow / (this.container.getRows() - 9);
+    else if (topRow > menu.getRows() - 9) topRow = menu.getRows() - 9;
+    menu.updateSlotPositions(topRow);
+    if (!smooth) this.currentScroll = (double) topRow / (this.menu.getRows() - 9);
   }
 }
 

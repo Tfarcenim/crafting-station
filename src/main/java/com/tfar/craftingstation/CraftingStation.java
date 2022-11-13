@@ -89,7 +89,7 @@ public class CraftingStation {
     @SubscribeEvent
     public static void block(final RegistryEvent.Register<Block> event) {
       // register a new block here
-      Block.Properties wood = Block.Properties.from(Blocks.CRAFTING_TABLE);
+      Block.Properties wood = Block.Properties.copy(Blocks.CRAFTING_TABLE);
       register(new CraftingStationBlock(wood),"crafting_station",event.getRegistry());
       register(new CraftingStationSlabBlock(wood),"crafting_station_slab",event.getRegistry());
 
@@ -98,7 +98,7 @@ public class CraftingStation {
     @SubscribeEvent
     public static void item(final RegistryEvent.Register<Item> event) {
       // register a new item here
-      Item.Properties properties = new Item.Properties().group(ItemGroup.DECORATIONS);
+      Item.Properties properties = new Item.Properties().tab(ItemGroup.TAB_DECORATIONS);
       register(new BlockItem(crafting_station,properties),"crafting_station",event.getRegistry());
       register(new BlockItem(crafting_station_slab,properties),"crafting_station_slab",event.getRegistry());
     }
@@ -106,13 +106,13 @@ public class CraftingStation {
     @SubscribeEvent
     public static void container(final RegistryEvent.Register<ContainerType<?>> event){
       register(IForgeContainerType.create((windowId, inv, data) ->
-              new CraftingStationContainer(windowId, inv, inv.player.world, data.readBlockPos())),"crafting_station_container",event.getRegistry());
+              new CraftingStationContainer(windowId, inv, inv.player.level, data.readBlockPos())),"crafting_station_container",event.getRegistry());
 
     }
 
     @SubscribeEvent
     public static void tile(final RegistryEvent.Register<TileEntityType<?>> event){
-      register(TileEntityType.Builder.create(CraftingStationBlockEntity::new,crafting_station,crafting_station_slab).build(null),"crafting_station_tile",event.getRegistry());
+      register(TileEntityType.Builder.of(CraftingStationBlockEntity::new,crafting_station,crafting_station_slab).build(null),"crafting_station_tile",event.getRegistry());
     }
 
     private static <T extends IForgeRegistryEntry<T>> void register(T obj, String name, IForgeRegistry<T> registry) {

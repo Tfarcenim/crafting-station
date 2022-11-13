@@ -16,7 +16,7 @@ public class ClientStuffs {
 
   @SubscribeEvent
   public static void doClientStuff(final FMLClientSetupEvent event) {
-    ScreenManager.registerFactory(CraftingStation.Objects.crafting_station_container, CraftingStationScreen::new);
+    ScreenManager.register(CraftingStation.Objects.crafting_station_container, CraftingStationScreen::new);
     ClientRegistry.bindTileEntityRenderer(CraftingStation.Objects.crafting_station_tile, CraftingStationBlockEntityRenderer::new);
   }
 }

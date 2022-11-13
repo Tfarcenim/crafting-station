@@ -30,61 +30,61 @@ public class SlotFastCraft extends CraftingResultSlot {
   }
 
   @Override
-  public ItemStack decrStackSize(int amount) {
-    if (this.getHasStack()) {
-      this.amountCrafted += Math.min(amount, getStack().getCount());
+  public ItemStack remove(int amount) {
+    if (this.hasItem()) {
+      this.removeCount += Math.min(amount, getItem().getCount());
     }
-    return getStack();
+    return getItem();
   }
 
   /**
    * the itemStack passed in is the output - ie, iron ingots, and pickaxes, not ore and wood.
    */
   @Override
-  protected void onCrafting(ItemStack stack) {
-    if (this.amountCrafted > 0) {
-      stack.onCrafting(this.player.world, this.player, this.amountCrafted);
-      BasicEventHooks.firePlayerCraftingEvent(this.player, stack, craftMatrix);
+  protected void checkTakeAchievements(ItemStack stack) {
+    if (this.removeCount > 0) {
+      stack.onCraftedBy(this.player.level, this.player, this.removeCount);
+      BasicEventHooks.firePlayerCraftingEvent(this.player, stack, craftSlots);
     }
 
-    this.amountCrafted = 0;
+    this.removeCount = 0;
   }
 
   @Override
   public ItemStack onTake(PlayerEntity thePlayer, ItemStack craftingResult) {
-    this.onCrafting(craftingResult);
+    this.checkTakeAchievements(craftingResult);
     net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
     /* CHANGE BEGINS HERE */
     NonNullList<ItemStack> nonnulllist = container.getRemainingItems();
     /* END OF CHANGE */
     net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 
-    // note: craftMatrixPersistent and this.field_75239_a are the same object!
+    // note: craftMatrixPersistent and this.craftSlots are the same object!
     craftingInventoryPersistant.setDoNotCallUpdates(true);
 
     for (int i = 0; i < nonnulllist.size(); ++i) {
-      ItemStack stackInSlot = this.craftMatrix.getStackInSlot(i);
+      ItemStack stackInSlot = this.craftSlots.getItem(i);
       ItemStack stack1 = nonnulllist.get(i);
 
       if (!stackInSlot.isEmpty()) {
-        this.craftMatrix.decrStackSize(i, 1);
-        stackInSlot = this.craftMatrix.getStackInSlot(i);
+        this.craftSlots.removeItem(i, 1);
+        stackInSlot = this.craftSlots.getItem(i);
       }
 
       if (!stack1.isEmpty()) {
         if (stackInSlot.isEmpty()) {
-          this.craftMatrix.setInventorySlotContents(i, stack1);
-        } else if (ItemStack.areItemsEqual(stackInSlot, stack1) && ItemStack.areItemStackTagsEqual(stackInSlot, stack1)) {
+          this.craftSlots.setItem(i, stack1);
+        } else if (ItemStack.isSame(stackInSlot, stack1) && ItemStack.tagMatches(stackInSlot, stack1)) {
           stack1.grow(stackInSlot.getCount());
-          this.craftMatrix.setInventorySlotContents(i, stack1);
-        } else if (!this.player.inventory.addItemStackToInventory(stack1)) {
-          this.player.dropItem(stack1, false);
+          this.craftSlots.setItem(i, stack1);
+        } else if (!this.player.inventory.add(stack1)) {
+          this.player.drop(stack1, false);
         }
       }
     }
 
     craftingInventoryPersistant.setDoNotCallUpdates(false);
-    container.onCraftMatrixChanged(craftingInventoryPersistant);
+    container.slotsChanged(craftingInventoryPersistant);
 
     return craftingResult;
   }

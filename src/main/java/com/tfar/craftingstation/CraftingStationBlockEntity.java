@@ -30,23 +30,23 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
 
   @Nonnull
   @Override
-  public CompoundNBT write(CompoundNBT tag) {
+  public CompoundNBT save(CompoundNBT tag) {
     CompoundNBT compound = this.input.serializeNBT();
     tag.put("inv", compound);
     // if (this.customName != null) {
     //   tag.putString("CustomName", ITextComponent.Serializer.toJson(this.customName));
     //  }
-    return super.write(tag);
+    return super.save(tag);
   }
 
   @Override
-  public void read(BlockState state,CompoundNBT tag) {
+  public void load(BlockState state,CompoundNBT tag) {
     CompoundNBT invTag = tag.getCompound("inv");
     input.deserializeNBT(invTag);
     //  if (tag.contains("CustomName", 8)) {
     //    this.customName = ITextComponent.Serializer.fromJson(tag.getString("CustomName"));
     //   }
-    super.read(state,tag);
+    super.load(state,tag);
   }
 
   @Nonnull
@@ -58,23 +58,23 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
   @Nullable
   @Override
   public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) {
-    return new CraftingStationContainer(id, playerInventory, world, pos);
+    return new CraftingStationContainer(id, playerInventory, level, worldPosition);
   }
 
   @Nonnull
   @Override
   public CompoundNBT getUpdateTag() {
-    return write(new CompoundNBT());    // okay to send entire inventory on chunk load
+    return save(new CompoundNBT());    // okay to send entire inventory on chunk load
   }
 
   @Override
   public SUpdateTileEntityPacket getUpdatePacket() {
-    return new SUpdateTileEntityPacket(getPos(), 1, getUpdateTag());
+    return new SUpdateTileEntityPacket(getBlockPos(), 1, getUpdateTag());
   }
 
   @Override
   public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
-    this.read(null,packet.getNbtCompound());
+    this.load(null,packet.getTag());
   }
 }
 

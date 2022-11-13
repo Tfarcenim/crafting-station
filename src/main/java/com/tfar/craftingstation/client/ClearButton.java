@@ -6,6 +6,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.StringTextComponent;
 
+import net.minecraft.client.gui.widget.button.Button.IPressable;
+import net.minecraft.client.gui.widget.button.Button.ITooltip;
+
 public class ClearButton extends Button {
 
 
@@ -15,9 +18,9 @@ public class ClearButton extends Button {
 
 
   @Override
-  public void renderWidget(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
+  public void renderButton(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
     Minecraft minecraft = Minecraft.getInstance();
-    minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+    minecraft.getTextureManager().bind(WIDGETS_LOCATION);
 
     RenderSystem.color3f(1, 0, 0);
 

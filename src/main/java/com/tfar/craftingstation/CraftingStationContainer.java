@@ -77,9 +77,9 @@ public class CraftingStationContainer extends Container {
 
     private static TileEntity getTileEntityAtPos(BlockPos pos, World world) {
         try {
-            return GET_TILE_ENTITY_METHOD != null ? (TileEntity) GET_TILE_ENTITY_METHOD.invoke(null, pos, world) : world.getTileEntity(pos);
+            return GET_TILE_ENTITY_METHOD != null ? (TileEntity) GET_TILE_ENTITY_METHOD.invoke(null, pos, world) : world.getBlockEntity(pos);
         } catch (IllegalAccessException | InvocationTargetException ignored) {
-            return world.getTileEntity(pos);
+            return world.getBlockEntity(pos);
         }
     }
 
@@ -101,7 +101,7 @@ public class CraftingStationContainer extends Container {
         }
 
         addPlayerSlots(inv);
-        onCraftMatrixChanged(craftMatrix);
+        slotsChanged(craftMatrix);
         if (hasSideContainers) changeContainer(currentContainer);
     }
 
@@ -115,14 +115,14 @@ public class CraftingStationContainer extends Container {
         Direction accessDir = null;
         List<TileEntity> tileEntities = new ArrayList<>();
         for (Direction dir : Direction.values()) {
-            BlockPos neighbor = pos.offset(dir);
+            BlockPos neighbor = pos.relative(dir);
 
-            TileEntity te = world.getTileEntity(neighbor);
+            TileEntity te = world.getBlockEntity(neighbor);
             if (te != null && !(te instanceof CraftingStationBlockEntity)) {
                 // if blacklisted, skip checks entirely
                 if (CraftingStation.blacklisted.contains(te.getType()))
                     continue;
-                if (te instanceof IInventory && !((IInventory) te).isUsableByPlayer(player)) {
+                if (te instanceof IInventory && !((IInventory) te).stillValid(player)) {
                     continue;
                 }
 
@@ -154,13 +154,13 @@ public class CraftingStationContainer extends Container {
     }
 
     public static IRecipe<CraftingInventory> findRecipe(CraftingInventory inv, World world, PlayerEntity player) {
-        return world.getRecipeManager().getRecipes(IRecipeType.CRAFTING).values().stream().flatMap(recipe -> {
+        return world.getRecipeManager().byType(IRecipeType.CRAFTING).values().stream().flatMap(recipe -> {
             try {
-                return Util.streamOptional(IRecipeType.CRAFTING.matches(recipe, world, inv));
+                return Util.toStream(IRecipeType.CRAFTING.tryMatch(recipe, world, inv));
             } catch (Exception e) {
                 CraftingStation.LOGGER.error("Bad recipe found: " + recipe.getId().toString());
                 CraftingStation.LOGGER.error(e.getMessage());
-                player.sendMessage(new TranslationTextComponent("text.crafting_station.error", recipe.getId().toString()).mergeStyle(TextFormatting.DARK_RED), Util.DUMMY_UUID);
+                player.sendMessage(new TranslationTextComponent("text.crafting_station.error", recipe.getId().toString()).withStyle(TextFormatting.DARK_RED), Util.NIL_UUID);
                 return null;
             }
         }).findFirst().orElse(null);
@@ -181,7 +181,7 @@ public class CraftingStationContainer extends Container {
     private void addSideContainerSlots(List<TileEntity> tes, Direction dir, int xPos, int yPos) {
         for (int i = 0; i < tes.size(); i++) {
             TileEntity te = tes.get(i);
-            containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider) te).getDisplayName() : new TranslationTextComponent(te.getBlockState().getBlock().getTranslationKey()));
+            containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider) te).getDisplayName() : new TranslationTextComponent(te.getBlockState().getBlock().getDescriptionId()));
             final int number = i;
             te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 int size = h.getSlots();
@@ -202,13 +202,13 @@ public class CraftingStationContainer extends Container {
     }
 
     public void hideSlot(Slot slot) {
-        slot.yPos = Integer.MAX_VALUE;
+        slot.y = Integer.MAX_VALUE;
     }
 
     @Override
-    public void onContainerClosed(PlayerEntity player) {
+    public void removed(PlayerEntity player) {
         tileEntity.currentContainer = currentContainer;
-        super.onContainerClosed(player);
+        super.removed(player);
     }
 
     private void addPlayerSlots(PlayerInventory playerInventory) {
@@ -236,32 +236,32 @@ public class CraftingStationContainer extends Container {
     }
 
     @Override
-    public void onCraftMatrixChanged(IInventory inventory) {
+    public void slotsChanged(IInventory inventory) {
         this.slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity player) {
+    public boolean stillValid(PlayerEntity player) {
         return true;
     }
 
     @Nonnull
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
 
         if (hasSideContainers) {
 
             return handleTransferWithSides(playerIn, index);
         } else {
 
-            Slot slot = this.inventorySlots.get(index);
+            Slot slot = this.slots.get(index);
 
-            if (slot == null || !slot.getHasStack()) {
+            if (slot == null || !slot.hasItem()) {
                 return ItemStack.EMPTY;
             }
 
-            ItemStack ret = slot.getStack().copy();
-            ItemStack stack = slot.getStack().copy();
+            ItemStack ret = slot.getItem().copy();
+            ItemStack stack = slot.getItem().copy();
 
             boolean nothingDone;
 
@@ -297,13 +297,13 @@ public class CraftingStationContainer extends Container {
     }
 
     protected ItemStack handleTransferWithSides(PlayerEntity player, int index) {
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
 
-        if (slot == null || !slot.getHasStack()) {
+        if (slot == null || !slot.hasItem()) {
             return ItemStack.EMPTY;
         }
 
-        ItemStack ret = slot.getStack().copy();
+        ItemStack ret = slot.getItem().copy();
         ItemStack stack = ret.copy();
 
         boolean nothingDone;
@@ -366,17 +366,17 @@ public class CraftingStationContainer extends Container {
 
         // if we have a recipe, fetch its result
         if (lastRecipe != null) {
-            itemstack = lastRecipe.getCraftingResult(inv);
+            itemstack = lastRecipe.assemble(inv);
         }
         // set the slot on both sides, client is for display/so the client knows about the recipe
-        result.setInventorySlotContents(0, itemstack);
+        result.setItem(0, itemstack);
 
         // update recipe on server
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             ServerPlayerEntity entityplayermp = (ServerPlayerEntity) player;
 
             // we need to sync to all players currently in the inventory
-            List<ServerPlayerEntity> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.getServerWorld());
+            List<ServerPlayerEntity> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.getLevel());
 
             // sync result to all serverside inventories to prevent duplications/recipes being blocked
             // need to do this every time as otherwise taking items of the result causes desync
@@ -393,7 +393,7 @@ public class CraftingStationContainer extends Container {
 
     private void syncResultToAllOpenWindows(final ItemStack stack, List<ServerPlayerEntity> players) {
         players.forEach(otherPlayer -> {
-            otherPlayer.openContainer.putStackInSlot(0, stack);
+            otherPlayer.containerMenu.setItem(0, stack);
             //otherPlayer.connection.sendPacket(new SPacketSetSlot(otherPlayer.openContainer.windowId, SLOT_RESULT, stack));
         });
     }
@@ -401,21 +401,21 @@ public class CraftingStationContainer extends Container {
     private void syncRecipeToAllOpenWindows(final IRecipe<CraftingInventory> lastRecipe, List<ServerPlayerEntity> players) {
         players.forEach(otherPlayer -> {
             // safe cast since hasSameContainerOpen does class checks
-            ((CraftingStationContainer) otherPlayer.openContainer).lastRecipe = lastRecipe;
-            PacketHandler.INSTANCE.sendTo(new S2CLastRecipePacket(lastRecipe), otherPlayer.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+            ((CraftingStationContainer) otherPlayer.containerMenu).lastRecipe = lastRecipe;
+            PacketHandler.INSTANCE.sendTo(new S2CLastRecipePacket(lastRecipe), otherPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
         });
     }
 
     private List<ServerPlayerEntity> getAllPlayersWithThisContainerOpen(CraftingStationContainer container, ServerWorld server) {
-        return server.getPlayers().stream()
+        return server.players().stream()
                 .filter(player -> hasSameContainerOpen(container, player))
                 .collect(Collectors.toList());
     }
 
     private boolean hasSameContainerOpen(CraftingStationContainer container, PlayerEntity playerToCheck) {
         return playerToCheck instanceof ServerPlayerEntity &&
-                playerToCheck.openContainer.getClass().isAssignableFrom(container.getClass()) &&
-                this.sameGui((CraftingStationContainer) playerToCheck.openContainer);
+                playerToCheck.containerMenu.getClass().isAssignableFrom(container.getClass()) &&
+                this.sameGui((CraftingStationContainer) playerToCheck.containerMenu);
     }
 
     public boolean sameGui(CraftingStationContainer otherContainer) {
@@ -425,18 +425,18 @@ public class CraftingStationContainer extends Container {
     @Nonnull
     protected ItemStack notifySlotAfterTransfer(PlayerEntity player, @Nonnull ItemStack stack, @Nonnull ItemStack original, Slot slot) {
         // notify slot
-        slot.onSlotChange(stack, original);
+        slot.onQuickCraft(stack, original);
 
         if (stack.getCount() == original.getCount()) {
             return ItemStack.EMPTY;
         }
 
         // update slot we pulled from
-        slot.putStack(stack);
+        slot.set(stack);
         slot.onTake(player, stack);
 
-        if (slot.getHasStack() && slot.getStack().isEmpty()) {
-            slot.putStack(ItemStack.EMPTY);
+        if (slot.hasItem() && slot.getItem().isEmpty()) {
+            slot.set(ItemStack.EMPTY);
         }
 
         return original;
@@ -448,7 +448,7 @@ public class CraftingStationContainer extends Container {
     }
 
     protected boolean moveToPlayerInventory(@Nonnull ItemStack itemstack) {
-        return this.mergeItemStack(itemstack, 10 + subContainerSize, this.inventorySlots.size(), false);
+        return this.moveItemStackTo(itemstack, 10 + subContainerSize, this.slots.size(), false);
     }
 
     protected boolean refillSideInventory(@Nonnull ItemStack itemStack) {
@@ -456,12 +456,12 @@ public class CraftingStationContainer extends Container {
     }
 
     protected boolean moveToCraftingStation(@Nonnull ItemStack itemstack) {
-        return this.mergeItemStack(itemstack, 1, 10, false);
+        return this.moveItemStackTo(itemstack, 1, 10, false);
     }
 
     // Fix for a vanilla bug: doesn't take Slot.getMaxStackSize into account
     @Override
-    protected boolean mergeItemStack(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
+    protected boolean moveItemStackTo(@Nonnull ItemStack stack, int startIndex, int endIndex, boolean useEndIndex) {
         boolean didSomething = mergeItemStackRefill(stack, startIndex, endIndex);
         if (!stack.isEmpty()) didSomething |= mergeItemStackMove(stack, startIndex, endIndex);
         return didSomething;
@@ -481,25 +481,25 @@ public class CraftingStationContainer extends Container {
 
             for (int k = startIndex; k < endIndex; k++) {
                 if (stack.isEmpty()) break;
-                targetSlot = this.inventorySlots.get(k);
-                slotStack = targetSlot.getStack();
+                targetSlot = this.slots.get(k);
+                slotStack = targetSlot.getItem();
 
                 if (!slotStack.isEmpty()
                         && slotStack.getItem() == stack.getItem()
-                        && ItemStack.areItemStackTagsEqual(stack, slotStack)
-                        && this.canMergeSlot(stack, targetSlot)) {
+                        && ItemStack.tagMatches(stack, slotStack)
+                        && this.canTakeItemForPickAll(stack, targetSlot)) {
                     int l = slotStack.getCount() + stack.getCount();
-                    int limit = targetSlot.getItemStackLimit(stack);
+                    int limit = targetSlot.getMaxStackSize(stack);
 
                     if (l <= limit) {
                         stack.setCount(0);
                         slotStack.setCount(l);
-                        targetSlot.onSlotChanged();
+                        targetSlot.setChanged();
                         didSomething = true;
                     } else if (slotStack.getCount() < limit) {
                         stack.shrink(limit - slotStack.getCount());
                         slotStack.setCount(limit);
-                        targetSlot.onSlotChanged();
+                        targetSlot.setChanged();
                         didSomething = true;
                     }
                 }
@@ -515,12 +515,12 @@ public class CraftingStationContainer extends Container {
         boolean didSomething = false;
 
         for (int k = startIndex; k < endIndex; k++) {
-            Slot targetSlot = this.inventorySlots.get(k);
-            ItemStack slotStack = targetSlot.getStack();
+            Slot targetSlot = this.slots.get(k);
+            ItemStack slotStack = targetSlot.getItem();
 
-            if (slotStack.isEmpty() && targetSlot.isItemValid(stack) && this.canMergeSlot(stack, targetSlot)) // Forge: Make sure to respect isItemValid in the slot.
+            if (slotStack.isEmpty() && targetSlot.mayPlace(stack) && this.canTakeItemForPickAll(stack, targetSlot)) // Forge: Make sure to respect isItemValid in the slot.
             {
-                int limit = targetSlot.getItemStackLimit(stack);
+                int limit = targetSlot.getMaxStackSize(stack);
                 ItemStack stack2 = stack.copy();
                 if (stack2.getCount() > limit) {
                     stack2.setCount(limit);
@@ -528,8 +528,8 @@ public class CraftingStationContainer extends Container {
                 } else {
                     stack.setCount(0);
                 }
-                targetSlot.putStack(stack2);
-                targetSlot.onSlotChanged();
+                targetSlot.set(stack2);
+                targetSlot.setChanged();
                 didSomething = true;
 
                 if (stack.isEmpty()) {
@@ -542,17 +542,17 @@ public class CraftingStationContainer extends Container {
 
 
     @Override
-    public boolean canMergeSlot(ItemStack stack, Slot slot) {
-        return slot.inventory != craftResult && super.canMergeSlot(stack, slot);
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
+        return slot.container != craftResult && super.canTakeItemForPickAll(stack, slot);
     }
 
     public void updateSlotPositions(int offset) {
         Pair<Integer, Integer> range = containerStarts.get(currentContainer);
         int start = range.getLeft();
         for (int i = start; i < range.getRight(); i++) {
-            Slot slot = inventorySlots.get(i);
+            Slot slot = slots.get(i);
             int index = (i - start) / 6 - offset;
-            slot.yPos = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
+            slot.y = (index >= 9 || index < 0) ? -10000 : 17 + 18 * index;
         }
     }
 
@@ -562,16 +562,16 @@ public class CraftingStationContainer extends Container {
         int start = range.getLeft();
         int finish = range.getRight();
         for (int i = 10; i < subContainerSize + 10; i++) {
-            Slot slot = this.inventorySlots.get(i);
+            Slot slot = this.slots.get(i);
             if (slot instanceof BigSlot && (i < start || i >= finish)) hideSlot(slot);
         }
         for (int i = start; i < finish; i++) {
-            Slot slot = inventorySlots.get(i);
+            Slot slot = slots.get(i);
             int row = (i - start) / 6;
             int column = (i - start) % 6;
-            slot.yPos = (row >= 9 || row < 0) ? -10000 : 17 + 18 * row;
+            slot.y = (row >= 9 || row < 0) ? -10000 : 17 + 18 * row;
             final int offsetx = needsScroll() ? 0 : 8;
-            slot.xPos = 18 * column - 125 + offsetx;
+            slot.x = 18 * column - 125 + offsetx;
 
         }
     }
@@ -579,7 +579,7 @@ public class CraftingStationContainer extends Container {
     public void updateLastRecipeFromServer(IRecipe<CraftingInventory> recipe) {
         lastRecipe = recipe;
         // if no recipe, set to empty to prevent ghost outputs when another player grabs the result
-        this.craftResult.setInventorySlotContents(0, recipe != null ? recipe.getCraftingResult(craftMatrix) : ItemStack.EMPTY);
+        this.craftResult.setItem(0, recipe != null ? recipe.assemble(craftMatrix) : ItemStack.EMPTY);
     }
 
     public boolean needsScroll() {

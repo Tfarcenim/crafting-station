@@ -29,19 +29,21 @@ import java.util.stream.IntStream;
 import static com.tfar.craftingstation.CraftingStationBlock.FACING;
 import static com.tfar.craftingstation.CraftingStationBlock.dropItems;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class CraftingStationSlabBlock extends SlabBlock {
 
 
   public CraftingStationSlabBlock(Properties properties) {
     super(properties);
-    this.stateContainer.getBaseState().with(FACING, Direction.NORTH);
+    this.stateDefinition.any().setValue(FACING, Direction.NORTH);
 
   }
 
   @Override
-  public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
-    if (!world.isRemote) {
-      INamedContainerProvider iNamedContainerProvider = getContainer(state,world,pos);
+  public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+    if (!world.isClientSide) {
+      INamedContainerProvider iNamedContainerProvider = getMenuProvider(state,world,pos);
       if (iNamedContainerProvider != null) {
         NetworkHooks.openGui((ServerPlayerEntity) player, iNamedContainerProvider, pos);
       }
@@ -50,8 +52,8 @@ public class CraftingStationSlabBlock extends SlabBlock {
   }
 
   @Override
-  public INamedContainerProvider getContainer(BlockState state, World world, BlockPos pos) {
-    TileEntity te = world.getTileEntity(pos);
+  public INamedContainerProvider getMenuProvider(BlockState state, World world, BlockPos pos) {
+    TileEntity te = world.getBlockEntity(pos);
     return te instanceof CraftingStationBlockEntity ? (INamedContainerProvider) te : null;
   }
 
@@ -67,34 +69,34 @@ public class CraftingStationSlabBlock extends SlabBlock {
   }
 
   @Override
-  public void onReplaced(BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
+  public void onRemove(BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
     if (state.getBlock() != newState.getBlock()) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
+      TileEntity tileentity = worldIn.getBlockEntity(pos);
       if (tileentity instanceof CraftingStationBlockEntity) {
         dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
-        worldIn.updateComparatorOutputLevel(pos, this);
+        worldIn.updateNeighbourForOutputSignal(pos, this);
       }
-      super.onReplaced(state, worldIn, pos, newState, isMoving);
+      super.onRemove(state, worldIn, pos, newState, isMoving);
     }
   }
 
   @Nonnull
   public BlockState rotate(BlockState p_185499_1_, Rotation p_185499_2_) {
-    return p_185499_1_.with(FACING, p_185499_2_.rotate(p_185499_1_.get(FACING)));
+    return p_185499_1_.setValue(FACING, p_185499_2_.rotate(p_185499_1_.getValue(FACING)));
   }
 
   @Nonnull
   public BlockState mirror(BlockState p_185471_1_, Mirror p_185471_2_) {
-    return p_185471_1_.rotate(p_185471_2_.toRotation(p_185471_1_.get(FACING)));
+    return p_185471_1_.rotate(p_185471_2_.getRotation(p_185471_1_.getValue(FACING)));
   }
 
-  protected void fillStateContainer(StateContainer.Builder<Block, BlockState> p_206840_1_) {
-    super.fillStateContainer(p_206840_1_);
+  protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_206840_1_) {
+    super.createBlockStateDefinition(p_206840_1_);
     p_206840_1_.add(FACING);
   }
 
   @Nullable
   public BlockState getStateForPlacement(BlockItemUseContext p_196258_1_) {
-    return super.getStateForPlacement(p_196258_1_).with(FACING, p_196258_1_.getPlacementHorizontalFacing());
+    return super.getStateForPlacement(p_196258_1_).setValue(FACING, p_196258_1_.getHorizontalDirection());
   }
 }

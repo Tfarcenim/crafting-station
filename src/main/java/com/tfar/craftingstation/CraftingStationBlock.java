@@ -32,45 +32,47 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class CraftingStationBlock extends Block implements IWaterLoggable {
 
   public static final VoxelShape shape;
 
   public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-  public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+  public static final DirectionProperty FACING = HorizontalBlock.FACING;
 
 
   public CraftingStationBlock(Properties p_i48440_1_) {
     super(p_i48440_1_);
-    this.stateContainer.getBaseState().with(FACING, Direction.NORTH).with(WATERLOGGED, false);
+    this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false);
   }
 
   static {
     VoxelShape[] shapes = new VoxelShape[5];
 
-    shapes[0] = Block.makeCuboidShape(0, 12, 0, 16, 16, 16);
-    shapes[1] = Block.makeCuboidShape(0, 0, 0, 4, 12, 4);
-    shapes[2] = Block.makeCuboidShape(12, 0, 0, 16, 12, 4);
-    shapes[3] = Block.makeCuboidShape(0, 0, 12, 4, 12, 16);
-    shapes[4] = Block.makeCuboidShape(12, 0, 12, 16, 12, 16);
+    shapes[0] = Block.box(0, 12, 0, 16, 16, 16);
+    shapes[1] = Block.box(0, 0, 0, 4, 12, 4);
+    shapes[2] = Block.box(12, 0, 0, 16, 12, 4);
+    shapes[3] = Block.box(0, 0, 12, 4, 12, 16);
+    shapes[4] = Block.box(12, 0, 12, 16, 12, 16);
 
     shape = VoxelShapes.or(shapes[0], shapes[1], shapes[2], shapes[3], shapes[4]);
   }
 
   @Override
-  public ActionResultType onBlockActivated(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
-    if (!world.isRemote) {
-      TileEntity tileEntity = world.getTileEntity(pos);
+  public ActionResultType use(BlockState p_225533_1_, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+    if (!world.isClientSide) {
+      TileEntity tileEntity = world.getBlockEntity(pos);
       if (tileEntity instanceof INamedContainerProvider) {
-        NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tileEntity, tileEntity.getPos());
+        NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tileEntity, tileEntity.getBlockPos());
       }
     }
     return ActionResultType.SUCCESS;
   }
 
   @Override
-  public INamedContainerProvider getContainer(BlockState state, World world, BlockPos pos) {
-    TileEntity te = world.getTileEntity(pos);
+  public INamedContainerProvider getMenuProvider(BlockState state, World world, BlockPos pos) {
+    TileEntity te = world.getBlockEntity(pos);
     return te instanceof CraftingStationBlockEntity ? (INamedContainerProvider) te : null;
   }
 
@@ -86,19 +88,19 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
   }
 
   @Override
-  public void onReplaced(BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
+  public void onRemove(BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
     if (state.getBlock() != newState.getBlock()) {
-      TileEntity tileentity = worldIn.getTileEntity(pos);
+      TileEntity tileentity = worldIn.getBlockEntity(pos);
       if (tileentity instanceof CraftingStationBlockEntity) {
         dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
-        worldIn.updateComparatorOutputLevel(pos, this);
+        worldIn.updateNeighbourForOutputSignal(pos, this);
       }
-      super.onReplaced(state, worldIn, pos, newState, isMoving);
+      super.onRemove(state, worldIn, pos, newState, isMoving);
     }
   }
 
   public static void dropItems(IItemHandler inv, World world, BlockPos pos) {
-    IntStream.range(0, inv.getSlots()).mapToObj(inv::getStackInSlot).filter(s -> !s.isEmpty()).forEach(stack -> InventoryHelper.spawnItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack));
+    IntStream.range(0, inv.getSlots()).mapToObj(inv::getStackInSlot).filter(s -> !s.isEmpty()).forEach(stack -> InventoryHelper.dropItemStack(world, pos.getX(), pos.getY(), pos.getZ(), stack));
   }
 
   @Override
@@ -108,28 +110,28 @@ public class CraftingStationBlock extends Block implements IWaterLoggable {
 
   @Nonnull
   public BlockState rotate(BlockState p_185499_1_, Rotation p_185499_2_) {
-    return p_185499_1_.with(FACING, p_185499_2_.rotate(p_185499_1_.get(FACING)));
+    return p_185499_1_.setValue(FACING, p_185499_2_.rotate(p_185499_1_.getValue(FACING)));
   }
 
   @Nonnull
   public BlockState mirror(BlockState p_185471_1_, Mirror p_185471_2_) {
-    return p_185471_1_.rotate(p_185471_2_.toRotation(p_185471_1_.get(FACING)));
+    return p_185471_1_.rotate(p_185471_2_.getRotation(p_185471_1_.getValue(FACING)));
   }
 
-  protected void fillStateContainer(StateContainer.Builder<Block, BlockState> p_206840_1_) {
+  protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_206840_1_) {
     p_206840_1_.add(WATERLOGGED,FACING);
   }
 
   @Nonnull
   public FluidState getFluidState(BlockState p_204507_1_) {
-    return p_204507_1_.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(p_204507_1_);
+    return p_204507_1_.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(p_204507_1_);
   }
 
   @Nullable
   public BlockState getStateForPlacement(BlockItemUseContext p_196258_1_) {
-    IWorld lvt_2_1_ = p_196258_1_.getWorld();
-    BlockPos lvt_3_1_ = p_196258_1_.getPos();
-    boolean lvt_4_1_ = lvt_2_1_.getFluidState(lvt_3_1_).getFluid() == Fluids.WATER;
-    return this.getDefaultState().with(FACING, p_196258_1_.getPlacementHorizontalFacing()).with(WATERLOGGED, lvt_4_1_);
+    IWorld lvt_2_1_ = p_196258_1_.getLevel();
+    BlockPos lvt_3_1_ = p_196258_1_.getClickedPos();
+    boolean lvt_4_1_ = lvt_2_1_.getFluidState(lvt_3_1_).getType() == Fluids.WATER;
+    return this.defaultBlockState().setValue(FACING, p_196258_1_.getHorizontalDirection()).setValue(WATERLOGGED, lvt_4_1_);
   }
 }

@@ -31,19 +31,19 @@ public class S2CLastRecipePacket {
 
 
   public S2CLastRecipePacket(PacketBuffer buf) {
-    rec = new ResourceLocation(buf.readString());
+    rec = new ResourceLocation(buf.readUtf());
   }
 
   public void encode(PacketBuffer buf) {
-    buf.writeString(rec.toString());
+    buf.writeUtf(rec.toString());
   }
 
   @SuppressWarnings("unchecked")
   public void handle(Supplier<Context> ctx) {
     ctx.get().enqueueWork(() -> {
-      if (Minecraft.getInstance().currentScreen instanceof CraftingStationScreen) {
-        IRecipe<?> r = Minecraft.getInstance().world.getRecipeManager().getRecipe(rec).orElse(null);
-        ((CraftingStationScreen) Minecraft.getInstance().currentScreen).getContainer().updateLastRecipeFromServer((IRecipe<CraftingInventory>) r);
+      if (Minecraft.getInstance().screen instanceof CraftingStationScreen) {
+        IRecipe<?> r = Minecraft.getInstance().level.getRecipeManager().byKey(rec).orElse(null);
+        ((CraftingStationScreen) Minecraft.getInstance().screen).getMenu().updateLastRecipeFromServer((IRecipe<CraftingInventory>) r);
       }
     });
     ctx.get().setPacketHandled(true);

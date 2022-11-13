@@ -29,7 +29,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
    */
   @Nonnull
   @Override
-  public ItemStack getStackInSlot(int slot) {
+  public ItemStack getItem(int slot) {
     validate(slot);
     return inv.getStackInSlot(slot);
   }
@@ -41,7 +41,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   }
 
   public boolean isValid(int slot){
-    return slot >= 0 && slot < getSizeInventory();
+    return slot >= 0 && slot < getContainerSize();
   }
 
   /**
@@ -49,7 +49,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
    */
   @Nonnull
   @Override
-  public ItemStack decrStackSize(int slot, int count) {
+  public ItemStack removeItem(int slot, int count) {
     validate(slot);
     ItemStack stack = inv.extractItem(slot,count,false);
     if (!stack.isEmpty())
@@ -61,7 +61,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
    * Sets the contents of this slot to the provided stack.
    */
   @Override
-  public void setInventorySlotContents(int slot,@Nonnull ItemStack stack) {
+  public void setItem(int slot,@Nonnull ItemStack stack) {
     validate(slot);
     inv.setStackInSlot(slot, stack);
     onCraftMatrixChanged();
@@ -72,12 +72,12 @@ public class CraftingInventoryPersistant extends CraftingInventory {
    */
   @Nonnull
   @Override
-  public ItemStack removeStackFromSlot(int index) {
+  public ItemStack removeItemNoUpdate(int index) {
     validate(index);
-    ItemStack s = getStackInSlot(index);
+    ItemStack s = getItem(index);
     if(s.isEmpty()) return ItemStack.EMPTY;
     onCraftMatrixChanged();
-    setInventorySlotContents(index, ItemStack.EMPTY);
+    setItem(index, ItemStack.EMPTY);
     return s;
   }
 
@@ -91,7 +91,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
   }
 
   @Override
-  public void clear(){
+  public void clearContent(){
     //dont
   }
 
@@ -106,7 +106,7 @@ public class CraftingInventoryPersistant extends CraftingInventory {
 
   public void onCraftMatrixChanged() {
     if(!doNotCallUpdates) {
-      this.eventHandler.onCraftMatrixChanged(this);
+      this.menu.slotsChanged(this);
     }
   }
 }
