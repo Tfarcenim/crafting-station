@@ -1,5 +1,6 @@
 package tfar.craftingstation;
 
+import net.minecraft.world.inventory.ContainerData;
 import tfar.craftingstation.init.ModBlockEntityTypes;
 import tfar.craftingstation.util.CraftingStationItemHandler;
 import net.minecraft.core.BlockPos;
@@ -21,7 +22,24 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
 
   public CraftingStationItemHandler input;
 
-  public int currentContainer = 0;
+ private int currentContainer = 0;
+
+ ContainerData data = new ContainerData() {
+   @Override
+   public int get(int pIndex) {
+     return currentContainer;
+   }
+
+   @Override
+   public void set(int pIndex, int pValue) {
+     currentContainer = pValue;
+   }
+
+   @Override
+   public int getCount() {
+     return 1;
+   }
+ };
 
   public CraftingStationBlockEntity(BlockPos pPos, BlockState pState) {
     super(ModBlockEntityTypes.crafting_station,pPos,pState);
@@ -57,7 +75,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
   @Nullable
   @Override
   public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-    return new CraftingStationContainer(id, playerInventory, worldPosition);
+    return new CraftingStationContainer(id, playerInventory, worldPosition,data);
   }
 
   @Nonnull

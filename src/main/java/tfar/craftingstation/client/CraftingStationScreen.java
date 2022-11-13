@@ -43,9 +43,13 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
     super.init();
     if (this.menu.hasSideContainers) {
       for (int i = 0; i < menu.containerStarts.size(); i++) {
-        addRenderableWidget(new TabButton(leftPos - 120 + 20 * i, topPos - 22, 22, 22, button -> {
-          changeContainer(((TabButton)button).index);
-        },i,menu.blocks.get(i)));
+
+        Button.OnTooltip widget = (button, poseStack, x, y) -> {
+
+          this.renderTooltip(poseStack, ((TabButton)button).stack, x, y);
+
+        };
+        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),widget,i,menu.blocks.get(i)));
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
@@ -81,8 +85,16 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
   protected void renderLabels(PoseStack stack,int p_146979_1_, int p_146979_2_) {
     super.renderLabels(stack, p_146979_1_, p_146979_2_);
     if (menu.hasSideContainers){
-      this.font.draw(stack,menu.containerNames.get(menu.currentContainer).getString(),-120,6, 0x404040);
+      this.font.draw(stack, getTruncatedString(),-122,6, 0x404040);
     }
+  }
+
+  String getTruncatedString() {
+    String string = menu.containerNames.get(menu.getCurrentContainer()).getString();
+    if (string.length() > 23) {
+      return string.substring(0, 23) + "...";
+    }
+    return string;
   }
 
   @Override

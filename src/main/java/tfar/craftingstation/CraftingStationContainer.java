@@ -1,5 +1,6 @@
 package tfar.craftingstation;
 
+import net.minecraft.world.inventory.*;
 import tfar.craftingstation.init.ModMenuTypes;
 import tfar.craftingstation.network.PacketHandler;
 import tfar.craftingstation.network.S2CLastRecipePacket;
@@ -16,10 +17,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.ResultContainer;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -53,7 +50,6 @@ public class CraftingStationContainer extends AbstractContainerMenu {
                 doubleSlabsGetTileEntity1 = doubleSlabsFlags.getDeclaredMethod("getTileEntityAtPos", BlockPos.class, BlockGetter.class);
             } catch (ClassNotFoundException | NoSuchMethodException e) {
                 e.printStackTrace();
-                doubleSlabsGetTileEntity1 = null;
             }
         }
         GET_TILE_ENTITY_METHOD = doubleSlabsGetTileEntity1;
@@ -68,12 +64,13 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
     public final List<Component> containerNames = new ArrayList<>();
     private final Player player;
+    private ContainerData data;
     public Recipe<CraftingContainer> lastRecipe;
     public int subContainerSize = 0;
     public boolean hasSideContainers;
-    public int currentContainer;
     protected Recipe<CraftingContainer> lastLastRecipe;
 
+    protected DataSlot slot;
 
     private static BlockEntity getTileEntityAtPos(BlockPos pos, Level world) {
         try {
@@ -83,14 +80,19 @@ public class CraftingStationContainer extends AbstractContainerMenu {
         }
     }
 
-
     public CraftingStationContainer(int id, Inventory inv, BlockPos pos) {
-        super(ModMenuTypes.crafting_station, id);
+        this(id, inv, pos,new SimpleContainerData(1));
+    }
 
+
+    public CraftingStationContainer(int id, Inventory inv, BlockPos pos, ContainerData data) {
+        super(ModMenuTypes.crafting_station, id);
         this.player = inv.player;
+        this.data = data;
         this.world = player.level;
         this.tileEntity = (CraftingStationBlockEntity) getTileEntityAtPos(pos, world);
-        currentContainer = tileEntity.currentContainer;
+
+        this.data = data;
         this.craftMatrix = new CraftingInventoryPersistant(this, tileEntity.input);
         this.hasSideContainers = false;
 
@@ -102,7 +104,8 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
         addPlayerSlots(inv);
         slotsChanged(craftMatrix);
-        if (hasSideContainers) changeContainer(currentContainer);
+        if (hasSideContainers) changeContainer(getCurrentContainer());
+        addDataSlots(data);
     }
 
     //it goes crafting output slot | 0
@@ -176,7 +179,7 @@ public class CraftingStationContainer extends AbstractContainerMenu {
     private void addSideContainerSlots(List<BlockEntity> tes, Direction dir, int xPos, int yPos) {
         for (int i = 0; i < tes.size(); i++) {
             BlockEntity te = tes.get(i);
-            containerNames.add(te instanceof MenuProvider ? ((MenuProvider) te).getDisplayName() : new TranslatableComponent(te.getBlockState().getBlock().getDescriptionId()));
+            containerNames.add(te instanceof MenuProvider menuProvider? menuProvider.getDisplayName() : te.getBlockState().getBlock().getName());
             final int number = i;
             te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 int size = h.getSlots();
@@ -200,10 +203,12 @@ public class CraftingStationContainer extends AbstractContainerMenu {
         slot.y = Integer.MAX_VALUE;
     }
 
-    @Override
-    public void removed(Player player) {
-        tileEntity.currentContainer = currentContainer;
-        super.removed(player);
+    void setCurrentContainer(int container) {
+        data.set(0,container);
+    }
+
+     public int getCurrentContainer() {
+        return data.get(0);
     }
 
     private void addPlayerSlots(Inventory playerInventory) {
@@ -542,7 +547,7 @@ public class CraftingStationContainer extends AbstractContainerMenu {
     }
 
     public void updateSlotPositions(int offset) {
-        Pair<Integer, Integer> range = containerStarts.get(currentContainer);
+        Pair<Integer, Integer> range = containerStarts.get(getCurrentContainer());
         int start = range.getLeft();
         for (int i = start; i < range.getRight(); i++) {
             Slot slot = slots.get(i);
@@ -552,8 +557,8 @@ public class CraftingStationContainer extends AbstractContainerMenu {
     }
 
     public void changeContainer(int newContainer) {
-        this.currentContainer = newContainer;
-        Pair<Integer, Integer> range = containerStarts.get(currentContainer);
+        setCurrentContainer(newContainer);
+        Pair<Integer, Integer> range = containerStarts.get(getCurrentContainer());
         int start = range.getLeft();
         int finish = range.getRight();
         for (int i = 10; i < subContainerSize + 10; i++) {
@@ -587,7 +592,10 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
     public int getSlotCount() {
         if (containerStarts.isEmpty()) return 0;
-        Pair<Integer, Integer> range = containerStarts.get(currentContainer);
+        if (getCurrentContainer() >= containerStarts.size()) {
+            setCurrentContainer(containerStarts.size() - 1);
+        }
+        Pair<Integer, Integer> range = containerStarts.get(getCurrentContainer());
         return range.getRight() - range.getLeft();
     }
 
