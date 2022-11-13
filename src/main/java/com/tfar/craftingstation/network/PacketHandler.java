@@ -1,7 +1,7 @@
 package com.tfar.craftingstation.network;
 
 import com.tfar.craftingstation.CraftingStation;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 

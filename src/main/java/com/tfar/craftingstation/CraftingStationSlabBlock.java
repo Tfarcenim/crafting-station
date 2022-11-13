@@ -1,24 +1,24 @@
 package com.tfar.craftingstation;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,13 @@ import java.util.stream.IntStream;
 import static com.tfar.craftingstation.CraftingStationBlock.FACING;
 import static com.tfar.craftingstation.CraftingStationBlock.dropItems;
 
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 
 public class CraftingStationSlabBlock extends SlabBlock {
 
@@ -41,20 +47,20 @@ public class CraftingStationSlabBlock extends SlabBlock {
   }
 
   @Override
-  public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
+  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult p_225533_6_) {
     if (!world.isClientSide) {
-      INamedContainerProvider iNamedContainerProvider = getMenuProvider(state,world,pos);
+      MenuProvider iNamedContainerProvider = getMenuProvider(state,world,pos);
       if (iNamedContainerProvider != null) {
-        NetworkHooks.openGui((ServerPlayerEntity) player, iNamedContainerProvider, pos);
+        NetworkHooks.openGui((ServerPlayer) player, iNamedContainerProvider, pos);
       }
     }
-    return ActionResultType.SUCCESS;
+    return InteractionResult.SUCCESS;
   }
 
   @Override
-  public INamedContainerProvider getMenuProvider(BlockState state, World world, BlockPos pos) {
-    TileEntity te = world.getBlockEntity(pos);
-    return te instanceof CraftingStationBlockEntity ? (INamedContainerProvider) te : null;
+  public MenuProvider getMenuProvider(BlockState state, Level world, BlockPos pos) {
+    BlockEntity te = world.getBlockEntity(pos);
+    return te instanceof CraftingStationBlockEntity ? (MenuProvider) te : null;
   }
 
   @Override
@@ -64,14 +70,14 @@ public class CraftingStationSlabBlock extends SlabBlock {
 
   @Nullable
   @Override
-  public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+  public BlockEntity createTileEntity(BlockState state, BlockGetter world) {
     return new CraftingStationBlockEntity();
   }
 
   @Override
-  public void onRemove(BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
+  public void onRemove(BlockState state, @Nonnull Level worldIn, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
     if (state.getBlock() != newState.getBlock()) {
-      TileEntity tileentity = worldIn.getBlockEntity(pos);
+      BlockEntity tileentity = worldIn.getBlockEntity(pos);
       if (tileentity instanceof CraftingStationBlockEntity) {
         dropItems(((CraftingStationBlockEntity) tileentity).input, worldIn, pos);
         worldIn.updateNeighbourForOutputSignal(pos, this);
@@ -90,13 +96,13 @@ public class CraftingStationSlabBlock extends SlabBlock {
     return p_185471_1_.rotate(p_185471_2_.getRotation(p_185471_1_.getValue(FACING)));
   }
 
-  protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_206840_1_) {
+  protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> p_206840_1_) {
     super.createBlockStateDefinition(p_206840_1_);
     p_206840_1_.add(FACING);
   }
 
   @Nullable
-  public BlockState getStateForPlacement(BlockItemUseContext p_196258_1_) {
+  public BlockState getStateForPlacement(BlockPlaceContext p_196258_1_) {
     return super.getStateForPlacement(p_196258_1_).setValue(FACING, p_196258_1_.getHorizontalDirection());
   }
 }

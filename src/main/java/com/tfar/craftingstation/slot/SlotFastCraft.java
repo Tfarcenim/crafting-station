@@ -3,11 +3,11 @@ package com.tfar.craftingstation.slot;
 
 import com.tfar.craftingstation.CraftingInventoryPersistant;
 import com.tfar.craftingstation.CraftingStationContainer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.CraftingResultSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.hooks.BasicEventHooks;
 
@@ -18,12 +18,12 @@ import net.minecraftforge.fml.hooks.BasicEventHooks;
  * <p>
  * Basically it makes crafting less laggy
  */
-public class SlotFastCraft extends CraftingResultSlot {
+public class SlotFastCraft extends ResultSlot {
 
   private final CraftingStationContainer container;
   protected CraftingInventoryPersistant craftingInventoryPersistant;
 
-  public SlotFastCraft(CraftingStationContainer container, CraftingInventoryPersistant craftingInventoryPersistant, IInventory resultInventory, int slotIndex, int xPosition, int yPosition, PlayerEntity player) {
+  public SlotFastCraft(CraftingStationContainer container, CraftingInventoryPersistant craftingInventoryPersistant, Container resultInventory, int slotIndex, int xPosition, int yPosition, Player player) {
     super(player, craftingInventoryPersistant, resultInventory, slotIndex, xPosition, yPosition);
     this.container = container;
     this.craftingInventoryPersistant = craftingInventoryPersistant;
@@ -51,7 +51,7 @@ public class SlotFastCraft extends CraftingResultSlot {
   }
 
   @Override
-  public ItemStack onTake(PlayerEntity thePlayer, ItemStack craftingResult) {
+  public ItemStack onTake(Player thePlayer, ItemStack craftingResult) {
     this.checkTakeAchievements(craftingResult);
     net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
     /* CHANGE BEGINS HERE */

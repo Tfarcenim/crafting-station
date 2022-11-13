@@ -1,28 +1,28 @@
 package com.tfar.craftingstation.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.tfar.craftingstation.CraftingStationBlockEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.properties.SlabType;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import com.mojang.math.Vector3f;
 
-public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<CraftingStationBlockEntity> {
+public class CraftingStationBlockEntityRenderer extends BlockEntityRenderer<CraftingStationBlockEntity> {
 
-  public CraftingStationBlockEntityRenderer(TileEntityRendererDispatcher p_i226006_1_) {
+  public CraftingStationBlockEntityRenderer(BlockEntityRenderDispatcher p_i226006_1_) {
     super(p_i226006_1_);
   }
 
   @Override
-  public void render(CraftingStationBlockEntity blockEntity, float var2, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int light, int var6) {
+  public void render(CraftingStationBlockEntity blockEntity, float var2, PoseStack matrixStack, MultiBufferSource iRenderTypeBuffer, int light, int var6) {
     if (this.renderer.camera != null) {
 
       if (blockEntity.input.isEmpty())return;
@@ -48,8 +48,8 @@ public class CraftingStationBlockEntityRenderer extends TileEntityRenderer<Craft
           //scale x,y,z
           matrixStack.scale(0.25F, 0.25F, 0.25F);
 
-          int lightAbove = WorldRenderer.getLightColor(blockEntity.getLevel(), blockEntity.getBlockPos().above());
-          Minecraft.getInstance().getItemRenderer().renderStatic(item, ItemCameraTransforms.TransformType.FIXED,
+          int lightAbove = LevelRenderer.getLightColor(blockEntity.getLevel(), blockEntity.getBlockPos().above());
+          Minecraft.getInstance().getItemRenderer().renderStatic(item, ItemTransforms.TransformType.FIXED,
                   lightAbove, OverlayTexture.NO_OVERLAY, matrixStack, iRenderTypeBuffer);
           //popmatrix
           matrixStack.popPose();

@@ -1,24 +1,24 @@
 package com.tfar.craftingstation.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.TextComponent;
 
-import net.minecraft.client.gui.widget.button.Button.IPressable;
-import net.minecraft.client.gui.widget.button.Button.ITooltip;
+import net.minecraft.client.gui.components.Button.OnPress;
+import net.minecraft.client.gui.components.Button.OnTooltip;
 
 public class ClearButton extends Button {
 
 
-  public ClearButton(int x, int y, int widthIn, int heightIn, IPressable callback,ITooltip tooltip) {
-    super(x, y, widthIn, heightIn,new StringTextComponent(""), callback,tooltip);
+  public ClearButton(int x, int y, int widthIn, int heightIn, OnPress callback,OnTooltip tooltip) {
+    super(x, y, widthIn, heightIn,new TextComponent(""), callback,tooltip);
   }
 
 
   @Override
-  public void renderButton(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
+  public void renderButton(PoseStack stack,int mouseX, int mouseY, float partialTicks) {
     Minecraft minecraft = Minecraft.getInstance();
     minecraft.getTextureManager().bind(WIDGETS_LOCATION);
 

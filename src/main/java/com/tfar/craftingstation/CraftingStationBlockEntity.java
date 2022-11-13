@@ -1,23 +1,23 @@
 package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.util.CraftingStationItemHandler;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CraftingStationBlockEntity extends TileEntity implements INamedContainerProvider {
+public class CraftingStationBlockEntity extends BlockEntity implements MenuProvider {
 
   public CraftingStationItemHandler input;
 
@@ -30,8 +30,8 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
 
   @Nonnull
   @Override
-  public CompoundNBT save(CompoundNBT tag) {
-    CompoundNBT compound = this.input.serializeNBT();
+  public CompoundTag save(CompoundTag tag) {
+    CompoundTag compound = this.input.serializeNBT();
     tag.put("inv", compound);
     // if (this.customName != null) {
     //   tag.putString("CustomName", ITextComponent.Serializer.toJson(this.customName));
@@ -40,8 +40,8 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
   }
 
   @Override
-  public void load(BlockState state,CompoundNBT tag) {
-    CompoundNBT invTag = tag.getCompound("inv");
+  public void load(BlockState state,CompoundTag tag) {
+    CompoundTag invTag = tag.getCompound("inv");
     input.deserializeNBT(invTag);
     //  if (tag.contains("CustomName", 8)) {
     //    this.customName = ITextComponent.Serializer.fromJson(tag.getString("CustomName"));
@@ -51,29 +51,29 @@ public class CraftingStationBlockEntity extends TileEntity implements INamedCont
 
   @Nonnull
   @Override
-  public ITextComponent getDisplayName() {
-    return new TranslationTextComponent("title.crafting_station");
+  public Component getDisplayName() {
+    return new TranslatableComponent("title.crafting_station");
   }
 
   @Nullable
   @Override
-  public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) {
+  public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
     return new CraftingStationContainer(id, playerInventory, level, worldPosition);
   }
 
   @Nonnull
   @Override
-  public CompoundNBT getUpdateTag() {
-    return save(new CompoundNBT());    // okay to send entire inventory on chunk load
+  public CompoundTag getUpdateTag() {
+    return save(new CompoundTag());    // okay to send entire inventory on chunk load
   }
 
   @Override
-  public SUpdateTileEntityPacket getUpdatePacket() {
-    return new SUpdateTileEntityPacket(getBlockPos(), 1, getUpdateTag());
+  public ClientboundBlockEntityDataPacket getUpdatePacket() {
+    return new ClientboundBlockEntityDataPacket(getBlockPos(), 1, getUpdateTag());
   }
 
   @Override
-  public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
+  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
     this.load(null,packet.getTag());
   }
 }

@@ -1,16 +1,16 @@
 package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.network.PacketHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tags.ITag;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeTagHandler;
 import net.minecraftforge.common.Tags;
@@ -42,7 +42,7 @@ public class CraftingStation {
   // Directly reference a log4j logger.
 
   public static final String MODID = "craftingstation";
-	public static final ITag<TileEntityType<?>> blacklisted
+	public static final Tag<BlockEntityType<?>> blacklisted
 					= ForgeTagHandler.makeWrapperTag(ForgeRegistries.TILE_ENTITIES,new ResourceLocation(MODID,"blacklisted"));
 
 	public static final Logger LOGGER = LogManager.getLogger();
@@ -75,7 +75,7 @@ public class CraftingStation {
 
   private void enqueueIMC(final InterModEnqueueEvent event) {
     InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
-      CompoundNBT tagCompound = new CompoundNBT();
+      CompoundTag tagCompound = new CompoundTag();
       tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
       tagCompound.putString("AlignToGrid", "left");
       return tagCompound;
@@ -98,21 +98,21 @@ public class CraftingStation {
     @SubscribeEvent
     public static void item(final RegistryEvent.Register<Item> event) {
       // register a new item here
-      Item.Properties properties = new Item.Properties().tab(ItemGroup.TAB_DECORATIONS);
+      Item.Properties properties = new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS);
       register(new BlockItem(crafting_station,properties),"crafting_station",event.getRegistry());
       register(new BlockItem(crafting_station_slab,properties),"crafting_station_slab",event.getRegistry());
     }
 
     @SubscribeEvent
-    public static void container(final RegistryEvent.Register<ContainerType<?>> event){
+    public static void container(final RegistryEvent.Register<MenuType<?>> event){
       register(IForgeContainerType.create((windowId, inv, data) ->
               new CraftingStationContainer(windowId, inv, inv.player.level, data.readBlockPos())),"crafting_station_container",event.getRegistry());
 
     }
 
     @SubscribeEvent
-    public static void tile(final RegistryEvent.Register<TileEntityType<?>> event){
-      register(TileEntityType.Builder.of(CraftingStationBlockEntity::new,crafting_station,crafting_station_slab).build(null),"crafting_station_tile",event.getRegistry());
+    public static void tile(final RegistryEvent.Register<BlockEntityType<?>> event){
+      register(BlockEntityType.Builder.of(CraftingStationBlockEntity::new,crafting_station,crafting_station_slab).build(null),"crafting_station_tile",event.getRegistry());
     }
 
     private static <T extends IForgeRegistryEntry<T>> void register(T obj, String name, IForgeRegistry<T> registry) {
@@ -123,7 +123,7 @@ public class CraftingStation {
   public static class Objects {
     public static final Block crafting_station = null;
     public static final Block crafting_station_slab = null;
-    public static final ContainerType<CraftingStationContainer> crafting_station_container = null;
-    public static final TileEntityType<CraftingStationBlockEntity> crafting_station_tile = null;
+    public static final MenuType<CraftingStationContainer> crafting_station_container = null;
+    public static final BlockEntityType<CraftingStationBlockEntity> crafting_station_tile = null;
   }
 }

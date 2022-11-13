@@ -4,29 +4,29 @@ import com.tfar.craftingstation.network.PacketHandler;
 import com.tfar.craftingstation.network.S2CLastRecipePacket;
 import com.tfar.craftingstation.slot.BigSlot;
 import com.tfar.craftingstation.slot.SlotFastCraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CraftingStationContainer extends Container {
+public class CraftingStationContainer extends AbstractContainerMenu {
     private static final Method GET_TILE_ENTITY_METHOD;
 
     static {
@@ -50,7 +50,7 @@ public class CraftingStationContainer extends Container {
         if (ModList.get().isLoaded("doubleslabs")) {
             try {
                 Class<?> doubleSlabsFlags = Class.forName("cjminecraft.doubleslabs.api.Flags");
-                doubleSlabsGetTileEntity1 = doubleSlabsFlags.getDeclaredMethod("getTileEntityAtPos", BlockPos.class, IBlockReader.class);
+                doubleSlabsGetTileEntity1 = doubleSlabsFlags.getDeclaredMethod("getTileEntityAtPos", BlockPos.class, BlockGetter.class);
             } catch (ClassNotFoundException | NoSuchMethodException e) {
                 e.printStackTrace();
                 doubleSlabsGetTileEntity1 = null;
@@ -60,31 +60,31 @@ public class CraftingStationContainer extends Container {
     }
 
     public final CraftingInventoryPersistant craftMatrix;
-    public final CraftResultInventory craftResult = new CraftResultInventory();
-    public final World world;
+    public final ResultContainer craftResult = new ResultContainer();
+    public final Level world;
     public final CraftingStationBlockEntity tileEntity;
     public final List<Pair<Integer, Integer>> containerStarts = new ArrayList<>();
     public final List<ItemStack> blocks = new ArrayList<>();
 
-    public final List<ITextComponent> containerNames = new ArrayList<>();
-    private final PlayerEntity player;
-    public IRecipe<CraftingInventory> lastRecipe;
+    public final List<Component> containerNames = new ArrayList<>();
+    private final Player player;
+    public Recipe<CraftingContainer> lastRecipe;
     public int subContainerSize = 0;
     public boolean hasSideContainers;
     public int currentContainer;
-    protected IRecipe<CraftingInventory> lastLastRecipe;
+    protected Recipe<CraftingContainer> lastLastRecipe;
 
 
-    private static TileEntity getTileEntityAtPos(BlockPos pos, World world) {
+    private static BlockEntity getTileEntityAtPos(BlockPos pos, Level world) {
         try {
-            return GET_TILE_ENTITY_METHOD != null ? (TileEntity) GET_TILE_ENTITY_METHOD.invoke(null, pos, world) : world.getBlockEntity(pos);
+            return GET_TILE_ENTITY_METHOD != null ? (BlockEntity) GET_TILE_ENTITY_METHOD.invoke(null, pos, world) : world.getBlockEntity(pos);
         } catch (IllegalAccessException | InvocationTargetException ignored) {
             return world.getBlockEntity(pos);
         }
     }
 
 
-    public CraftingStationContainer(int id, PlayerInventory inv, World world, BlockPos pos) {
+    public CraftingStationContainer(int id, Inventory inv, Level world, BlockPos pos) {
         super(CraftingStation.Objects.crafting_station_container, id);
 
         this.world = world;
@@ -113,16 +113,16 @@ public class CraftingStationContainer extends Container {
     protected void searchSideInventories(BlockPos pos) {
         // detect te
         Direction accessDir = null;
-        List<TileEntity> tileEntities = new ArrayList<>();
+        List<BlockEntity> tileEntities = new ArrayList<>();
         for (Direction dir : Direction.values()) {
             BlockPos neighbor = pos.relative(dir);
 
-            TileEntity te = world.getBlockEntity(neighbor);
+            BlockEntity te = world.getBlockEntity(neighbor);
             if (te != null && !(te instanceof CraftingStationBlockEntity)) {
                 // if blacklisted, skip checks entirely
                 if (CraftingStation.blacklisted.contains(te.getType()))
                     continue;
-                if (te instanceof IInventory && !((IInventory) te).stillValid(player)) {
+                if (te instanceof Container && !((Container) te).stillValid(player)) {
                     continue;
                 }
 
@@ -143,7 +143,7 @@ public class CraftingStationContainer extends Container {
         }
 
         if (!tileEntities.isEmpty()) {
-            for (TileEntity tileEntity : tileEntities) {
+            for (BlockEntity tileEntity : tileEntities) {
                 tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(this::accept);
             }
         }
@@ -153,14 +153,14 @@ public class CraftingStationContainer extends Container {
         }
     }
 
-    public static IRecipe<CraftingInventory> findRecipe(CraftingInventory inv, World world, PlayerEntity player) {
-        return world.getRecipeManager().byType(IRecipeType.CRAFTING).values().stream().flatMap(recipe -> {
+    public static Recipe<CraftingContainer> findRecipe(CraftingContainer inv, Level world, Player player) {
+        return world.getRecipeManager().byType(RecipeType.CRAFTING).values().stream().flatMap(recipe -> {
             try {
-                return Util.toStream(IRecipeType.CRAFTING.tryMatch(recipe, world, inv));
+                return Util.toStream(RecipeType.CRAFTING.tryMatch(recipe, world, inv));
             } catch (Exception e) {
                 CraftingStation.LOGGER.error("Bad recipe found: " + recipe.getId().toString());
                 CraftingStation.LOGGER.error(e.getMessage());
-                player.sendMessage(new TranslationTextComponent("text.crafting_station.error", recipe.getId().toString()).withStyle(TextFormatting.DARK_RED), Util.NIL_UUID);
+                player.sendMessage(new TranslatableComponent("text.crafting_station.error", recipe.getId().toString()).withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
                 return null;
             }
         }).findFirst().orElse(null);
@@ -178,10 +178,10 @@ public class CraftingStationContainer extends Container {
         }
     }
 
-    private void addSideContainerSlots(List<TileEntity> tes, Direction dir, int xPos, int yPos) {
+    private void addSideContainerSlots(List<BlockEntity> tes, Direction dir, int xPos, int yPos) {
         for (int i = 0; i < tes.size(); i++) {
-            TileEntity te = tes.get(i);
-            containerNames.add(te instanceof INamedContainerProvider ? ((INamedContainerProvider) te).getDisplayName() : new TranslationTextComponent(te.getBlockState().getBlock().getDescriptionId()));
+            BlockEntity te = tes.get(i);
+            containerNames.add(te instanceof MenuProvider ? ((MenuProvider) te).getDisplayName() : new TranslatableComponent(te.getBlockState().getBlock().getDescriptionId()));
             final int number = i;
             te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
                 int size = h.getSlots();
@@ -206,12 +206,12 @@ public class CraftingStationContainer extends Container {
     }
 
     @Override
-    public void removed(PlayerEntity player) {
+    public void removed(Player player) {
         tileEntity.currentContainer = currentContainer;
         super.removed(player);
     }
 
-    private void addPlayerSlots(PlayerInventory playerInventory) {
+    private void addPlayerSlots(Inventory playerInventory) {
         // inventory
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
@@ -236,18 +236,18 @@ public class CraftingStationContainer extends Container {
     }
 
     @Override
-    public void slotsChanged(IInventory inventory) {
+    public void slotsChanged(Container inventory) {
         this.slotChangedCraftingGrid(world, player, craftMatrix, craftResult);
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player) {
+    public boolean stillValid(Player player) {
         return true;
     }
 
     @Nonnull
     @Override
-    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(Player playerIn, int index) {
 
         if (hasSideContainers) {
 
@@ -296,7 +296,7 @@ public class CraftingStationContainer extends Container {
         }
     }
 
-    protected ItemStack handleTransferWithSides(PlayerEntity player, int index) {
+    protected ItemStack handleTransferWithSides(Player player, int index) {
         Slot slot = this.slots.get(index);
 
         if (slot == null || !slot.hasItem()) {
@@ -356,7 +356,7 @@ public class CraftingStationContainer extends Container {
         return notifySlotAfterTransfer(player, stack, ret, slot);
     }
 
-    protected void slotChangedCraftingGrid(World world, PlayerEntity player, CraftingInventory inv, CraftResultInventory result) {
+    protected void slotChangedCraftingGrid(Level world, Player player, CraftingContainer inv, ResultContainer result) {
         ItemStack itemstack = ItemStack.EMPTY;
 
         // if the recipe is no longer valid, update it
@@ -373,10 +373,10 @@ public class CraftingStationContainer extends Container {
 
         // update recipe on server
         if (!world.isClientSide) {
-            ServerPlayerEntity entityplayermp = (ServerPlayerEntity) player;
+            ServerPlayer entityplayermp = (ServerPlayer) player;
 
             // we need to sync to all players currently in the inventory
-            List<ServerPlayerEntity> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.getLevel());
+            List<ServerPlayer> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.getLevel());
 
             // sync result to all serverside inventories to prevent duplications/recipes being blocked
             // need to do this every time as otherwise taking items of the result causes desync
@@ -391,14 +391,14 @@ public class CraftingStationContainer extends Container {
         }
     }
 
-    private void syncResultToAllOpenWindows(final ItemStack stack, List<ServerPlayerEntity> players) {
+    private void syncResultToAllOpenWindows(final ItemStack stack, List<ServerPlayer> players) {
         players.forEach(otherPlayer -> {
             otherPlayer.containerMenu.setItem(0, stack);
             //otherPlayer.connection.sendPacket(new SPacketSetSlot(otherPlayer.openContainer.windowId, SLOT_RESULT, stack));
         });
     }
 
-    private void syncRecipeToAllOpenWindows(final IRecipe<CraftingInventory> lastRecipe, List<ServerPlayerEntity> players) {
+    private void syncRecipeToAllOpenWindows(final Recipe<CraftingContainer> lastRecipe, List<ServerPlayer> players) {
         players.forEach(otherPlayer -> {
             // safe cast since hasSameContainerOpen does class checks
             ((CraftingStationContainer) otherPlayer.containerMenu).lastRecipe = lastRecipe;
@@ -406,14 +406,14 @@ public class CraftingStationContainer extends Container {
         });
     }
 
-    private List<ServerPlayerEntity> getAllPlayersWithThisContainerOpen(CraftingStationContainer container, ServerWorld server) {
+    private List<ServerPlayer> getAllPlayersWithThisContainerOpen(CraftingStationContainer container, ServerLevel server) {
         return server.players().stream()
                 .filter(player -> hasSameContainerOpen(container, player))
                 .collect(Collectors.toList());
     }
 
-    private boolean hasSameContainerOpen(CraftingStationContainer container, PlayerEntity playerToCheck) {
-        return playerToCheck instanceof ServerPlayerEntity &&
+    private boolean hasSameContainerOpen(CraftingStationContainer container, Player playerToCheck) {
+        return playerToCheck instanceof ServerPlayer &&
                 playerToCheck.containerMenu.getClass().isAssignableFrom(container.getClass()) &&
                 this.sameGui((CraftingStationContainer) playerToCheck.containerMenu);
     }
@@ -423,7 +423,7 @@ public class CraftingStationContainer extends Container {
     }
 
     @Nonnull
-    protected ItemStack notifySlotAfterTransfer(PlayerEntity player, @Nonnull ItemStack stack, @Nonnull ItemStack original, Slot slot) {
+    protected ItemStack notifySlotAfterTransfer(Player player, @Nonnull ItemStack stack, @Nonnull ItemStack original, Slot slot) {
         // notify slot
         slot.onQuickCraft(stack, original);
 
@@ -576,7 +576,7 @@ public class CraftingStationContainer extends Container {
         }
     }
 
-    public void updateLastRecipeFromServer(IRecipe<CraftingInventory> recipe) {
+    public void updateLastRecipeFromServer(Recipe<CraftingContainer> recipe) {
         lastRecipe = recipe;
         // if no recipe, set to empty to prevent ghost outputs when another player grabs the result
         this.craftResult.setItem(0, recipe != null ? recipe.assemble(craftMatrix) : ItemStack.EMPTY);

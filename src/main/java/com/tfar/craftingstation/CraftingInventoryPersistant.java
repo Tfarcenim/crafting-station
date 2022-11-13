@@ -1,10 +1,10 @@
 package com.tfar.craftingstation;
 
 import com.tfar.craftingstation.util.CraftingStationItemHandler;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
-public class CraftingInventoryPersistant extends CraftingInventory {
+public class CraftingInventoryPersistant extends CraftingContainer {
 
   private boolean doNotCallUpdates;
   protected final CraftingStationItemHandler inv;
 
-  public CraftingInventoryPersistant(Container eventHandler, CraftingStationItemHandler itemHandler) {
+  public CraftingInventoryPersistant(AbstractContainerMenu eventHandler, CraftingStationItemHandler itemHandler) {
     super(eventHandler, 3, 3);
     this.inv = itemHandler;
     doNotCallUpdates = false;

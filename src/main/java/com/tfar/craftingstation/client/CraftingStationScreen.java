@@ -1,21 +1,21 @@
 package com.tfar.craftingstation.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tfar.craftingstation.CraftingStation;
 import com.tfar.craftingstation.CraftingStationContainer;
 import com.tfar.craftingstation.network.C2SClearPacket;
 import com.tfar.craftingstation.network.PacketHandler;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fml.ModList;
 
-public class CraftingStationScreen extends ContainerScreen<CraftingStationContainer> {
+public class CraftingStationScreen extends AbstractContainerScreen<CraftingStationContainer> {
   public static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
 
   public static final ResourceLocation SCROLLBAR_AND_TAB = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
@@ -33,7 +33,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
 
   private int topRow;
 
-  public CraftingStationScreen(CraftingStationContainer p_i51094_1_, PlayerInventory p_i51094_2_, ITextComponent p_i51094_3_) {
+  public CraftingStationScreen(CraftingStationContainer p_i51094_1_, Inventory p_i51094_2_, Component p_i51094_3_) {
     super(p_i51094_1_, p_i51094_2_, p_i51094_3_);
     topRow = 0;
   }
@@ -50,9 +50,9 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
 
-      Button.ITooltip tooltip =  (button, matrices, i, i1) -> {
+      Button.OnTooltip tooltip =  (button, matrices, i, i1) -> {
         this.renderTooltip(matrices,
-                this.minecraft.font.split(new TranslationTextComponent("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
+                this.minecraft.font.split(new TranslatableComponent("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
 
       };
 
@@ -72,13 +72,13 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   @Override
-  public void render(MatrixStack stack,int mouseX, int mouseY, float partialTicks) {
+  public void render(PoseStack stack,int mouseX, int mouseY, float partialTicks) {
     renderBackground(stack);
     super.render(stack,mouseX, mouseY, partialTicks);
     renderTooltip(stack,mouseX, mouseY);
   }
 
-  protected void renderLabels(MatrixStack stack,int p_146979_1_, int p_146979_2_) {
+  protected void renderLabels(PoseStack stack,int p_146979_1_, int p_146979_2_) {
     super.renderLabels(stack, p_146979_1_, p_146979_2_);
     if (menu.hasSideContainers){
       this.font.draw(stack,menu.containerNames.get(menu.currentContainer).getString(),-120,6, 0x404040);
@@ -86,7 +86,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
   }
 
   @Override
-  protected void renderBg(MatrixStack stack,float partialTicks, int mouseX, int mouseY) {
+  protected void renderBg(PoseStack stack,float partialTicks, int mouseX, int mouseY) {
     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     minecraft.getTextureManager().bind(CRAFTING_TABLE_GUI_TEXTURES);
     blit(stack,leftPos, topPos, 0, 0, imageWidth, imageHeight);
@@ -148,7 +148,7 @@ public class CraftingStationScreen extends ContainerScreen<CraftingStationContai
 
       if (mouseX <= k2 && mouseX >= k1) {
         this.currentScroll = (mouseY - j1) / (j2 - j1 - 0f);
-        currentScroll = MathHelper.clamp(currentScroll, 0, 1);
+        currentScroll = Mth.clamp(currentScroll, 0, 1);
         scrollTo(currentScroll);
       }
     }

@@ -8,9 +8,9 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -42,12 +42,12 @@ public class JeiPlugin implements IModPlugin, IGuiContainerHandler<CraftingStati
 
   @Nonnull
   @Override
-  public List<Rectangle2d> getGuiExtraAreas(CraftingStationScreen containerScreen) {
-    List<Rectangle2d> areas = new ArrayList<>();
+  public List<Rect2i> getGuiExtraAreas(CraftingStationScreen containerScreen) {
+    List<Rect2i> areas = new ArrayList<>();
     if (containerScreen.getMenu().hasSideContainers){
       int x = (containerScreen.width - 140) / 2 - 140;
       int y = (containerScreen.height - 180) / 2 - 16;
-      areas.add(new Rectangle2d(x, y, 140, 196));    }
+      areas.add(new Rect2i(x, y, 140, 196));    }
     return areas;
   }
 }
