@@ -6,7 +6,6 @@ import tfar.craftingstation.util.CraftingStationItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -69,7 +68,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
   @Nonnull
   @Override
   public Component getDisplayName() {
-    return new TranslatableComponent("title.crafting_station");
+    return Component.translatable("title.crafting_station");
   }
 
   @Nullable

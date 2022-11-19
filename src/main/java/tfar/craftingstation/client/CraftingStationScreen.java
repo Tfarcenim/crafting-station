@@ -12,7 +12,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fml.ModList;
 
 public class CraftingStationScreen extends AbstractContainerScreen<CraftingStationContainer> {
@@ -56,7 +55,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 
       Button.OnTooltip tooltip =  (button, matrices, i, i1) -> {
         this.renderTooltip(matrices,
-                this.minecraft.font.split(new TranslatableComponent("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
+                this.minecraft.font.split(Component.translatable("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
 
       };
 

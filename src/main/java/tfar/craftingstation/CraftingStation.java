@@ -23,6 +23,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +49,7 @@ public class CraftingStation {
     IEventBus iEventBus = FMLJavaModLoadingContext.get().getModEventBus();
     iEventBus.addListener(this::setup);
     iEventBus.addListener(this::enqueueIMC);
+    iEventBus.addListener(RegistryEvents::block);
     //ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
   }
 
@@ -76,13 +78,9 @@ public class CraftingStation {
       return tagCompound;
     });
   }
-
-  // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
-  // Event bus for receiving Registry Events)
-  @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
   public static class RegistryEvents {
     @SubscribeEvent
-    public static void block(final RegistryEvent.Register<Block> event) {
+    public static void block(final RegisterEvent event) {
       // register a new block here
       register(ModBlocks.crafting_station,"crafting_station",event.getRegistry());
       register(ModBlocks.crafting_station_slab,"crafting_station_slab",event.getRegistry());

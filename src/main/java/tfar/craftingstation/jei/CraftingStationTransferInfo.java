@@ -1,14 +1,16 @@
 package tfar.craftingstation.jei;
 
-import tfar.craftingstation.CraftingStationContainer;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import tfar.craftingstation.CraftingStationContainer;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,13 +31,13 @@ public class CraftingStationTransferInfo implements IRecipeTransferInfo<Crafting
   }
 
   @Override
-  public Class<CraftingRecipe> getRecipeClass() {
-    return CraftingRecipe.class;
+  public Optional<MenuType<CraftingStationContainer>> getMenuType() {
+    return Optional.empty();
   }
 
   @Override
-  public ResourceLocation getRecipeCategoryUid() {
-    return RecipeTypes.CRAFTING.getUid();
+  public RecipeType<CraftingRecipe> getRecipeType() {
+    return RecipeTypes.CRAFTING;
   }
 
   @Override

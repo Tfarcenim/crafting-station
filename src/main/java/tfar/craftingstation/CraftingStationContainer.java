@@ -1,6 +1,7 @@
 package tfar.craftingstation;
 
 import net.minecraft.world.inventory.*;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import tfar.craftingstation.init.ModMenuTypes;
 import tfar.craftingstation.network.PacketHandler;
 import tfar.craftingstation.network.S2CLastRecipePacket;
@@ -10,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -24,7 +24,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
@@ -123,14 +122,14 @@ public class CraftingStationContainer extends AbstractContainerMenu {
             BlockEntity te = world.getBlockEntity(neighbor);
             if (te != null && !(te instanceof CraftingStationBlockEntity)) {
                 // if blacklisted, skip checks entirely
-                if (ForgeRegistries.BLOCK_ENTITIES.tags().getTag(CraftingStation.blacklisted).contains(te.getType()))
+                if (ForgeRegistries.BLOCK_ENTITY_TYPES.tags().getTag(CraftingStation.blacklisted).contains(te.getType()))
                     continue;
                 if (te instanceof Container container && !container.stillValid(player)) {
                     continue;
                 }
 
                 // try internal access first
-                if (te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).filter(IItemHandlerModifiable.class::isInstance).isPresent()) {
+                if (te.getCapability(ForgeCapabilities.ITEM_HANDLER, null).filter(IItemHandlerModifiable.class::isInstance).isPresent()) {
                     tileEntities.add(te);
                     blocks.add(new ItemStack(world.getBlockState(neighbor).getBlock()));
                 }
@@ -147,7 +146,7 @@ public class CraftingStationContainer extends AbstractContainerMenu {
 
         if (!tileEntities.isEmpty()) {
             for (BlockEntity tileEntity : tileEntities) {
-                tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(this::accept);
+                tileEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(this::accept);
             }
         }
 
@@ -181,7 +180,7 @@ public class CraftingStationContainer extends AbstractContainerMenu {
             BlockEntity te = tes.get(i);
             containerNames.add(te instanceof MenuProvider menuProvider? menuProvider.getDisplayName() : te.getBlockState().getBlock().getName());
             final int number = i;
-            te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
+            te.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(h -> {
                 int size = h.getSlots();
                 this.subContainerSize += size;
                 int offsetx = needsScroll() ? 0 : 8;

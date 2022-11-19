@@ -1,19 +1,15 @@
 package tfar.craftingstation.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TextComponent;
-
-import net.minecraft.client.gui.components.Button.OnPress;
-import net.minecraft.client.gui.components.Button.OnTooltip;
+import net.minecraft.network.chat.Component;
 
 public class ClearButton extends Button {
 
 
   public ClearButton(int x, int y, int widthIn, int heightIn, OnPress callback,OnTooltip tooltip) {
-    super(x, y, widthIn, heightIn,new TextComponent(""), callback,tooltip);
+    super(x, y, widthIn, heightIn, Component.empty(), callback,tooltip);
   }
 
 
