@@ -62,7 +62,7 @@ public class CraftingStationBlock extends Block implements SimpleWaterloggedBloc
     if (!world.isClientSide) {
       BlockEntity tileEntity = world.getBlockEntity(pos);
       if (tileEntity instanceof MenuProvider) {
-        NetworkHooks.openGui((ServerPlayer) player, (MenuProvider) tileEntity, tileEntity.getBlockPos());
+        NetworkHooks.openScreen((ServerPlayer) player, (MenuProvider) tileEntity, tileEntity.getBlockPos());
       }
     }
     return InteractionResult.SUCCESS;
@@ -115,11 +115,11 @@ public class CraftingStationBlock extends Block implements SimpleWaterloggedBloc
   }
 
   @Nullable
-  public BlockState getStateForPlacement(BlockPlaceContext p_196258_1_) {
-    LevelAccessor lvt_2_1_ = p_196258_1_.getLevel();
-    BlockPos lvt_3_1_ = p_196258_1_.getClickedPos();
-    boolean lvt_4_1_ = lvt_2_1_.getFluidState(lvt_3_1_).getType() == Fluids.WATER;
-    return this.defaultBlockState().setValue(FACING, p_196258_1_.getHorizontalDirection()).setValue(WATERLOGGED, lvt_4_1_);
+  public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+    LevelAccessor level = ctx.getLevel();
+    BlockPos pos = ctx.getClickedPos();
+    boolean water = level.getFluidState(pos).getType() == Fluids.WATER;
+    return this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection()).setValue(WATERLOGGED, water);
   }
 
   @org.jetbrains.annotations.Nullable

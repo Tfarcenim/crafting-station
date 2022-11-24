@@ -33,7 +33,7 @@ public class CraftingStationSlabBlock extends SlabBlock implements EntityBlock {
     if (!world.isClientSide) {
       MenuProvider iNamedContainerProvider = getMenuProvider(state,world,pos);
       if (iNamedContainerProvider != null) {
-        NetworkHooks.openGui((ServerPlayer) player, iNamedContainerProvider, pos);
+        NetworkHooks.openScreen((ServerPlayer) player, iNamedContainerProvider, pos);
       }
     }
     return InteractionResult.SUCCESS;

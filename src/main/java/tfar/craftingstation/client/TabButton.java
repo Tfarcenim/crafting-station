@@ -1,22 +1,20 @@
 package tfar.craftingstation.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import tfar.craftingstation.CraftingStation;
 import tfar.craftingstation.CraftingStationContainer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.TextComponent;
 
 public class TabButton extends Button{
 
   public final int index;
   public final ItemStack stack;
   public TabButton(int x, int y, int widthIn, int heightIn, Button.OnPress callback,OnTooltip tooltip, int index, ItemStack stack) {
-    super(x, y, widthIn, heightIn,new TextComponent(""), callback,tooltip);
+    super(x, y, widthIn, heightIn, Component.empty(), callback,tooltip);
     this.index = index;
     this.stack = stack;
   }
