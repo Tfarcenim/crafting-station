@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import com.mojang.math.Vector3f;
 
 public class CraftingStationBlockEntityRenderer implements BlockEntityRenderer<CraftingStationBlockEntity> {
 
@@ -44,7 +43,7 @@ public class CraftingStationBlockEntityRenderer implements BlockEntityRenderer<C
         matrixStack.pushPose();
         //translate x,y,z
         matrixStack.translate(spacing * i +offset, 0, spacing * j +offset);
-        matrixStack.mulPose(Vector3f.YP.rotation(0));
+        //matrixStack.mulPose(Vector3f.YP.rotation(0));
         //scale x,y,z
         matrixStack.scale(0.25F, 0.25F, 0.25F);
 

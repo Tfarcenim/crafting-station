@@ -74,7 +74,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
   @Nullable
   @Override
   public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-    return new CraftingStationContainer(id, playerInventory, worldPosition,data);
+    return new CraftingStationMenu(id, playerInventory, worldPosition,data);
   }
 
   @Nonnull

@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CraftingStationContainer extends AbstractContainerMenu {
+public class CraftingStationMenu extends AbstractContainerMenu {
     private static final Method GET_TILE_ENTITY_METHOD;
 
     static {
@@ -79,12 +79,12 @@ public class CraftingStationContainer extends AbstractContainerMenu {
         }
     }
 
-    public CraftingStationContainer(int id, Inventory inv, BlockPos pos) {
+    public CraftingStationMenu(int id, Inventory inv, BlockPos pos) {
         this(id, inv, pos,new SimpleContainerData(1));
     }
 
 
-    public CraftingStationContainer(int id, Inventory inv, BlockPos pos, ContainerData data) {
+    public CraftingStationMenu(int id, Inventory inv, BlockPos pos, ContainerData data) {
         super(ModMenuTypes.crafting_station, id);
         this.player = inv.player;
         this.data = data;
@@ -400,24 +400,24 @@ public class CraftingStationContainer extends AbstractContainerMenu {
     private void syncRecipeToAllOpenWindows(final Recipe<CraftingContainer> lastRecipe, List<ServerPlayer> players) {
         players.forEach(otherPlayer -> {
             // safe cast since hasSameContainerOpen does class checks
-            ((CraftingStationContainer) otherPlayer.containerMenu).lastRecipe = lastRecipe;
+            ((CraftingStationMenu) otherPlayer.containerMenu).lastRecipe = lastRecipe;
             PacketHandler.INSTANCE.sendTo(new S2CLastRecipePacket(lastRecipe), otherPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
         });
     }
 
-    private List<ServerPlayer> getAllPlayersWithThisContainerOpen(CraftingStationContainer container, ServerLevel server) {
+    private List<ServerPlayer> getAllPlayersWithThisContainerOpen(CraftingStationMenu container, ServerLevel server) {
         return server.players().stream()
                 .filter(player -> hasSameContainerOpen(container, player))
                 .collect(Collectors.toList());
     }
 
-    private boolean hasSameContainerOpen(CraftingStationContainer container, Player playerToCheck) {
+    private boolean hasSameContainerOpen(CraftingStationMenu container, Player playerToCheck) {
         return playerToCheck instanceof ServerPlayer &&
                 playerToCheck.containerMenu.getClass().isAssignableFrom(container.getClass()) &&
-                this.sameGui((CraftingStationContainer) playerToCheck.containerMenu);
+                this.sameGui((CraftingStationMenu) playerToCheck.containerMenu);
     }
 
-    public boolean sameGui(CraftingStationContainer otherContainer) {
+    public boolean sameGui(CraftingStationMenu otherContainer) {
         return this.tileEntity == otherContainer.tileEntity;
     }
 

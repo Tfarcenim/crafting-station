@@ -1,11 +1,10 @@
 package tfar.craftingstation;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -34,7 +33,7 @@ public class CraftingStation {
 
     public static final String MODID = "craftingstation";
     public static final TagKey<BlockEntityType<?>> blacklisted
-            = TagKey.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, new ResourceLocation(MODID, "blacklisted"));
+            = TagKey.create(Registries.BLOCK_ENTITY_TYPE, new ResourceLocation(MODID, "blacklisted"));
 
     public static final Logger LOGGER = LogManager.getLogger();
 
@@ -68,7 +67,7 @@ public class CraftingStation {
     private void enqueueIMC(final InterModEnqueueEvent event) {
         InterModComms.sendTo("craftingtweaks", "RegisterProvider", () -> {
             CompoundTag tagCompound = new CompoundTag();
-            tagCompound.putString("ContainerClass", CraftingStationContainer.class.getName());
+            tagCompound.putString("ContainerClass", CraftingStationMenu.class.getName());
             tagCompound.putString("AlignToGrid", "left");
             return tagCompound;
         });
@@ -78,14 +77,14 @@ public class CraftingStation {
         @SubscribeEvent
         public static void block(final RegisterEvent event) {
             // register a new block here
-            event.register(Registry.BLOCK_REGISTRY, modLoc("crafting_station"), () -> ModBlocks.crafting_station);
-            event.register(Registry.BLOCK_REGISTRY, modLoc("crafting_station_slab"), () -> ModBlocks.crafting_station_slab);
+            event.register(Registries.BLOCK, modLoc("crafting_station"), () -> ModBlocks.crafting_station);
+            event.register(Registries.BLOCK, modLoc("crafting_station_slab"), () -> ModBlocks.crafting_station_slab);
             // register a new item here
-            Item.Properties properties = new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS);
-            event.register(Registry.ITEM_REGISTRY, modLoc("crafting_station"), () -> new BlockItem(ModBlocks.crafting_station, properties));
-            event.register(Registry.ITEM_REGISTRY, modLoc("crafting_station_slab"), () -> new BlockItem(ModBlocks.crafting_station_slab, properties));
-            event.register(Registry.MENU_REGISTRY, modLoc("crafting_station"), () -> ModMenuTypes.crafting_station);
-            event.register(Registry.BLOCK_ENTITY_TYPE_REGISTRY, modLoc("crafting_station"), () -> ModBlockEntityTypes.crafting_station);
+            Item.Properties properties = new Item.Properties();
+            event.register(Registries.ITEM, modLoc("crafting_station"), () -> new BlockItem(ModBlocks.crafting_station, properties));
+            event.register(Registries.ITEM, modLoc("crafting_station_slab"), () -> new BlockItem(ModBlocks.crafting_station_slab, properties));
+            event.register(Registries.MENU, modLoc("crafting_station"), () -> ModMenuTypes.crafting_station);
+            event.register(Registries.BLOCK_ENTITY_TYPE, modLoc("crafting_station"), () -> ModBlockEntityTypes.crafting_station);
         }
 
         public static ResourceLocation modLoc(String s) {

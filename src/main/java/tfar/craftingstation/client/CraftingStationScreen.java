@@ -2,19 +2,19 @@ package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.components.Tooltip;
 import tfar.craftingstation.CraftingStation;
-import tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingStationMenu;
 import tfar.craftingstation.network.C2SClearPacket;
 import tfar.craftingstation.network.PacketHandler;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.ModList;
 
-public class CraftingStationScreen extends AbstractContainerScreen<CraftingStationContainer> {
+public class CraftingStationScreen extends AbstractContainerScreen<CraftingStationMenu> {
   public static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
 
   public static final ResourceLocation SCROLLBAR_AND_TAB = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
@@ -32,7 +32,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 
   private int topRow;
 
-  public CraftingStationScreen(CraftingStationContainer p_i51094_1_, Inventory p_i51094_2_, Component p_i51094_3_) {
+  public CraftingStationScreen(CraftingStationMenu p_i51094_1_, Inventory p_i51094_2_, Component p_i51094_3_) {
     super(p_i51094_1_, p_i51094_2_, p_i51094_3_);
     topRow = 0;
   }
@@ -43,23 +43,18 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
     if (this.menu.hasSideContainers) {
       for (int i = 0; i < menu.containerStarts.size(); i++) {
 
-        Button.OnTooltip widget = (button, poseStack, x, y) -> {
+        Tooltip tab = null;//Tooltip.create((TabButton)button).stack, x, y);
 
-          this.renderTooltip(poseStack, ((TabButton)button).stack, x, y);
-
-        };
-        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),widget,i,menu.blocks.get(i)));
+        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),i,menu.blocks.get(i)));
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
 
-      Button.OnTooltip tooltip =  (button, matrices, i, i1) -> {
-        this.renderTooltip(matrices,
-                this.minecraft.font.split(Component.translatable("text.crafting_station.clear"), Math.max(this.width / 2 - 43, 170)), i, i1);
+      Tooltip tooltipC =  Tooltip.create(Component.translatable("text.crafting_station.clear"));
 
-      };
-
-      this.addRenderableWidget(new ClearButton(leftPos + 85, topPos + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()),tooltip));
+      ClearButton clear =new ClearButton(leftPos + 85, topPos + 16,7,7, b -> PacketHandler.INSTANCE.sendToServer(new C2SClearPacket()));
+      clear.setTooltip(tooltipC);
+      this.addRenderableWidget(clear);
     }
   }
 

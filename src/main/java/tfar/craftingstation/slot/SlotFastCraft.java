@@ -2,7 +2,7 @@
 package tfar.craftingstation.slot;
 
 import tfar.craftingstation.CraftingInventoryPersistant;
-import tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingStationMenu;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -18,10 +18,10 @@ import net.minecraft.world.item.ItemStack;
  */
 public class SlotFastCraft extends ResultSlot {
 
-  private final CraftingStationContainer container;
+  private final CraftingStationMenu container;
   protected CraftingInventoryPersistant craftingInventoryPersistant;
 
-  public SlotFastCraft(CraftingStationContainer container, CraftingInventoryPersistant craftingInventoryPersistant, Container resultInventory, int slotIndex, int xPosition, int yPosition, Player player) {
+  public SlotFastCraft(CraftingStationMenu container, CraftingInventoryPersistant craftingInventoryPersistant, Container resultInventory, int slotIndex, int xPosition, int yPosition, Player player) {
     super(player, craftingInventoryPersistant, resultInventory, slotIndex, xPosition, yPosition);
     this.container = container;
     this.craftingInventoryPersistant = craftingInventoryPersistant;

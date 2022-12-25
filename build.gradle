@@ -76,12 +76,8 @@ repositories{
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
-  //  maven {
-        // location of a maven mirror for JEI files, as a fallback
-   //     name = "ModMaven"
-   //     url = 'https://modmaven.dev/'
-  //  }
-   // maven { url "https://maven.tterrag.com/" }
+    maven { url "https://maven.shedaniel.me/" }
+
 }
 
 dependencies {
@@ -89,10 +85,6 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}" //21
 
-    // compile against the JEI API but do not include it at runtime
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
-    // at runtime, use the full JEI jar
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
     //compile fileTree(dir: 'libs', include: '*.jar')
 
@@ -101,7 +93,10 @@ dependencies {
     // compile "some.group:artifact:version"
    // compile fg.deobf("curse.maven:dank-storage-335673:3586635")
 
+    implementation fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:$rei_version")
 
+    implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:$cloth_config_version")
+    implementation fg.deobf("dev.architectury:architectury-forge:$architectury_version")
     // Real examples
     // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env

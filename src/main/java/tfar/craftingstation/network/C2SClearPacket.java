@@ -1,6 +1,6 @@
 package tfar.craftingstation.network;
 
-import tfar.craftingstation.CraftingStationContainer;
+import tfar.craftingstation.CraftingStationMenu;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.network.NetworkEvent;
@@ -16,9 +16,9 @@ public class C2SClearPacket {
 
     ctx.get().enqueueWork(() -> {
       AbstractContainerMenu container = player.containerMenu;
-      if (container instanceof CraftingStationContainer craftingStationContainer) {
+      if (container instanceof CraftingStationMenu craftingStationMenu) {
         for (int i = 1; i < 10;i++)
-        craftingStationContainer.quickMoveStack(player,i);
+        craftingStationMenu.quickMoveStack(player,i);
       }
     });
     ctx.get().setPacketHandled(true);

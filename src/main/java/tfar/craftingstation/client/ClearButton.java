@@ -8,8 +8,8 @@ import net.minecraft.network.chat.Component;
 public class ClearButton extends Button {
 
 
-  public ClearButton(int x, int y, int widthIn, int heightIn, OnPress callback,OnTooltip tooltip) {
-    super(x, y, widthIn, heightIn, Component.empty(), callback,tooltip);
+  public ClearButton(int x, int y, int widthIn, int heightIn, OnPress callback) {
+    super(x, y, widthIn, heightIn, Component.empty(), callback,Button.DEFAULT_NARRATION);
   }
 
 
@@ -29,18 +29,14 @@ public class ClearButton extends Button {
     int halfwidth2 = this.width - halfwidth1;
     int halfheight1 = this.height / 2;
     int halfheight2 = this.height - halfheight1;
-    blit(stack,x, y, 0,
+    blit(stack,getX(), getY(), 0,
             46 + i * 20, halfwidth1, halfheight1);
-    blit(stack,x + halfwidth1, y, 200 - halfwidth2,
+    blit(stack,getX() + halfwidth1, getY(), 200 - halfwidth2,
             46 + i * 20, halfwidth2, halfheight1);
 
-    blit(stack,x, y + halfheight1,
+    blit(stack,getX(), getY() + halfheight1,
             0, 46 + i * 20 + 20 - halfheight2, halfwidth1, halfheight2);
-    blit(stack,x + halfwidth1, y + halfheight1,
+    blit(stack,getX() + halfwidth1, getY() + halfheight1,
             200 - halfwidth2, 46 + i * 20 + 20 - halfheight2, halfwidth2, halfheight2);
-
-    if (this.isHoveredOrFocused()) {
-      this.renderToolTip(stack,mouseX,mouseY);
-    }
   }
 }
