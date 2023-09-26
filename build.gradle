@@ -76,6 +76,14 @@ repositories{
         name = "Progwml6 maven"
         url = "https://dvs1.progwml6.com/files/maven/"
     }
+
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
   //  maven {
         // location of a maven mirror for JEI files, as a fallback
    //     name = "ModMaven"
@@ -98,9 +106,10 @@ dependencies {
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-   // compile fg.deobf("curse.maven:dank-storage-335673:3586635")
+    // compile "some.group:artifact:version" 289412 4760341
+    //implementation fg.deobf("curse.maven:dank-storage-335673:3586635")
 
+    //implementation fg.deobf("curse.maven:ftb-quests-forge-289412:$ftb_quests_forge")
 
     // Real examples
     // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env

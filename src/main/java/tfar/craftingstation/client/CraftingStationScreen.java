@@ -48,7 +48,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
           this.renderTooltip(poseStack, ((TabButton)button).stack, x, y);
 
         };
-        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),widget,i,menu.blocks.get(i)));
+        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),widget,i,menu.blocks.get(i),this));
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
