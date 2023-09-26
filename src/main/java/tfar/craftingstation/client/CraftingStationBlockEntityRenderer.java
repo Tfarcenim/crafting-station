@@ -1,6 +1,7 @@
 package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import tfar.craftingstation.Configs;
 import tfar.craftingstation.CraftingStationBlockEntity;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
@@ -25,7 +26,7 @@ public class CraftingStationBlockEntityRenderer implements BlockEntityRenderer<C
   @Override
   public void render(CraftingStationBlockEntity blockEntity, float var2, PoseStack matrixStack, MultiBufferSource iRenderTypeBuffer, int light, int var6) {
 
-    if (blockEntity.input.isEmpty())return;
+    if (!Configs.Client.showItemsInTable.get() || blockEntity.input.isEmpty())return;
 
     BlockState state = blockEntity.getBlockState();
 
