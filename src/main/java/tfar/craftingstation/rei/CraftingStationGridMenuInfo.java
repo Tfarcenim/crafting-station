@@ -8,7 +8,7 @@ import tfar.craftingstation.CraftingStationMenu;
 
 import java.util.stream.IntStream;
 
-public class CraftingStationGridMenuInfo<D extends SimpleGridMenuDisplay> implements SimpleGridMenuInfo<tfar.craftingstation.CraftingStationMenu, D> {
+public class CraftingStationGridMenuInfo<D extends SimpleGridMenuDisplay> implements SimpleGridMenuInfo<CraftingStationMenu, D> {
         private final D display;
 
         public CraftingStationGridMenuInfo(D display) {

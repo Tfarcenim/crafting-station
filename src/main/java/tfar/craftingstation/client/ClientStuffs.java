@@ -1,6 +1,5 @@
 package tfar.craftingstation.client;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
@@ -12,8 +11,6 @@ import tfar.craftingstation.init.ModMenuTypes;
 
 @Mod.EventBusSubscriber(bus= Mod.EventBusSubscriber.Bus.MOD,value = Dist.CLIENT)
 public class ClientStuffs {
-
-  public static final Minecraft mc = Minecraft.getInstance();
 
   @SubscribeEvent
   public static void doClientStuff(final FMLClientSetupEvent event) {

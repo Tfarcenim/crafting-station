@@ -88,7 +88,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
         super(ModMenuTypes.crafting_station, id);
         this.player = inv.player;
         this.data = data;
-        this.world = player.level;
+        this.world = player.level();
         this.tileEntity = (CraftingStationBlockEntity) getTileEntityAtPos(pos, world);
 
         this.data = data;
@@ -365,7 +365,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
 
         // if we have a recipe, fetch its result
         if (lastRecipe != null) {
-            itemstack = lastRecipe.assemble(inv);
+            itemstack = lastRecipe.assemble(inv,world.registryAccess());
         }
         // set the slot on both sides, client is for display/so the client knows about the recipe
         result.setItem(0, itemstack);
@@ -375,7 +375,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
             ServerPlayer entityplayermp = (ServerPlayer) player;
 
             // we need to sync to all players currently in the inventory
-            List<ServerPlayer> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.getLevel());
+            List<ServerPlayer> relevantPlayers = getAllPlayersWithThisContainerOpen(this, entityplayermp.serverLevel());
 
             // sync result to all serverside inventories to prevent duplications/recipes being blocked
             // need to do this every time as otherwise taking items of the result causes desync
@@ -401,7 +401,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
         players.forEach(otherPlayer -> {
             // safe cast since hasSameContainerOpen does class checks
             ((CraftingStationMenu) otherPlayer.containerMenu).lastRecipe = lastRecipe;
-            PacketHandler.INSTANCE.sendTo(new S2CLastRecipePacket(lastRecipe), otherPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+            PacketHandler.INSTANCE.sendTo(new S2CLastRecipePacket(lastRecipe), otherPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
         });
     }
 
@@ -484,8 +484,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
                 slotStack = targetSlot.getItem();
 
                 if (!slotStack.isEmpty()
-                        && slotStack.getItem() == stack.getItem()
-                        && ItemStack.tagMatches(stack, slotStack)
+                        && ItemStack.isSameItemSameTags(stack, slotStack)
                         && this.canTakeItemForPickAll(stack, targetSlot)) {
                     int l = slotStack.getCount() + stack.getCount();
                     int limit = targetSlot.getMaxStackSize(stack);
@@ -578,7 +577,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
     public void updateLastRecipeFromServer(Recipe<CraftingContainer> recipe) {
         lastRecipe = recipe;
         // if no recipe, set to empty to prevent ghost outputs when another player grabs the result
-        this.craftResult.setItem(0, recipe != null ? recipe.assemble(craftMatrix) : ItemStack.EMPTY);
+        this.craftResult.setItem(0, recipe != null ? recipe.assemble(craftMatrix,world.registryAccess()) : ItemStack.EMPTY);
     }
 
     public boolean needsScroll() {

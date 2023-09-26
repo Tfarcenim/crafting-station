@@ -1,11 +1,14 @@
 package tfar.craftingstation.rei;
 
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.forge.REIPluginCommon;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.renderer.Rect2i;
 import tfar.craftingstation.client.CraftingStationScreen;
 import tfar.craftingstation.init.ModBlocks;
@@ -13,6 +16,8 @@ import tfar.craftingstation.init.ModBlocks;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+
+import static me.shedaniel.rei.plugin.common.BuiltinPlugin.CRAFTING;
 
 @REIPluginCommon
 public class ReiClientPlugin implements REIClientPlugin {
@@ -23,12 +28,17 @@ public class ReiClientPlugin implements REIClientPlugin {
 
   @Override
   public void registerCategories(CategoryRegistry registry) {
-    registry.addWorkstations(BuiltinPlugin.CRAFTING, EntryStacks.of(ModBlocks.crafting_station),EntryStacks.of(ModBlocks.crafting_station_slab));
+    registry.addWorkstations(CRAFTING, EntryStacks.of(ModBlocks.crafting_station),EntryStacks.of(ModBlocks.crafting_station_slab));
   }
-  
+
+
+  @Override
+  public void registerScreens(ScreenRegistry registry) {
+    registry.registerContainerClickArea(new Rectangle(88, 32, 28, 23), CraftingStationScreen.class, CRAFTING);
+  }
 
   @Nonnull
- // @Override
+  //@Override
   public List<Rect2i> getGuiExtraAreas(CraftingStationScreen containerScreen) {
     List<Rect2i> areas = new ArrayList<>();
     if (containerScreen.getMenu().hasSideContainers){

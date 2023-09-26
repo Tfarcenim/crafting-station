@@ -21,6 +21,7 @@ import net.minecraftforge.registries.RegisterEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tfar.craftingstation.datagen.ModDatagen;
 import tfar.craftingstation.init.ModBlockEntityTypes;
 import tfar.craftingstation.init.ModBlocks;
 import tfar.craftingstation.init.ModMenuTypes;
@@ -40,20 +41,23 @@ public class CraftingStation {
     public CraftingStation() {
         // Register the setup method for modloading
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_SPEC);
         IEventBus iEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         iEventBus.addListener(this::setup);
         iEventBus.addListener(this::enqueueIMC);
+        iEventBus.addListener(ModDatagen::gather);
         iEventBus.addListener(RegistryEvents::block);
-        //ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
     }
 
     public static final Configs.Server SERVER;
     public static final ForgeConfigSpec SERVER_SPEC;
+    public static final Configs.Client CLIENT;
+    public static final ForgeConfigSpec CLIENT_SPEC;
 
     static {
-        //final Pair<ClientConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
-        //CLIENT_SPEC = specPair.getRight();
-        //CLIENT = specPair.getLeft();
+        final Pair<Configs.Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Configs.Client::new);
+        CLIENT_SPEC = specPair.getRight();
+        CLIENT = specPair.getLeft();
         final Pair<Configs.Server, ForgeConfigSpec> specPair2 = new ForgeConfigSpec.Builder().configure(Configs.Server::new);
         SERVER_SPEC = specPair2.getRight();
         SERVER = specPair2.getLeft();

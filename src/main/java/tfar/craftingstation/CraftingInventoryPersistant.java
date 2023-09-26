@@ -1,5 +1,6 @@
 package tfar.craftingstation;
 
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import tfar.craftingstation.util.CraftingStationItemHandler;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -10,7 +11,7 @@ import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
 
 /** pretends to be an InventoryCrafting while actually just wrapping an IItemHandler */
-public class CraftingInventoryPersistant extends CraftingContainer {
+public class CraftingInventoryPersistant extends TransientCraftingContainer {
 
   private boolean doNotCallUpdates;
   protected final CraftingStationItemHandler inv;

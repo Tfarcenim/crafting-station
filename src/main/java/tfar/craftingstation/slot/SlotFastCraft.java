@@ -41,7 +41,7 @@ public class SlotFastCraft extends ResultSlot {
   @Override
   protected void checkTakeAchievements(ItemStack stack) {
     if (this.removeCount > 0) {
-      stack.onCraftedBy(this.player.level, this.player, this.removeCount);
+      stack.onCraftedBy(this.player.level(), this.player, this.removeCount);
       net.minecraftforge.event.ForgeEventFactory.firePlayerCraftingEvent(this.player, stack, craftSlots);
     }
 
@@ -72,7 +72,7 @@ public class SlotFastCraft extends ResultSlot {
       if (!stack1.isEmpty()) {
         if (stackInSlot.isEmpty()) {
           this.craftSlots.setItem(i, stack1);
-        } else if (ItemStack.isSame(stackInSlot, stack1) && ItemStack.tagMatches(stackInSlot, stack1)) {
+        } else if (ItemStack.isSameItemSameTags(stackInSlot,stack1)) {
           stack1.grow(stackInSlot.getCount());
           this.craftSlots.setItem(i, stack1);
         } else if (!this.player.getInventory().add(stack1)) {

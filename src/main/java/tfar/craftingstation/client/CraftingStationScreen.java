@@ -2,6 +2,7 @@ package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import tfar.craftingstation.CraftingStation;
 import tfar.craftingstation.CraftingStationMenu;
@@ -45,7 +46,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
 
         Tooltip tab = null;//Tooltip.create((TabButton)button).stack, x, y);
 
-        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),i,menu.blocks.get(i)));
+        addRenderableWidget(new TabButton(leftPos - 128 + 21 * i, topPos - 22, 22, 28, button -> changeContainer(((TabButton)button).index),i,menu.blocks.get(i),this));
       }
     }
     if (!ModList.get().isLoaded("craftingtweaks")) {
@@ -70,16 +71,16 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
   }
 
   @Override
-  public void render(PoseStack stack,int mouseX, int mouseY, float partialTicks) {
+  public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
     renderBackground(stack);
     super.render(stack,mouseX, mouseY, partialTicks);
     renderTooltip(stack,mouseX, mouseY);
   }
 
-  protected void renderLabels(PoseStack stack,int p_146979_1_, int p_146979_2_) {
+  protected void renderLabels(GuiGraphics stack,int p_146979_1_, int p_146979_2_) {
     super.renderLabels(stack, p_146979_1_, p_146979_2_);
     if (menu.hasSideContainers){
-      this.font.draw(stack, getTruncatedString(),-122,6, 0x404040);
+      stack.drawString(font, getTruncatedString(),-122,6, 0x404040,false);
     }
   }
 
@@ -92,10 +93,9 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
   }
 
   @Override
-  protected void renderBg(PoseStack stack,float partialTicks, int mouseX, int mouseY) {
+  protected void renderBg(GuiGraphics stack,float partialTicks, int mouseX, int mouseY) {
     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-    bind(CRAFTING_TABLE_GUI_TEXTURES);
-    blit(stack,leftPos, topPos, 0, 0, imageWidth, imageHeight);
+    stack.blit(CRAFTING_TABLE_GUI_TEXTURES,leftPos, topPos, 0, 0, imageWidth, imageHeight);
     int i = this.leftPos;
 
     int i1 = i - 16;
@@ -104,8 +104,8 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
     int j = (this.height - this.imageHeight) / 2;
     if (this.menu.hasSideContainers) {
       //draw background
-      bind(SECONDARY_GUI_TEXTURE);
-      this.blit(stack,i - 130, j, 0, 0, this.imageWidth, this.imageHeight + 18);
+      //bind(SECONDARY_GUI_TEXTURE);
+      stack.blit(SECONDARY_GUI_TEXTURE,i - 130, j, 0, 0, this.imageWidth, this.imageHeight + 18);
 
       bind(SCROLLBAR_BACKGROUND_AND_TAB);
       int totalSlots = this.menu.getSlotCount();
@@ -119,18 +119,18 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
       for (int i3 = 0; i3 < slotsToDraw; i3++) {
         int j1 = i3 % 6;
         int k1 = i3 / 6;
-        blit(stack,i + j1 * 18 + offset, 18 * k1 + j + 16, 8, 17, 18, 18);
+        stack.blit(SCROLLBAR_BACKGROUND_AND_TAB,i + j1 * 18 + offset, 18 * k1 + j + 16, 8, 17, 18, 18);
       }
 
       if (this.hasScrollbar()) {
-        blit(stack,i - 17, j + 16, 174, 17, 14, 100);
-        blit(stack,i - 17, j + 67, 174, 18, 14, 111);
+        stack.blit(SCROLLBAR_BACKGROUND_AND_TAB,i - 17, j + 16, 174, 17, 14, 100);
+        stack.blit(SCROLLBAR_BACKGROUND_AND_TAB,i - 17, j + 67, 174, 18, 14, 111);
         bind(SCROLLBAR_AND_TAB);
         int k = (int) (j + 17 + 145 * currentScroll);
 
         if (isScrolling && mouseX <= i2 && mouseX >= i1)
-          blit(stack,i - 16, k, 244, 0, 12, 15);
-        else blit(stack,i - 16, k, 244 - 12, 0, 12, 15);
+          stack.blit(SCROLLBAR_AND_TAB,i - 16, k, 244, 0, 12, 15);
+        else stack.blit(SCROLLBAR_AND_TAB,i - 16, k, 244 - 12, 0, 12, 15);
       }
     }
   }

@@ -1,9 +1,11 @@
 package tfar.craftingstation.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 public class ClearButton extends Button {
 
@@ -14,29 +16,26 @@ public class ClearButton extends Button {
 
 
   @Override
-  public void renderButton(PoseStack stack,int mouseX, int mouseY, float partialTicks) {
-    RenderSystem.setShaderTexture(0,WIDGETS_LOCATION);
-
-    RenderSystem.setShaderColor(1, 0, 0,1);
-
-    int i = getYImage(isHoveredOrFocused());
-
+  public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+    Minecraft minecraft = Minecraft.getInstance();
+    guiGraphics.setColor(1,0,0,this.alpha);
     RenderSystem.enableBlend();
-    RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-    RenderSystem.blendFunc(770, 771);
-
-    int halfwidth1 = this.width / 2;
-    int halfwidth2 = this.width - halfwidth1;
-    int halfheight1 = this.height / 2;
-    int halfheight2 = this.height - halfheight1;
-    blit(stack,getX(), getY(), 0,
-            46 + i * 20, halfwidth1, halfheight1);
-    blit(stack,getX() + halfwidth1, getY(), 200 - halfwidth2,
-            46 + i * 20, halfwidth2, halfheight1);
-
-    blit(stack,getX(), getY() + halfheight1,
-            0, 46 + i * 20 + 20 - halfheight2, halfwidth1, halfheight2);
-    blit(stack,getX() + halfwidth1, getY() + halfheight1,
-            200 - halfwidth2, 46 + i * 20 + 20 - halfheight2, halfwidth2, halfheight2);
+    RenderSystem.enableDepthTest();
+    guiGraphics.blitNineSliced(WIDGETS_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+    guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    int i = getFGColor();
+    this.renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
   }
+
+  private int getTextureY() {
+    int i = 1;
+    if (!this.active) {
+      i = 0;
+    } else if (this.isHoveredOrFocused()) {
+      i = 2;
+    }
+
+    return 46 + i * 20;
+  }
+
 }
