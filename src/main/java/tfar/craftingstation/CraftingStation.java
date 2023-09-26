@@ -44,16 +44,18 @@ public class CraftingStation {
         iEventBus.addListener(this::setup);
         iEventBus.addListener(this::enqueueIMC);
         iEventBus.addListener(RegistryEvents::block);
-        //ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Configs.SERVER_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_SPEC);
     }
 
     public static final Configs.Server SERVER;
     public static final ForgeConfigSpec SERVER_SPEC;
+    public static final Configs.Client CLIENT;
+    public static final ForgeConfigSpec CLIENT_SPEC;
 
     static {
-        //final Pair<ClientConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
-        //CLIENT_SPEC = specPair.getRight();
-        //CLIENT = specPair.getLeft();
+        final Pair<Configs.Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Configs.Client::new);
+        CLIENT_SPEC = specPair.getRight();
+        CLIENT = specPair.getLeft();
         final Pair<Configs.Server, ForgeConfigSpec> specPair2 = new ForgeConfigSpec.Builder().configure(Configs.Server::new);
         SERVER_SPEC = specPair2.getRight();
         SERVER = specPair2.getLeft();
