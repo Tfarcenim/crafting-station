@@ -1,6 +1,5 @@
 package tfar.craftingstation.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
@@ -108,7 +107,7 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
       stack.blit(SECONDARY_GUI_TEXTURE,i - 130, j, 0, 0, this.imageWidth, this.imageHeight + 18);
 
       bind(SCROLLBAR_BACKGROUND_AND_TAB);
-      int totalSlots = this.menu.getSlotCount();
+      int totalSlots = this.menu.getActiveSubContainerSlotCount();
       int slotsToDraw = 54;
       if (totalSlots < slotsToDraw) slotsToDraw = totalSlots;
       else if (hasScrollbar() && topRow == this.menu.getRows() - 9 && totalSlots % 6 != 0)

@@ -1,14 +1,8 @@
 package tfar.craftingstation.rei;
 
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.api.common.transfer.info.simple.RecipeBookGridMenuInfo;
-import me.shedaniel.rei.api.common.transfer.info.simple.SimpleMenuInfoProvider;
 import me.shedaniel.rei.forge.REIPluginCommon;
-import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.world.inventory.CraftingMenu;
-import tfar.craftingstation.CraftingStationMenu;
 import tfar.craftingstation.client.CraftingStationScreen;
 
 import javax.annotation.Nonnull;
@@ -22,10 +16,10 @@ public class ReiPlugin implements REIServerPlugin{
  //   registration.addRecipeTransferHandler(new CraftingStationTransferInfo());
   //}
 
-  @Override
-  public void registerMenuInfo(MenuInfoRegistry registry) {
-    registry.register(BuiltinPlugin.CRAFTING, CraftingStationMenu.class, SimpleMenuInfoProvider.of(CraftingStationGridMenuInfo::new));
-  }
+  //@Override
+  //public void registerMenuInfo(MenuInfoRegistry registry) {
+    //registry.register(BuiltinPlugin.CRAFTING, CraftingStationMenu.class, SimpleMenuInfoProvider.of(CraftingStationGridMenuInfo::new));
+ // }
 
 
   // @Override

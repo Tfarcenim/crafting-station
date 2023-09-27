@@ -4,12 +4,11 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.forge.REIPluginCommon;
-import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.renderer.Rect2i;
+import tfar.craftingstation.CraftingStationMenu;
 import tfar.craftingstation.client.CraftingStationScreen;
 import tfar.craftingstation.init.ModBlocks;
 
@@ -31,6 +30,10 @@ public class ReiClientPlugin implements REIClientPlugin {
     registry.addWorkstations(CRAFTING, EntryStacks.of(ModBlocks.crafting_station),EntryStacks.of(ModBlocks.crafting_station_slab));
   }
 
+  @Override
+  public void registerTransferHandlers(TransferHandlerRegistry registry) {
+    registry.register(new CraftingStationTransferHandler(CraftingStationMenu.class,CRAFTING));
+  }
 
   @Override
   public void registerScreens(ScreenRegistry registry) {

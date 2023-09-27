@@ -581,14 +581,14 @@ public class CraftingStationMenu extends AbstractContainerMenu {
     }
 
     public boolean needsScroll() {
-        return getSlotCount() > 54;
+        return getActiveSubContainerSlotCount() > 54;
     }
 
     public int getRows() {
-        return (int) Math.ceil((double) getSlotCount() / 6);
+        return (int) Math.ceil((double) getActiveSubContainerSlotCount() / 6);
     }
 
-    public int getSlotCount() {
+    public int getActiveSubContainerSlotCount() {
         if (containerStarts.isEmpty()) return 0;
         if (getCurrentContainer() >= containerStarts.size()) {
             setCurrentContainer(containerStarts.size() - 1);
