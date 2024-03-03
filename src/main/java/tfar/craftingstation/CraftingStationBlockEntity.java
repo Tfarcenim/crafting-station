@@ -42,7 +42,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
 
   public CraftingStationBlockEntity(BlockPos pPos, BlockState pState) {
     super(ModBlockEntityTypes.crafting_station,pPos,pState);
-    this.input = new CraftingStationItemHandler(9);
+    this.input = new CraftingStationItemHandler(9, this);
   }
 
   @Nonnull
