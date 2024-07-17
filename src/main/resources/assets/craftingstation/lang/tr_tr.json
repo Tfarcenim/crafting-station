@@ -1,0 +1,12 @@
+{
+  "block.craftingstation.crafting_station": "Üretim İstasyonu",
+  "block.craftingstation.crafting_station_slab": "Üretim İstasyonu Basamağı",
+  
+  "title.crafting_station": "Crafting Station",
+  
+  "text.crafting_station.error": "Bozuk tarif %s bulundu, ayrıntılar için günlüğe bakın",
+  "text.crafting_station.clear": "Üretim ızgarasını temizle",
+  "text.crafting_station.connected_resources.true": "Bağlantılı Kaynakları Kullanın: Doğru",
+  "text.crafting_station.connected_resources.false": "Bağlantılı Kaynakları Kullanın: Yanlış"
+
+}
