@@ -36,7 +36,7 @@ public class CraftingStationMenu extends AbstractContainerMenu {
     public static final int MAX_SLOTS = 54;
 
     public final PersistantCraftingContainer craftMatrix;
-    public final ResultContainer craftResult = new ResultContainer();
+    public final ResultContainer craftResult;
     public final Level world;
     public final CraftingStationBlockEntity tileEntity;
 
@@ -49,19 +49,19 @@ public class CraftingStationMenu extends AbstractContainerMenu {
     private int firstSlot;
 
     public CraftingStationMenu(int id, Inventory inv, BlockPos pos) {
-        this(id, inv, new SimpleContainer(9), pos);
+        this(id, inv, new SimpleContainer(9),new ResultContainer(), pos);
     }
 
 
-    public CraftingStationMenu(int id, Inventory inv, SimpleContainer simpleContainer, BlockPos pos) {
+    public CraftingStationMenu(int id, Inventory inv, SimpleContainer inputContainer, ResultContainer outputContainer, BlockPos pos) {
         super(ModMenuTypes.crafting_station, id);
         this.player = inv.player;
         this.pos = pos;
         this.world = player.level();
         this.tileEntity = (CraftingStationBlockEntity) ModIntegration.getTileEntityAtPos(player.level(), pos);
         setCurrentContainer(tileEntity.getCurrentContainer());
-        this.craftMatrix = new PersistantCraftingContainer(this, simpleContainer);
-
+        this.craftMatrix = new PersistantCraftingContainer(this, inputContainer);
+        this.craftResult = outputContainer;
 
         addOwnSlots();
 

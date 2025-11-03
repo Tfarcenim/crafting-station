@@ -5,6 +5,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
 import tfar.craftingstation.init.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
@@ -23,6 +24,8 @@ import tfar.craftingstation.menu.CraftingStationMenu;
 public class CraftingStationBlockEntity extends BlockEntity implements MenuProvider {
 
     public SimpleContainer input;
+
+    public ResultContainer output;
 
     private Component customName;
     protected Direction currentContainer = Direction.DOWN;
@@ -56,6 +59,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
                 return listtag;
             }
         };
+        output = new ResultContainer();
     }
 
     public void setCurrentContainer(Direction currentContainer) {
@@ -95,7 +99,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-        return new CraftingStationMenu(id, playerInventory, input,worldPosition);
+        return new CraftingStationMenu(id, playerInventory, input,output,worldPosition);
     }
 
     public void setCustomName(Component pName) {
