@@ -2,6 +2,7 @@ package tfar.craftingstation.menu;
 
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.crafting.*;
@@ -163,7 +164,15 @@ public class CraftingStationMenu extends AbstractContainerMenu {
                 if (Services.PLATFORM.hasCapability(te)) {
                     blockEntityMap.put(dir, te);
                     blocks.put(dir, new ItemStack(world.getBlockState(neighbor).getBlock()));
-                    containerNames.put(dir, te instanceof MenuProvider menuProvider ? menuProvider.getDisplayName() : te.getBlockState().getBlock().getName());
+
+                    Component name = null;
+                    if (te instanceof MenuProvider menuProvider) {
+                        name = menuProvider.getDisplayName();
+                    } else if (te instanceof Nameable nameable) {
+                        name = nameable.getDisplayName();
+                    }
+
+                    containerNames.put(dir, name== null ? te.getBlockState().getBlock().getName() : name);
                 }
                 // try sided access else
                 //      if(te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir.getOpposite())) {

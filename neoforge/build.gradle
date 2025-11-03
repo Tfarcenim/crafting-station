@@ -8,7 +8,7 @@ neoForge {
     // Automatically enable neoforge AccessTransformers if the file exists
     def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformers.add(at.absolutePath)
+        accessTransformers.from(at.absolutePath)
     }
     parchment {
         minecraftVersion = parchment_minecraft
@@ -21,6 +21,11 @@ neoForge {
         }
         client {
             client()
+        }
+        client2 {
+            client()
+            programArguments.addAll '--username', 'Dev1'
+            gameDirectory = project.file('run2')
         }
         data {
             data()
@@ -51,7 +56,8 @@ dependencies {
     }
 
     implementation "curse.maven:metal-barrels-324985:5554620"
-
+    implementation "curse.maven:sophisticated-storage-619320:7168639"
+    implementation "curse.maven:sophisticated-core-618298:7168230"
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }

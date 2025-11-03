@@ -82,12 +82,12 @@ public class CraftingStationScreen extends AbstractContainerScreen<CraftingStati
         }
     }
 
-    String getTruncatedString() {
-        String string = menu.containerNames.getOrDefault(menu.getSelectedContainer(), Component.empty()).getString();
-        if (string.length() > 23) {
-            return string.substring(0, 23) + "...";
-        }
-        return string;
+    Component getTruncatedString() {
+        Component c = menu.containerNames.getOrDefault(menu.getSelectedContainer(), Component.empty());
+      //  if (font.width(c) > 23) {
+          //  return string.substring(0, 23) + "...";
+    //    }
+        return c;
     }
 
     @Override
