@@ -7,6 +7,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import org.jetbrains.annotations.Nullable;
 import tfar.craftingstation.init.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +21,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import tfar.craftingstation.menu.CraftingStationMenu;
+import tfar.craftingstation.platform.Services;
+
+import java.util.Optional;
 
 
 public class CraftingStationBlockEntity extends BlockEntity implements MenuProvider {
@@ -29,6 +34,9 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
 
     private Component customName;
     protected Direction currentContainer = Direction.DOWN;
+
+    private final RecipeManager.CachedCheck<CraftingInput, ? extends CraftingRecipe> quickCheck;
+
 
     public CraftingStationBlockEntity(BlockPos pPos, BlockState pState) {
         super(ModBlockEntityTypes.crafting_station, pPos, pState);
@@ -60,6 +68,7 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
             }
         };
         output = new ResultContainer();
+        this.quickCheck = RecipeManager.createCheck(RecipeType.CRAFTING);
     }
 
     public void setCurrentContainer(Direction currentContainer) {
@@ -106,13 +115,61 @@ public class CraftingStationBlockEntity extends BlockEntity implements MenuProvi
         this.customName = pName;
     }
 
+    //borrowed from TiC to fix a dupe bug
+    public ItemStack calcResult(@Nullable Player player) {
+        if (this.level == null || input.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        // assume empty unless we learn otherwise
+        ItemStack result = ItemStack.EMPTY;
+        if (!this.level.isClientSide && this.level.getServer() != null) {
+            RecipeManager manager = this.level.getServer().getRecipeManager();
+
+            CraftingInput craftingInventory = CraftingInput.of(3,3,input.items);
+
+            // first, try the cached recipe
+            Services.PLATFORM.forgeHooks$setCraftingPlayer(player);
+            Optional<? extends RecipeHolder<? extends CraftingRecipe>> recipe = quickCheck.getRecipeFor(craftingInventory,level);
+            // if it does not match, find a new recipe
+            // note we intentionally have no player access during matches, that could lead to an unstable recipe
+            if (recipe.isEmpty()) {
+                recipe = manager.getRecipeFor(RecipeType.CRAFTING, craftingInventory, this.level);
+            }
+
+            // if we have a recipe, fetch its result
+            if (recipe.isPresent()) {
+                result = recipe.get().value().assemble(craftingInventory, level.registryAccess());
+
+                // sync if the recipe is different
+                /*if (recipe != lastRecipe) {
+                    this.lastRecipe = recipe;
+                    this.syncToRelevantPlayers(this::syncRecipe);
+                }*/
+            }
+            Services.PLATFORM.forgeHooks$setCraftingPlayer(null);
+        }
+        /*else if (this.lastRecipe != null && this.lastRecipe.matches(this.craftingInventory, this.level)) {
+            Services.PLATFORM.forgeHooks$setCraftingPlayer(player);
+            result = this.lastRecipe.assemble(this.craftingInventory, level.registryAccess());
+            Services.PLATFORM.forgeHooks$setCraftingPlayer(null);
+        }*/
+        return result;
+    }
+
     public Component getCustomName() {
         return this.customName;
     }
 
     @Override
+    public void setRemoved() {
+        super.setRemoved();
+        output.setItem(0,ItemStack.EMPTY);
+    }
+
+    @Override
     public void setChanged() {
         super.setChanged();
+        output.setItem(0,calcResult(null));
         level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),3);
     }
 

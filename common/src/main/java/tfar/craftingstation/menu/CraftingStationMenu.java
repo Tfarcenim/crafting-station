@@ -224,13 +224,8 @@ public class CraftingStationMenu extends AbstractContainerMenu {
     // }
 
     @Override
-    public void slotsChanged(Container inventory) {
-        slotChangedCraftingGrid(this, world, player, craftMatrix, craftResult, null);
-    }
-
-    @Override
     public boolean stillValid(Player player) {
-        return true;
+        return !tileEntity.isRemoved();
     }
 
     @Override
@@ -341,38 +336,6 @@ public class CraftingStationMenu extends AbstractContainerMenu {
             return ItemStack.EMPTY;
         }
         return notifySlotAfterTransfer(player, stack, ret, slot);
-    }
-
-    protected static void slotChangedCraftingGrid(
-            AbstractContainerMenu pMenu,
-            Level pLevel,
-            Player pPlayer,
-            CraftingContainer pCraftSlots,
-            ResultContainer pResultSlots,
-            RecipeHolder<CraftingRecipe> pRecipe
-    ) {
-        if (!pLevel.isClientSide) {
-            CraftingInput craftinginput = pCraftSlots.asCraftInput();
-            ServerPlayer serverplayer = (ServerPlayer) pPlayer;
-            ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional = pLevel.getServer()
-                    .getRecipeManager()
-                    .getRecipeFor(RecipeType.CRAFTING, craftinginput, pLevel, pRecipe);
-            if (optional.isPresent()) {
-                RecipeHolder<CraftingRecipe> recipeholder = optional.get();
-                CraftingRecipe craftingrecipe = recipeholder.value();
-                if (pResultSlots.setRecipeUsed(pLevel, serverplayer, recipeholder)) {
-                    ItemStack itemstack1 = craftingrecipe.assemble(craftinginput, pLevel.registryAccess());
-                    if (itemstack1.isItemEnabled(pLevel.enabledFeatures())) {
-                        itemstack = itemstack1;
-                    }
-                }
-            }
-
-            pResultSlots.setItem(0, itemstack);
-            pMenu.setRemoteSlot(0, itemstack);
-            serverplayer.connection.send(new ClientboundContainerSetSlotPacket(pMenu.containerId, pMenu.incrementStateId(), 0, itemstack));
-        }
     }
 
     public boolean sameGui(CraftingStationMenu otherContainer) {
@@ -621,28 +584,15 @@ public class CraftingStationMenu extends AbstractContainerMenu {
 
 
     public void syncSideContainers() {
-        for (Map.Entry<Direction, BlockEntity> entry : blockEntityMap.entrySet()) {
-            Direction direction = entry.getKey();
-            BlockEntity blockEntity = entry.getValue();
-            SideContainerWrapper wrapper = Services.PLATFORM.getWrapper(blockEntity);
-            if (wrapper != null) {
-                for (int i = 0; i < wrapper.$getSlotCount(); i++) {
-                    Services.PLATFORM.sendToClient(new S2CSideSetSideContainerSlot(wrapper.$getStack(i), direction, i), (ServerPlayer) player);
-                }
-            }
-        }
-    }
-
-
-    public void synchronizeSlotToRemote(int pSlotIndex, ItemStack pStack, Supplier<ItemStack> pSupplier) {
-        if (!this.suppressRemoteUpdates) {
-            ItemStack itemstack = this.remoteSlots.get(pSlotIndex);
-            if (true) {
-                ItemStack itemstack1 = pSupplier.get();
-                this.remoteSlots.set(pSlotIndex, itemstack1);
-                if (this.synchronizer != null) {
-                    // Forge: Only synchronize a slot change if the itemstack actually changed in a way that is relevant to the client (i.e. share tag changed)
-                    this.synchronizer.sendSlotChange(this, pSlotIndex, itemstack1);
+        if (!world.isClientSide) {
+            for (Map.Entry<Direction, BlockEntity> entry : blockEntityMap.entrySet()) {
+                Direction direction = entry.getKey();
+                BlockEntity blockEntity = entry.getValue();
+                SideContainerWrapper wrapper = Services.PLATFORM.getWrapper(blockEntity);
+                if (wrapper != null) {
+                    for (int i = 0; i < wrapper.$getSlotCount(); i++) {
+                        Services.PLATFORM.sendToClient(new S2CSideSetSideContainerSlot(wrapper.$getStack(i), direction, i), (ServerPlayer) player);
+                    }
                 }
             }
         }
